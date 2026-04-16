@@ -1,35 +1,18 @@
-import { useState } from 'react'
+// NOTE: Hamburger + Drawer are built and ready in Drawer.jsx / Navbar.module.css
+// — wired back in when the side-menu feature is needed.
 import { NavLink } from 'react-router-dom'
-import Drawer from './Drawer'
 import styles from './Navbar.module.css'
 
 export default function Navbar() {
-  const [drawerOpen, setDrawerOpen] = useState(false)
-
   return (
-    <>
-      <header className={styles.navbar}>
-        {/* Hamburger — mobile only */}
-        <button
-          className={`${styles.hamburger} ${drawerOpen ? styles.open : ''}`}
-          onClick={() => setDrawerOpen((v) => !v)}
-          aria-label="Toggle menu"
-        >
-          <span />
-          <span />
-          <span />
-        </button>
+    <header className={styles.navbar}>
+      {/* Centered logo */}
+      <NavLink to="/" className={styles.logo}>
+        DanzWay
+      </NavLink>
 
-        {/* Centered logo */}
-        <NavLink to="/" className={styles.logo}>
-          DanzWay
-        </NavLink>
-
-        {/* Dancer icon */}
-        <span className={styles.icon} aria-hidden="true">🕺</span>
-      </header>
-
-      <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
-    </>
+      {/* Dancer icon */}
+      <span className={styles.icon} aria-hidden="true">🕺</span>
+    </header>
   )
 }

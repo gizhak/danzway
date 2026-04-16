@@ -6,17 +6,18 @@
 
 .main {
   flex: 1;
-  padding: 1.5rem 1.5rem;
-  /* Reserve space for floating BottomNav (62px height + 1.1rem margin + gap) */
-  padding-bottom: calc(62px + 1.1rem + 1.5rem);
+  /* Center the app shell — feels like a mobile app on desktop */
   width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+  /* Reserve space for floating BottomNav (62px + 1.1rem gap + breathing room) */
+  padding-bottom: calc(62px + 1.1rem + 1.5rem);
   box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
   .main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding-bottom: 2rem;
+    padding-bottom: 2.5rem;
   }
 }
