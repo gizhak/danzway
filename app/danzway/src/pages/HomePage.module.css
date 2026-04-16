@@ -1,28 +1,57 @@
 .hero {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .heroTitle {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.75rem;
+  font-weight: 800;
   color: var(--color-brand-heading);
-  margin: 0 0 0.5rem;
-  letter-spacing: -0.02em;
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
 }
 
-.heroTitle span {
-  color: var(--color-brand-amber);
+.heroTitleGradient {
+  background: linear-gradient(90deg, var(--color-brand-amber) 0%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .heroSubtitle {
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--color-brand-text);
   margin: 0;
+}
+
+.searchRow {
+  margin-bottom: 2rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .sectionTitle {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--color-brand-heading);
-  margin: 0 0 1.25rem;
+  margin: 0;
+}
+
+.resultCount {
+  font-size: 0.8rem;
+  color: var(--color-brand-text);
+  opacity: 0.6;
+}
+
+.noResults {
+  text-align: center;
+  padding: 3rem 0;
+  color: var(--color-brand-text);
+  opacity: 0.5;
+  font-size: 0.9rem;
 }

@@ -7,7 +7,16 @@
 .main {
   flex: 1;
   padding: 2rem 1.5rem;
+  /* On mobile, leave room for the fixed BottomNav (64px) */
+  padding-bottom: calc(2rem + 64px);
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding-bottom: 2rem;
+  }
 }
