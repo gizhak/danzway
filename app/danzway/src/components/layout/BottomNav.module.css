@@ -1,16 +1,22 @@
 .bottomNav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 1.1rem;
+  left: 1rem;
+  right: 1rem;
   z-index: 50;
-  height: 64px;
-  background: rgba(20, 20, 24, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--color-brand-border);
+  height: 62px;
+
+  /* Floating pill */
+  border-radius: 9999px;
+  background: rgba(18, 18, 20, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(255,255,255,0.05) inset;
+
   display: flex;
   align-items: stretch;
+  padding: 0 0.5rem;
 }
 
 /* Mobile only */
@@ -28,23 +34,26 @@
   justify-content: center;
   gap: 3px;
   text-decoration: none;
-  color: var(--color-brand-text);
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  transition: color 0.15s ease;
+  color: rgba(156, 163, 175, 0.65);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  transition: color 0.15s ease, background 0.15s ease;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .navItem:hover {
-  color: var(--color-brand-heading);
+  color: var(--color-brand-text);
 }
 
 .navItem.active {
   color: var(--color-brand-amber);
+  background: rgba(245, 158, 11, 0.10);
 }
 
 .navIcon {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   line-height: 1;
 }

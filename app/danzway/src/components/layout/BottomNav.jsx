@@ -2,7 +2,10 @@ import { NavLink } from 'react-router-dom'
 import styles from './BottomNav.module.css'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Events', icon: '🎵', end: true },
+  { to: '/',       label: 'FEED',    icon: '⊞',  end: true  },
+  { to: '/map',    label: 'MAP',     icon: '📍',  end: false },
+  { to: '/post',   label: 'POST',    icon: '✏️',  end: false },
+  { to: '/profile',label: 'PROFILE', icon: '👤',  end: false },
 ]
 
 export default function BottomNav() {
