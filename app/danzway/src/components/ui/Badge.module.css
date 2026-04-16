@@ -1,11 +1,13 @@
 .badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.8rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  background-color: var(--color-brand-amber-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background-color: rgba(245, 158, 11, 0.12);
   color: var(--color-brand-amber-light);
-  border: 1px solid var(--color-brand-amber-dark);
+  border: 1px solid var(--color-brand-amber);
   white-space: nowrap;
 }

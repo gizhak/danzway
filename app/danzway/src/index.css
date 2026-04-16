@@ -24,7 +24,8 @@
 /* Base resets */
 body {
   margin: 0;
-  background-color: var(--color-brand-bg);
+  background: radial-gradient(circle at top, #1a1a1c 0%, #0f0f12 100%);
+  background-attachment: fixed;
   color: var(--color-brand-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -33,4 +34,11 @@ body {
 
 #root {
   min-height: 100svh;
+}
+
+/* Global glass utility — apply with class="glass" or compose in module CSS */
+.glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.03);
 }

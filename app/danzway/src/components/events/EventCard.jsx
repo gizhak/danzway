@@ -15,7 +15,10 @@ export default function EventCard({ event }) {
   return (
     <article className={styles.card}>
       {image ? (
-        <img src={image} alt={title} className={styles.image} />
+        <div className={styles.imageWrapper}>
+          <img src={image} alt={title} className={styles.image} />
+          <div className={styles.imageOverlay} />
+        </div>
       ) : (
         <div className={styles.imagePlaceholder}>♪</div>
       )}
