@@ -1,0 +1,28 @@
+.hero {
+  margin-bottom: 2.5rem;
+}
+
+.heroTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.heroTitle span {
+  color: var(--color-brand-amber);
+}
+
+.heroSubtitle {
+  font-size: 1rem;
+  color: var(--color-brand-text);
+  margin: 0;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-brand-heading);
+  margin: 0 0 1.25rem;
+}
