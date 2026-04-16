@@ -6,17 +6,17 @@
 
 .main {
   flex: 1;
-  padding: 2rem 1.5rem;
-  /* On mobile, leave room for the fixed BottomNav (64px) */
-  padding-bottom: calc(2rem + 64px);
-  max-width: 1200px;
+  padding: 1.5rem 1.5rem;
+  /* Reserve space for floating BottomNav (62px height + 1.1rem margin + gap) */
+  padding-bottom: calc(62px + 1.1rem + 1.5rem);
   width: 100%;
-  margin: 0 auto;
   box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
   .main {
+    max-width: 1200px;
+    margin: 0 auto;
     padding-bottom: 2rem;
   }
 }

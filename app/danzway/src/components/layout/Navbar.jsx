@@ -9,23 +9,6 @@ export default function Navbar() {
   return (
     <>
       <header className={styles.navbar}>
-        <NavLink to="/" className={styles.logo}>
-          Danz<span>Way</span>
-        </NavLink>
-
-        {/* Desktop nav */}
-        <nav className={styles.nav}>
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
-            }
-          >
-            Events
-          </NavLink>
-        </nav>
-
         {/* Hamburger — mobile only */}
         <button
           className={`${styles.hamburger} ${drawerOpen ? styles.open : ''}`}
@@ -36,6 +19,14 @@ export default function Navbar() {
           <span />
           <span />
         </button>
+
+        {/* Centered logo */}
+        <NavLink to="/" className={styles.logo}>
+          DanzWay
+        </NavLink>
+
+        {/* Dancer icon */}
+        <span className={styles.icon} aria-hidden="true">🕺</span>
       </header>
 
       <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />

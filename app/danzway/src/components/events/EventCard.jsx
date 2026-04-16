@@ -1,51 +1,114 @@
-import { Link } from 'react-router-dom'
 import Badge from '../ui/Badge'
-import Button from '../ui/Button'
 import styles from './EventCard.module.css'
 
-export default function EventCard({ event }) {
-  const { id, title, date, time, location, venue, styles: danceStyles, image, price, currency } = event
+function getRelativeDate(dateStr) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const event = new Date(dateStr)
+  event.setHours(0, 0, 0, 0)
+  const diff = Math.round((event - today) / (1000 * 60 * 60 * 24))
+  if (diff === 0) return 'Tonight'
+  if (diff === 1) return 'Tomorrow'
+  if (diff > 1 && diff < 7)
+    return event.toLocaleDateString('en-US', { weekday: 'long' })
+  return event.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
 
-  const formattedDate = new Date(date).toLocaleDateString('en-IL', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  })
+function getAvatarInitials(name) {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+}
+
+export default function EventCard({ event }) {
+  const {
+    title,
+    date,
+    time,
+    location,
+    venue,
+    styles: danceStyles,
+    image,
+    price,
+    currency,
+    description,
+    url,
+  } = event
+
+  const relDate = getRelativeDate(date)
+  const parsedDate = new Date(date)
+  const month = parsedDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+  const day   = parsedDate.getDate()
+
+  const hashtags = danceStyles
+    .map((s) => `#${s.toLowerCase().replace(/\s+/g, '')}`)
+    .join(' ')
+
+  const waMessage = encodeURIComponent(`Hi! I'm interested in: ${title} — ${venue}, ${location} on ${date} at ${time}`)
+  const waUrl = `https://wa.me/?text=${waMessage}`
 
   return (
     <article className={styles.card}>
-      {image ? (
-        <div className={styles.imageWrapper}>
-          <img src={image} alt={title} className={styles.image} />
-          <div className={styles.imageOverlay} />
+
+      {/* ── Header row ── */}
+      <div className={styles.header}>
+        <div className={styles.avatar}>{getAvatarInitials(venue)}</div>
+        <div className={styles.headerInfo}>
+          <div className={styles.venueName}>{venue} · {location}</div>
+          <div className={styles.venueDate}>{relDate} · {time}</div>
         </div>
-      ) : (
-        <div className={styles.imagePlaceholder}>♪</div>
-      )}
+        <button className={styles.menuBtn} aria-label="More options">···</button>
+      </div>
 
-      <div className={styles.body}>
-        <h3 className={styles.title}>{title}</h3>
+      {/* ── Image ── */}
+      <div className={styles.imageWrapper}>
+        {image ? (
+          <>
+            <img src={image} alt={title} className={styles.image} />
+            <div className={styles.imageOverlay} />
+          </>
+        ) : (
+          <div className={styles.imagePlaceholder}>♪</div>
+        )}
 
-        <div className={styles.meta}>
-          <span>📅 {formattedDate} · {time}</span>
-          <span>📍 {venue}, {location}</span>
-        </div>
-
-        <div className={styles.badges}>
-          {danceStyles.map((s) => (
-            <Badge key={s} label={s} />
-          ))}
+        {/* Date badge */}
+        <div className={styles.dateBadge}>
+          <div className={styles.dateBadgeMonth}>{month}</div>
+          <div className={styles.dateBadgeDay}>{day}</div>
         </div>
       </div>
 
-      <div className={styles.footer}>
-        <span className={styles.price}>
-          {price} {currency}
-        </span>
-        <Button as={Link} to={`/events/${id}`} variant="outline">
-          Details
-        </Button>
+      {/* ── Style badges ── */}
+      <div className={styles.styleBadges}>
+        {danceStyles.map((s) => <Badge key={s} label={s} />)}
       </div>
+
+      {/* ── Description + hashtags ── */}
+      <p className={styles.description}>
+        {description}{' '}
+        <span className={styles.hashtags}>{hashtags} #danzway</span>
+      </p>
+
+      {/* ── Action buttons ── */}
+      <div className={styles.actions}>
+        <button className={styles.actionBtn}>♥ INTERESTED</button>
+        <button className={styles.actionBtn}>➤ SHARE</button>
+      </div>
+
+      {/* ── WhatsApp RSVP ── */}
+      <a
+        href={waUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.rsvpBtn}
+      >
+        <span>📱</span>
+        WHATSAPP RSVP · {price} {currency}
+      </a>
+
     </article>
   )
 }

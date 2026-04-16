@@ -7,7 +7,7 @@ export default function EventList({ events }) {
   }
 
   return (
-    <div className={styles.grid}>
+    <div className={styles.feed}>
       {events.map((event) => (
         <EventCard key={event.id} event={event} />
       ))}
