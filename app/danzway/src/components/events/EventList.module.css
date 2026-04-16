@@ -1,0 +1,13 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-brand-text);
+  opacity: 0.5;
+  padding: 3rem 0;
+  font-size: 0.9rem;
+}

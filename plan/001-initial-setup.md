@@ -1,8 +1,8 @@
 # Plan 001: Initial Infrastructure
-Status: Pending
+Status: Complete
 
 ## Tasks
-- [ ] Initialize Vite + React project in `app/danzway`
-- [ ] Install Tailwind CSS and basic dependencies
-- [ ] Set up basic folder structure (components, services, store)
-- [ ] Create a "Hello World" page to verify setup
+- [x] Initialize Vite + React project in `app/danzway`
+- [x] Install Tailwind CSS and basic dependencies
+- [x] Set up basic folder structure (components, services, store)
+- [x] Create a "Hello World" page to verify setup
