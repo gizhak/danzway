@@ -1,5 +1,6 @@
-/* ─── Page ─────────────────────────────────────────────────────────────────── */
+/* ─── Page wrapper — hero bleeds edge-to-edge ───────────── */
 .page {
+  margin: -1.5rem -1.25rem 0;
   padding-bottom: 7rem;
 }
 
@@ -18,31 +19,72 @@
   display: inline-block;
 }
 
-/* ─── Back button ───────────────────────────────────────────────────────────── */
-.backBtn {
+/* ─── Header row: Back + Share ───────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.back {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.6rem 1.25rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.55);
+  gap: 0.5rem;
+  min-height: 48px;
+  min-width: 72px;
+  padding: 0 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-brand-text);
   text-decoration: none;
-  letter-spacing: 0.02em;
   transition: color 0.15s ease;
 }
 
-.backBtn:hover {
-  color: rgba(245, 158, 11, 0.85);
+.back:hover {
+  color: var(--color-brand-heading);
 }
 
-/* ─── Hero ──────────────────────────────────────────────────────────────────── */
+.backArrow {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* ─── Share FAB ───────────────────────────────────────── */
+.shareFab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  box-shadow: 0 3px 14px rgba(245, 158, 11, 0.45);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.shareFab:hover {
+  box-shadow: 0 5px 22px rgba(245, 158, 11, 0.6);
+  transform: translateY(-1px) scale(1.05);
+}
+
+.shareFab:active {
+  transform: scale(0.93);
+}
+
+/* ─── Hero ──────────────────────────────────────────────── */
 .hero {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
+  background: rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.04);
 }
 
 .heroImg {
@@ -52,58 +94,129 @@
   display: block;
 }
 
-.heroPlaceholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  opacity: 0.1;
-}
-
 .heroOverlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    transparent 30%,
-    rgba(5, 5, 6, 0.75) 100%
+    rgba(8, 8, 9, 0) 40%,
+    rgba(8, 8, 9, 0.75) 100%
   );
 }
 
-.heroInfo {
+/* ─── Date badge — top-right of hero ─────────────────── */
+.dateBadge {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.25rem 1.25rem 1rem;
+  top: 12px;
+  right: 12px;
+  width: 48px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+  z-index: 2;
 }
 
-.heroName {
-  font-size: 1.55rem;
-  font-weight: 800;
+.dateBadgeMonth {
+  background: #d97706;
   color: #fff;
-  margin: 0 0 0.25rem;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  padding: 3px 0;
 }
 
-.heroCity {
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.7);
+.dateBadgeDay {
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1;
+  padding: 4px 0 6px;
+}
+
+.dateBadgeLabelSmall {
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 0.52rem;
+  font-weight: 800;
+  text-align: center;
+  padding: 4px 2px 6px;
+  line-height: 1.1;
+}
+
+/* ─── Content area ────────────────────────────────────── */
+.content {
+  padding: 1.5rem 1.25rem 0;
+}
+
+/* ─── Title row (logo + name) ─────────────────────────── */
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+}
+
+.logoAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(245, 158, 11, 0.4);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--color-brand-heading);
   margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
-/* ─── Gallery strip ─────────────────────────────────────────────────────────── */
+/* ─── Meta rows ───────────────────────────────────────── */
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  color: var(--color-brand-text);
+  text-decoration: none;
+}
+
+.metaIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ─── Dance style badges ──────────────────────────────── */
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ─── Photo gallery strip ─────────────────────────────── */
 .gallery {
   display: flex;
   gap: 0.4rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding: 0.75rem 1.25rem;
+  margin: 0 -1.25rem 1.25rem;
+  padding: 0 1.25rem;
   scrollbar-width: none;
 }
 
@@ -121,166 +234,142 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* ─── Body ──────────────────────────────────────────────────────────────────── */
-.body {
-  padding: 0.25rem 1.25rem 0;
+/* ─── Divider ─────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 0 1.25rem;
 }
 
-.section {
-  margin-bottom: 1.75rem;
+/* ─── Map card ────────────────────────────────────────── */
+.mapCard {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.sectionLabel {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--color-brand-text);
-  opacity: 0.38;
-  margin-bottom: 0.65rem;
+.mapIframe {
+  width: 100%;
+  height: 220px;
+  display: block;
+  border: 0;
 }
 
-/* ─── Dance styles ──────────────────────────────────────────────────────────── */
-.styleRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.styleChip {
-  padding: 0.3rem 0.8rem;
-  border-radius: 9999px;
+.mapLink {
+  display: block;
+  padding: 0.55rem 1rem;
   font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: rgba(245, 158, 11, 0.9);
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  font-weight: 600;
+  color: var(--color-brand-amber-light);
+  text-decoration: none;
+  text-align: right;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  transition: color 0.15s ease;
 }
 
-/* ─── Meta row: categories + rating ────────────────────────────────────────── */
-.metaRow {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.75rem;
-}
-
-.metaLeft {
-  flex: 1;
-  min-width: 0;
-}
-
-.categoryRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-bottom: 0.55rem;
-}
-
-.categoryChip {
-  padding: 0.2rem 0.55rem;
-  border-radius: 9999px;
-  font-size: 0.63rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.address {
-  font-size: 0.78rem;
-  color: var(--color-brand-text);
-  opacity: 0.5;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.ratingBlock {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.1rem;
-}
-
-.ratingNum {
-  font-size: 1.6rem;
-  font-weight: 800;
+.mapLink:hover {
   color: var(--color-brand-heading);
-  line-height: 1;
 }
 
-.ratingStar {
-  font-size: 1rem;
-  color: #fbbf24;
-  line-height: 1;
-}
-
-.ratingCount {
-  font-size: 0.63rem;
-  color: var(--color-brand-text);
-  opacity: 0.4;
-}
-
-/* ─── Contact buttons ───────────────────────────────────────────────────────── */
-.contactList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-
-.contactBtn {
+.mapCardFallback {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--color-brand-heading);
-  font-size: 0.84rem;
-  font-weight: 600;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   text-decoration: none;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.contactBtn:hover {
-  border-color: rgba(245, 158, 11, 0.3);
-  background: rgba(245, 158, 11, 0.04);
+.mapCardFallback:hover {
+  border-color: rgba(245, 158, 11, 0.30);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.contactIcon {
-  font-size: 1.1rem;
+.mapVisual {
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
 }
 
-/* ─── Social buttons ────────────────────────────────────────────────────────── */
+.mapInfo { flex: 1; min-width: 0; }
+
+.mapVenue {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mapCity {
+  font-size: 0.78rem;
+  color: var(--color-brand-text);
+  margin-top: 1px;
+}
+
+.mapCta {
+  font-size: 0.75rem;
+  color: var(--color-brand-amber-light);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ─── Instagram post embed ────────────────────────────── */
+.igEmbedWrapper {
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  margin-bottom: 1.5rem;
+}
+
+.igEmbedFrame {
+  width: 100%;
+  min-height: 480px;
+  border: none;
+  display: block;
+}
+
+/* ─── Social buttons ──────────────────────────────────── */
 .socialRow {
   display: flex;
   gap: 0.65rem;
   flex-wrap: wrap;
+  margin-bottom: 1.25rem;
 }
 
 .socialBtn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1rem;
+  padding: 0.65rem 1.2rem;
   border-radius: 10px;
-  border: 1px solid rgba(245, 158, 11, 0.22);
-  background: rgba(245, 158, 11, 0.06);
-  color: rgba(245, 158, 11, 0.85);
-  font-size: 0.8rem;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.07);
+  color: rgba(245, 158, 11, 0.9);
+  font-size: 0.82rem;
   font-weight: 700;
   text-decoration: none;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .socialBtn:hover {
-  border-color: rgba(245, 158, 11, 0.5);
-  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.55);
+  background: rgba(245, 158, 11, 0.12);
 }
 
 .socialBtnFb {
@@ -294,87 +383,75 @@
   background: rgba(96, 165, 250, 0.1);
 }
 
-.socialIcon {
-  font-size: 1rem;
-}
-
-/* ─── Reviews ───────────────────────────────────────────────────────────────── */
-.reviewList {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.review {
-  padding: 0.85rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.review:last-child {
-  border-bottom: none;
-}
-
-.reviewHeader {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 0.45rem;
-}
-
-.reviewAvatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.reviewAvatarFallback {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(245, 158, 11, 0.15);
-  color: rgba(245, 158, 11, 0.8);
-  font-size: 0.72rem;
-  font-weight: 800;
+/* ─── Website button ──────────────────────────────────── */
+.websiteBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-}
-
-.reviewMeta {
-  flex: 1;
-  min-width: 0;
-}
-
-.reviewAuthor {
-  display: block;
-  font-size: 0.8rem;
-  font-weight: 700;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--color-brand-heading);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 1.25rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.websiteBtn:hover {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.04);
+}
+
+/* ─── Admin: Refresh button ──────────────────────────── */
+.adminRefreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+}
+
+.adminRefreshBtn:hover:not(:disabled) {
+  border-color: rgba(245, 158, 11, 0.35);
+  color: rgba(245, 158, 11, 0.75);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.adminRefreshBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Toast ───────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px;
+  font-size: 0.83rem;
+  font-weight: 600;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.reviewTime {
-  display: block;
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.28);
-}
-
-.reviewStars {
-  font-size: 0.65rem;
-  color: #fbbf24;
-  flex-shrink: 0;
-  letter-spacing: 1px;
-}
-
-.reviewText {
-  font-size: 0.82rem;
-  color: var(--color-brand-text);
-  line-height: 1.65;
-  margin: 0;
-  opacity: 0.8;
+  color: var(--color-brand-heading);
+  background: rgba(15, 15, 16, 0.92);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(245, 158, 11, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+  pointer-events: none;
 }

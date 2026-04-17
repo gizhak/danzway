@@ -67,9 +67,16 @@ export default appSlice.reducer
 export const selectSavedIds      = (state) => state.app.savedIds
 export const selectSavedCount    = (state) => Object.keys(state.app.savedIds).length
 
+// Normalise venue name for loose matching (lowercase, collapse spaces)
+function normKey(str) {
+  return (str ?? '').toLowerCase().replace(/\s+/g, ' ').trim()
+}
+
 /**
- * Returns { [venueName]: nextUpcomingEvent } — the soonest future event per venue.
- * Used by VenueCard to show the next party date badge.
+ * Returns a lookup map for the soonest upcoming event per venue.
+ * Keys stored: exact event.venue  +  normalised event.venue  +  event.placeId (if present).
+ * VenueCard should try all three to handle slight name differences or
+ * venues whose name was imported in a different language.
  */
 export const selectNextEventByVenueName = createSelector(
   (state) => state.app.events,
@@ -77,14 +84,22 @@ export const selectNextEventByVenueName = createSelector(
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const map = {}
+
+    function put(key, event) {
+      if (!key) return
+      const d = new Date(event.date)
+      const existing = map[key]
+      if (!existing || d < new Date(existing.date)) map[key] = event
+    }
+
     events.forEach((e) => {
       if (!e.venue || !e.date) return
       const d = new Date(e.date)
-      if (d < today) return                          // past event — skip
-      const existing = map[e.venue]
-      if (!existing || d < new Date(existing.date)) {
-        map[e.venue] = e                             // keep the earliest upcoming
-      }
+      if (d < today) return                        // past — skip
+
+      put(e.venue,          e)                     // exact
+      put(normKey(e.venue), e)                     // normalised (case / spaces)
+      if (e.placeId) put(e.placeId, e)            // placeId if event was refreshed
     })
     return map
   }

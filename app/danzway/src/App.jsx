@@ -7,6 +7,7 @@ import MapPage from './pages/MapPage'
 import PostPage from './pages/PostPage'
 import VenueDiscoveryPage from './pages/admin/VenueDiscoveryPage'
 import VenueDetailPage from './pages/VenueDetailPage'
+import PartiesPage from './pages/PartiesPage'
 
 const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
 
@@ -16,6 +17,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/"                 element={<HomePage />} />
+          <Route path="/parties"          element={<PartiesPage />} />
           <Route path="/venues/:placeId"  element={<VenueDetailPage />} />
           <Route path="/events/:id"       element={<EventDetailPage />} />
           <Route path="/profile"          element={<ProfilePage />} />

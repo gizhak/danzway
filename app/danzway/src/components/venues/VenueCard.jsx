@@ -38,7 +38,9 @@ export default function VenueCard({ venue }) {
 
   const saved              = useSelector(selectIsSaved(placeId))
   const nextEventsByVenue  = useSelector(selectNextEventByVenueName)
-  const nextEvent          = nextEventsByVenue[name] ?? null
+  // Try: exact name → normalised name → placeId (covers imported Hebrew names)
+  const normName           = (name ?? '').toLowerCase().replace(/\s+/g, ' ').trim()
+  const nextEvent          = nextEventsByVenue[name] ?? nextEventsByVenue[normName] ?? nextEventsByVenue[placeId] ?? null
 
   // Image priority: first Google photo → generic nightclub image
   // Logo is ONLY used in the circular avatar header, never stretched as hero
