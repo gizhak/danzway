@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import useAppStore from '../../store/useAppStore'
+import { useSelector } from 'react-redux'
+import { selectSavedCount } from '../../store/appSlice'
 import styles from './BottomNav.module.css'
 
 const NAV_ITEMS = [
@@ -10,7 +11,7 @@ const NAV_ITEMS = [
 ]
 
 export default function BottomNav() {
-  const savedCount = useAppStore((s) => s.savedIds.size)
+  const savedCount = useSelector(selectSavedCount)
 
   return (
     <nav className={styles.bottomNav} aria-label="Mobile navigation">

@@ -1,5 +1,5 @@
 # Plan 007: Migrate State Management — Zustand → Redux Toolkit
-Status: Pending Approval
+Status: Complete
 
 ---
 
@@ -43,7 +43,7 @@ This is cleaner than the Zustand approach because the state shape itself is JSON
 > **Recommendation: Option A** — the state is two fields. A `subscribe()` listener is the right tool here. Clean, zero dependencies.
 
 **→ Pick one:**
-- [ ] A — `store.subscribe()` manual persistence ← recommended
+- [ *] A — `store.subscribe()` manual persistence ← recommended
 - [ ] B — `redux-persist`
 
 ---
