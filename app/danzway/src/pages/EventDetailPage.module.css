@@ -4,6 +4,16 @@
   margin: -1.5rem -1.25rem 0;
 }
 
+/* ─── Header row: Back + Share ───────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
 /* ─── Back button — thumb-friendly hit area ───────────── */
 .back {
   display: inline-flex;
@@ -17,8 +27,6 @@
   color: var(--color-brand-text);
   text-decoration: none;
   transition: color 0.15s ease;
-  position: relative;
-  z-index: 2;
 }
 
 .back:hover {
@@ -28,6 +36,32 @@
 .backArrow {
   font-size: 1.1rem;
   line-height: 1;
+}
+
+/* ─── Share FAB ───────────────────────────────────────── */
+.shareFab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  box-shadow: 0 3px 14px rgba(245, 158, 11, 0.45);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.shareFab:hover {
+  box-shadow: 0 5px 22px rgba(245, 158, 11, 0.6);
+  transform: translateY(-1px) scale(1.05);
+}
+
+.shareFab:active {
+  transform: scale(0.93);
 }
 
 /* ─── Hero image block ────────────────────────────────── */
@@ -317,4 +351,33 @@
   color: var(--color-brand-text);
   opacity: 0.6;
   padding: 2rem 1.25rem;
+}
+
+/* ─── Link copied toast ───────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-brand-heading);
+  background: rgba(15, 15, 16, 0.92);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(245, 158, 11, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.toastIcon {
+  font-size: 1rem;
+  line-height: 1;
 }
