@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import useAppStore from '../../store/useAppStore'
+import { useSelector, useDispatch } from 'react-redux'
+import { selectIsSaved, toggleSave } from '../../store/appSlice'
 import Badge from '../ui/Badge'
 import styles from './EventCard.module.css'
 
@@ -27,8 +28,7 @@ function getAvatarInitials(name) {
 }
 
 export default function EventCard({ event }) {
-  const isSaved    = useAppStore((s) => s.isSaved)
-  const toggleSave = useAppStore((s) => s.toggleSave)
+  const dispatch = useDispatch()
 
   const {
     id,
@@ -44,6 +44,8 @@ export default function EventCard({ event }) {
     description,
     whatsapp,
   } = event
+
+  const saved = useSelector(selectIsSaved(id))
 
   const relDate = getRelativeDate(date)
   const parsedDate = new Date(date)
@@ -108,13 +110,13 @@ export default function EventCard({ event }) {
       {/* ── Action buttons ── */}
       <div className={styles.actions}>
         <motion.button
-          className={`${styles.actionBtn} ${isSaved(id) ? styles.actionBtnSaved : ''}`}
-          onClick={() => toggleSave(id)}
+          className={`${styles.actionBtn} ${saved ? styles.actionBtnSaved : ''}`}
+          onClick={() => dispatch(toggleSave(id))}
           whileTap={{ scale: 0.88 }}
-          animate={isSaved(id) ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 }}
+          animate={saved ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
         >
-          {isSaved(id) ? '♥' : '♡'} INTERESTED
+          {saved ? '♥' : '♡'} INTERESTED
         </motion.button>
         <button className={styles.actionBtn}>➤ SHARE</button>
       </div>

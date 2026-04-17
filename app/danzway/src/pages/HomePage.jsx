@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { mockEvents } from '../data/mockEvents'
-import useAppStore from '../store/useAppStore'
+import { selectStyleFilter, setStyleFilter } from '../store/appSlice'
 import EventList from '../components/events/EventList'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import SearchBar from '../components/ui/SearchBar'
@@ -33,9 +34,8 @@ function filterEvents(events, query, styleFilter) {
 
 export default function HomePage() {
   const [query, setQuery] = useState('')
-
-  const styleFilter    = useAppStore((s) => s.styleFilter)
-  const setStyleFilter = useAppStore((s) => s.setStyleFilter)
+  const dispatch          = useDispatch()
+  const styleFilter       = useSelector(selectStyleFilter)
 
   const filtered = useMemo(
     () => filterEvents(mockEvents, query, styleFilter),
@@ -55,7 +55,7 @@ export default function HomePage() {
       </section>
 
       <div className={styles.filterRow}>
-        <StyleFilterRow active={styleFilter} onSelect={setStyleFilter} />
+        <StyleFilterRow active={styleFilter} onSelect={(id) => dispatch(setStyleFilter(id))} />
       </div>
 
       <div className={styles.searchRow}>

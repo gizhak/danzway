@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useSelector, useDispatch } from 'react-redux'
 import { mockEvents } from '../data/mockEvents'
-import useAppStore from '../store/useAppStore'
+import { selectSavedIds, toggleSave } from '../store/appSlice'
 import styles from './ProfilePage.module.css'
 
 function formatShortDate(dateStr) {
@@ -13,7 +14,7 @@ function formatShortDate(dateStr) {
 }
 
 function SavedEventRow({ event }) {
-  const toggleSave = useAppStore((s) => s.toggleSave)
+  const dispatch = useDispatch()
 
   return (
     <motion.div
@@ -44,7 +45,7 @@ function SavedEventRow({ event }) {
         </Link>
         <button
           className={styles.unsaveBtn}
-          onClick={() => toggleSave(event.id)}
+          onClick={() => dispatch(toggleSave(event.id))}
           aria-label={`Remove ${event.title} from saved`}
         >
           ♥
@@ -55,10 +56,10 @@ function SavedEventRow({ event }) {
 }
 
 export default function ProfilePage() {
-  const savedIds = useAppStore((s) => s.savedIds)
+  const savedIds = useSelector(selectSavedIds)
 
-  const savedEvents = mockEvents.filter((e) => savedIds.has(e.id))
-  const count = savedEvents.length
+  const savedEvents = mockEvents.filter((e) => savedIds[e.id])
+  const count    = savedEvents.length
 
   return (
     <div className={styles.page}>
