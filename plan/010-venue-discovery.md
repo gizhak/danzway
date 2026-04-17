@@ -1,334 +1,214 @@
-# Plan 010: Venue Discovery
+# Plan 010: Admin Control Center — Venue Discovery
 
 **Branch:** `f-110-venue-discovery`  
-**Status:** Awaiting Approval
+**Status:** In Progress (v2 — refined requirements)
 
 ---
 
 ## Overview
 
-Build an admin-only Venue Discovery Dashboard that queries Google Places for every dance venue in Israel, lets the admin bulk-import them with rich metadata (photo gallery, reviews with author photos, categories), and stores each venue as a reusable Firestore template. When a specific event is scheduled at a venue, the admin picks a template and adds a date/time on top — no re-typing venue details every time.
+A professional admin-only control center for managing every dance venue in Israel. The dashboard lets the admin discover venues via Google Places, toggle each one on/off (controlling home feed visibility), assign dance styles for filtering, set a venue logo, and add social media handles. The home feed shows logos. The EventDetailPage shows the full Google Places photo gallery and a social media embed.
 
 ---
 
-## New Firestore Collection: `venues`
-
-Separate from `events`. A venue document is a **permanent template** — it holds the place data and grows richer over time. Events reference it but stay independent.
+## Updated Firestore `venues` Document Shape
 
 ```
 venues/{placeId}
-  ├── placeId:        string          // Google Place ID (also the doc ID)
-  ├── name:           string          // display name (e.g. "Club Havana")
-  ├── address:        string          // formatted address from Google
-  ├── city:           string          // extracted city (e.g. "Tel Aviv")
-  ├── categories:     string[]        // mapped English labels (e.g. ["Nightclub","Bar"])
-  ├── categoriesHe:   string[]        // Hebrew labels (e.g. ["מועדון לילה","בר"])
-  ├── googleTypes:    string[]        // raw Google types array (kept for re-mapping later)
-  ├── rating:         number          // Google Maps rating (e.g. 4.2)
-  ├── reviewCount:    number          // total number of Google reviews
-  ├── photos:         string[]        // up to 5 direct photo media URLs
-  ├── reviews:        Review[]        // up to 5 reviews (see shape below)
+  ├── placeId:        string           // Google Place ID (doc ID)
+  ├── name:           string
+  ├── address:        string
+  ├── city:           string
+  ├── active:         boolean          // V Logic — true = visible on home feed
+  ├── logo:           string | null    // Custom logo URL (shown on cards / home feed)
+  ├── styles:         string[]         // Dance styles assigned by admin e.g. ["Salsa","Bachata"]
+  ├── categories:     string[]         // Mapped from Google types e.g. ["Nightclub","Bar"]
+  ├── categoriesHe:   string[]         // Hebrew versions
+  ├── googleTypes:    string[]         // Raw Google types (kept for re-mapping)
+  ├── rating:         number
+  ├── reviewCount:    number
+  ├── photos:         string[]         // Google Places gallery (up to 5) — EventDetailPage only
+  ├── reviews:        Review[]         // Up to 5 Google reviews with author photos
   ├── phone:          string | null
   ├── website:        string | null
-  ├── coordinates:    { lat, lng }    // from Google location object
-  ├── importedAt:     Timestamp
-  └── lastRefreshed:  Timestamp
-
-// Review sub-shape:
-{
-  author:       string    // authorAttribution.displayName
-  authorPhoto:  string    // authorAttribution.photoUri
-  rating:       number
-  text:         string    // text.text
-  relativeTime: string    // "2 months ago"
-}
+  ├── instagram:      string | null    // Handle or full URL e.g. "@club_havana"
+  ├── facebook:       string | null    // Page name or full URL
+  ├── instagramPostUrl: string | null  // URL of a specific pinned post for oEmbed
+  ├── coordinates:    { lat, lng }
+  ├── importedAt:     number           // Timestamp as millis (serializable for Redux)
+  └── lastRefreshed:  number
 ```
 
 ---
 
-## Google Types → Category Mapping
+## Rule 1 — Logo vs. Gallery: Where Each Appears
 
-Stored in `src/services/googlePlaces.js` as a constant.
-
-| Google Type | English | Hebrew |
+| Surface | Image source | Priority order |
 |---|---|---|
-| `night_club` | Nightclub | מועדון לילה |
-| `dance_school` | Dance Studio | אולפן ריקודים |
-| `bar` | Bar | בר |
-| `restaurant` | Restaurant & Bar | מסעדה ובר |
-| `gym` | Studio | סטודיו |
-| `sports_activity_location` | Dance Studio | אולפן ריקודים |
-| `entertainment_venue` | Event Venue | אולם אירועים |
-| `event_venue` | Event Venue | אולם אירועים |
-| `performing_arts_theater` | Theater | תיאטרון |
-| `cultural_center` | Cultural Center | מרכז תרבות |
-| `community_center` | Community Center | מרכז קהילתי |
+| **EventCard** (home feed) | Logo only | `venue.logo → event.placePhoto → event.image → placeholder` |
+| **EventDetailPage** hero | Full photo | `event.placePhoto → event.image → placeholder` |
+| **EventDetailPage** gallery | Google gallery | `venue.photos[]` (shown in a dedicated gallery section) |
 
-If none of the known types match, fall back to `"Venue"` / `"מקום"`.
+**Why:** A venue logo is the brand identity — it's what users recognise on a quick-scroll feed. The rich Google photos live on the detail page where there's space to tell the full story.
+
+Implementation: the `EventCard` component needs to know the venue's logo. Since events currently don't store a `venueId`, the logo will be looked up by matching `event.venue` (name) against the `venues` collection in Redux. When a match is found, `venue.logo` is used. No match = fall back to `event.placePhoto`.
 
 ---
 
-## Preset Search Queries
+## Rule 2 — The V Logic (Active / Inactive Toggle)
 
-Stored as a constant in `VenueDiscoveryPage.jsx`. Each query is a button the admin can click to trigger a search — no typing required.
+Every venue in the system (whether found in search or already imported) has a single toggle:
 
-```js
-const PRESET_QUERIES = [
-  { label: 'Salsa — TLV',       query: 'salsa club Tel Aviv'           },
-  { label: 'Salsa — Jerusalem',  query: 'salsa club Jerusalem'          },
-  { label: 'Salsa — Haifa',      query: 'salsa club Haifa'              },
-  { label: 'Bachata — TLV',      query: 'bachata Tel Aviv'              },
-  { label: 'Kizomba — TLV',      query: 'kizomba Tel Aviv'              },
-  { label: 'Zouk — Israel',      query: 'zouk dance Israel'             },
-  { label: 'Tango — Israel',     query: 'tango club Israel'             },
-  { label: 'WCS — Israel',       query: 'west coast swing Israel'       },
-  { label: 'Dance Clubs — TLV',  query: 'dance club Tel Aviv'           },
-  { label: 'Latin Bars — TLV',   query: 'latin dance bar Tel Aviv'      },
-  { label: 'Dance Studios — TLV',query: 'dance school Tel Aviv'         },
-  { label: 'Studios — Jerusalem',query: 'dance school Jerusalem'        },
-  { label: 'Latin (HE) — TLV',   query: 'מועדון לטיני תל אביב'         },
-  { label: 'Dance (HE) — TLV',   query: 'מועדון ריקודים תל אביב'       },
-]
+- **Active (✓ green):** Venue is visible on the home page.  
+- **Inactive (grey):** Venue is hidden from the feed immediately.
+
+### Where the toggle appears:
+1. **Search results grid** — on already-imported venues, show the toggle directly on the card (replaces the "Imported ✓" static badge with a live toggle).
+2. **Imported venues list** — a prominent toggle switch on every row.
+
+### How it works:
 ```
+Toggle ON  → updateDoc(venues/{placeId}, { active: true  })
+Toggle OFF → updateDoc(venues/{placeId}, { active: false })
+```
+
+The home feed (HomePage) filters venue-linked events by `active: true`. This is the single source of truth — no cache invalidation needed since Redux re-fetches `venues` after every toggle.
 
 ---
 
-## Task 1 — Extend `src/services/googlePlaces.js`
+## Rule 3 — Smart Tagging: Dance Styles
 
-### 1a. Add the category mapping constant
-
-```js
-export const GOOGLE_TYPE_MAP = {
-  night_club:                { en: 'Nightclub',       he: 'מועדון לילה'      },
-  dance_school:              { en: 'Dance Studio',    he: 'אולפן ריקודים'    },
-  bar:                       { en: 'Bar',             he: 'בר'               },
-  restaurant:                { en: 'Restaurant & Bar',he: 'מסעדה ובר'        },
-  gym:                       { en: 'Studio',          he: 'סטודיו'           },
-  sports_activity_location:  { en: 'Dance Studio',    he: 'אולפן ריקודים'    },
-  entertainment_venue:       { en: 'Event Venue',     he: 'אולם אירועים'     },
-  event_venue:               { en: 'Event Venue',     he: 'אולם אירועים'     },
-  performing_arts_theater:   { en: 'Theater',         he: 'תיאטרון'          },
-  cultural_center:           { en: 'Cultural Center', he: 'מרכז תרבות'       },
-  community_center:          { en: 'Community Center',he: 'מרכז קהילתי'      },
-}
-
-export function mapGoogleTypes(types = []) {
-  const matched = types
-    .map((t) => GOOGLE_TYPE_MAP[t])
-    .filter(Boolean)
-  // Deduplicate by English label
-  const seen = new Set()
-  return matched.filter(({ en }) => !seen.has(en) && seen.add(en))
-  // Returns [{ en, he }, ...] or [{ en: 'Venue', he: 'מקום' }] as fallback
-}
-```
-
-### 1b. `searchDanceVenues(query)`
-
-Calls Places Text Search (New). Returns an array of lightweight result objects for the discovery grid — **not** full details yet (details are fetched on import to save quota).
+In the dashboard, each imported venue row shows a **style tag row** below its main info:
 
 ```
-POST https://places.googleapis.com/v1/places:searchText
-Body: { textQuery: query, languageCode: 'en' }
-FieldMask: places.id,places.displayName,places.types,
-           places.formattedAddress,places.rating,
-           places.userRatingCount,places.photos
+[Salsa ✓] [Bachata ✓] [Kizomba] [Zouk] [Tango] [WCS]
 ```
 
-Returns array of:
-```js
-{
-  placeId:      string
-  name:         string
-  address:      string
-  types:        string[]
-  categories:   { en, he }[]   // already mapped via mapGoogleTypes()
-  rating:       number
-  reviewCount:  number
-  thumbnail:    string | null  // first photo URL at 400px, or null
-}
+Clicking a style chip **toggles** it — amber = assigned, grey = not assigned. Changes are written to Firestore immediately:
+```
+updateDoc(venues/{placeId}, { styles: [...updatedStylesArray] })
 ```
 
-**Deduplication:** accepts a `Set` of already-seen placeIds and filters them out, so running multiple queries doesn't produce duplicate cards.
+These `styles` tags flow through to the home feed filter — when a user selects "Salsa" in the style filter, only events/venues with `"Salsa"` in their styles array are shown.
 
-### 1c. `getFullVenueDetails(placeId)`
-
-Called only when the admin confirms import. Fetches everything needed for the Firestore document in one round trip.
-
-```
-GET https://places.googleapis.com/v1/places/{placeId}
-FieldMask: id,displayName,types,formattedAddress,location,
-           nationalPhoneNumber,websiteUri,rating,
-           userRatingCount,photos,reviews
-```
-
-Returns a fully shaped venue object ready for `setDoc`:
-- `photos`: up to 5 photo media URLs (iterate `data.photos.slice(0, 5)`)
-- `reviews`: map each review to `{ author, authorPhoto, rating, text, relativeTime }`
-- `coordinates`: `{ lat: data.location.latitude, lng: data.location.longitude }`
-- `categories` / `categoriesHe`: via `mapGoogleTypes(data.types)`
-
-### 1d. `importVenuesToFirestore(placeIds)`
-
-Orchestrator used by the "Import Selected" button:
-1. For each `placeId` in the array, call `getFullVenueDetails(placeId)`
-2. Call `setDoc(doc(db, 'venues', placeId), venueData, { merge: true })`
-3. Returns `{ imported: number, failed: number }`
+**The full style list:**
+`['Salsa', 'Bachata', 'Kizomba', 'Zouk', 'Tango', 'West Coast Swing', 'Social']`
 
 ---
 
-## Task 2 — New Redux Slice: `src/store/venuesSlice.js`
+## Rule 4 — Social Media (Instagram / Facebook)
 
-Keeps venue discovery state **separate** from the events slice.
+### The honest Instagram API situation
 
-```js
-{
-  venues: [],           // imported venues from Firestore (for future "Create Event" flow)
-  status: 'idle',
-  error: null
-}
-```
+| Approach | Auth needed | Complexity | Status |
+|---|---|---|---|
+| Instagram Basic Display API | OAuth + App Review | High | **Deprecated Mar 2024** |
+| Instagram Graph API | Business account OAuth + App Review | Very high | Not viable for us |
+| **Instagram oEmbed** | **None (for public posts)** | **Low** | **✓ Use this** |
+| Unofficial iframe embed | None | Low | Fragile — Instagram blocks periodically |
+| Manual link only | None | Zero | Safe fallback |
 
-**Thunk:** `fetchVenues()` — reads `getDocs(collection(db, 'venues'))`.
+### Our approach: Two-field strategy
 
-**Selectors:** `selectAllVenues`, `selectVenuesStatus`.
+**Field 1: `instagram`** — the venue's profile handle (e.g. `"@club_havana"`)  
+**Field 2: `instagramPostUrl`** — URL of a specific public post (e.g. a party flyer post)
 
-Wire into `src/store/index.js` as `venues` key.
+The admin fills both fields manually in the dashboard (typically copy-pasted from the venue's Google Maps listing "website" link, or from a quick search). No scraping, no API approval.
 
----
+### Can Google Places return Instagram links?
 
-## Task 3 — New Page: `src/pages/admin/VenueDiscoveryPage.jsx`
+Partially. The Places API returns `websiteUri` — some venues link directly to their Instagram. We will:
+1. Auto-detect if `websiteUri` contains `instagram.com` → auto-populate `instagram` field on import
+2. Auto-detect `facebook.com` → auto-populate `facebook` field
+3. Otherwise leave them blank for manual entry
 
-Route: `/admin/venues`  
-Only rendered when `IS_ADMIN === true` (checked in `App.jsx`).
+### Rendering on EventDetailPage
 
-### Layout — three vertical sections:
-
-#### Section A: Search Panel
-
-- **Preset query buttons** — 14 pill buttons from `PRESET_QUERIES` array. Clicking one fires `searchDanceVenues(query)` and appends results to the grid (deduplicating by placeId).
-- **Manual search input** — text field + "Search" button for custom queries (e.g. a specific venue name someone messaged you about). Same function call.
-- **"Clear Results"** button — resets the grid.
-- Active query shown as a status line: _"Showing 12 results for 'salsa club Tel Aviv'"_
-
-#### Section B: Results Grid
-
-Responsive grid of **VenueResultCard** components.
-
-Each card shows:
-- Thumbnail photo (or placeholder)
-- Venue name + city
-- Category badges (English labels)
-- Star rating + review count
-- **Checkbox** (top-right corner)
-- **"Details →"** button that expands an inline panel showing the photo gallery (swipeable, up to 5 images) and the 5 reviews with author photo, name, rating, and text
-
-**Bulk controls** (sticky bar above the grid, visible when results exist):
-- "Select All" / "Deselect All" toggle
-- **"Import Selected (N)"** button — disabled when nothing selected, shows spinner during import
-- Already-imported venues are dimmed with an "Imported ✓" badge — checkbox hidden
-
-#### Section C: Imported Venues
-
-Below the search results, a separate list of all venues already in the `venues` Firestore collection.
-
-Each row shows: thumbnail, name, city, category, rating, **"Create Event →"** button (placeholder for Plan 011 — does nothing yet, just labelled).
-
----
-
-## Task 4 — Wire Route + Admin Nav
-
-### `src/App.jsx`
-
+**Instagram profile link (always shown if `instagram` is set):**
 ```jsx
-import VenueDiscoveryPage from './pages/admin/VenueDiscoveryPage'
-
-// Inside Routes, alongside other routes:
-{IS_ADMIN && (
-  <Route path="/admin/venues" element={<VenueDiscoveryPage />} />
-)}
+<a href={`https://instagram.com/${handle}`} target="_blank">
+  Follow on Instagram @{handle}
+</a>
 ```
 
-### `src/components/layout/BottomNav.jsx`
-
-Add admin nav item conditionally — only when `IS_ADMIN`:
-
-```jsx
-const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
-
-// Append to NAV_ITEMS when IS_ADMIN:
-{ to: '/admin/venues', label: 'VENUES', icon: '🗺', end: false }
+**Instagram post embed (shown if `instagramPostUrl` is set):**
+Uses the free, no-auth **Instagram oEmbed endpoint**:
 ```
+GET https://api.instagram.com/oembed/?url={instagramPostUrl}&omitscript=true
+```
+Returns embed HTML including the post image, caption, and like count. We inject the returned `html` via `dangerouslySetInnerHTML` (safe here — it's Instagram's own embed code). No API key, no app review, no rate limit beyond reasonable use (~unlimited for public posts).
+
+**Fallback:** if oEmbed fails or no post URL is set, show only the profile link button.
+
+**Facebook:** link only — `https://facebook.com/{handle}`. No embed.
 
 ---
 
-## Task 5 — CSS: `src/pages/admin/VenueDiscoveryPage.module.css`
+## Dashboard Tasks (Updated)
 
-Key style decisions:
-- Dark-premium theme matching the rest of the app
-- Results grid: `grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))`
-- VenueResultCard: image top, content below, checkbox overlay top-right
-- Photo gallery in details panel: horizontal scroll strip, `aspect-ratio: 4/3`, `border-radius: 10px`
-- Review item: flex row — `authorPhoto` as 36px circle, text stack beside it
-- Import button: amber gradient (matches the app's CTA style)
-- "Imported ✓" badge: muted green, overlays card, reduces card opacity to 0.55
-- Sticky bulk-controls bar: `position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px)`
+### Task A — VenueResultCard updates (search results)
+
+For venues **not yet imported:** unchanged — show checkbox + Import button.
+
+For venues **already imported** (identified by `placeId` in the `venues` collection):
+- Show the **V toggle** (green = active, grey = inactive) instead of the static "Imported ✓" badge
+- The toggle fires `updateDoc` immediately + re-fetches `venues`
+- Show a small "Manage ↓" link that jumps/scrolls to that venue's row in Section C
+
+### Task B — ImportedVenueRow updates
+
+Replace the current minimal row with a full management card:
+
+```
+[logo or thumb] [name, city, categories]   [V toggle]
+                [Style tags row]
+                [Instagram / Facebook inputs]
+                [Edit Photo button]          [Create Event →]
+```
+
+**Style tags row:** all 7 style chips, amber = assigned. Tap to toggle, saves immediately.
+
+**Social fields:** two compact text inputs: `@instagram` and `@facebook`. Show inline, save on blur or Enter. Auto-filled from website detection on import.
+
+**V toggle:** large, prominent, can't miss it. Green pill = active ("● Live"), grey = "○ Hidden".
+
+### Task C — Duplicate detection in search results
+
+When search results load, `importedPlaceIds` Set is checked per result. For imported venues:
+- The card uses `importedVenueData` from the Redux `venues` state (matched by `placeId`)
+- Shows current `active` status as the toggle state, not just a static badge
+- Admin can activate/deactivate directly from the search result without scrolling to Section C
+
+This makes it **impossible to miss** a venue you already have — it's live-managed, not just labelled.
 
 ---
 
-## Task Order & Dependencies
+## Files to Change
 
-```
-Task 1 (googlePlaces.js additions)   — independent, no UI deps
-Task 2 (venuesSlice.js)              — independent
-Task 3 (VenueDiscoveryPage)          — depends on Task 1 + Task 2
-Task 4 (route + nav wiring)          — depends on Task 3 existing
-Task 5 (CSS)                         — alongside Task 3
-```
-
----
-
-## Files Changed Summary
-
-| File | Action |
+| File | Change |
 |---|---|
-| `src/services/googlePlaces.js` | Add: `GOOGLE_TYPE_MAP`, `mapGoogleTypes`, `searchDanceVenues`, `getFullVenueDetails`, `importVenuesToFirestore` |
-| `src/store/venuesSlice.js` | New — venues state, `fetchVenues` thunk, selectors |
-| `src/store/index.js` | Wire `venuesSlice` into store |
-| `src/pages/admin/VenueDiscoveryPage.jsx` | New — full discovery dashboard |
-| `src/pages/admin/VenueDiscoveryPage.module.css` | New — all styles |
-| `src/App.jsx` | Add `/admin/venues` route, guarded by `IS_ADMIN` |
-| `src/components/layout/BottomNav.jsx` | Add admin nav item when `IS_ADMIN` |
+| `src/services/googlePlaces.js` | Auto-detect `instagram`/`facebook` from `websiteUri` on import; add `fetchInstagramOEmbed(postUrl)` |
+| `src/store/venuesSlice.js` | Add `updateVenueField` action for optimistic local updates on toggles; add `selectVenueByName(name)` selector for EventCard logo lookup |
+| `src/pages/admin/VenueDiscoveryPage.jsx` | V toggle on cards + rows; style tag chips; social media inputs; scroll-to-row from search results |
+| `src/pages/admin/VenueDiscoveryPage.module.css` | Toggle styles, style chip row, social inputs, management card layout |
+| `src/components/events/EventCard.jsx` | Look up `venue.logo` from Redux `venues` and use as primary image |
+| `src/pages/EventDetailPage.jsx` | Show Google photo gallery section; show Instagram embed (oEmbed) + social links |
+| `src/pages/EventDetailPage.module.css` | Gallery section, social links row, Instagram embed container |
 
 ---
 
-## Firestore Security Rules Update Required
+## What Does NOT Change
 
-The `venues` collection needs `allow write: if true` alongside `events`.
-Update in Firebase Console → Firestore → Rules:
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /events/{eventId} {
-      allow read: if true;
-      allow write: if true;
-    }
-    match /venues/{venueId} {
-      allow read: if true;
-      allow write: if true;
-    }
-  }
-}
-```
+- The `events` collection shape is unchanged — events still have their own `image` / `placePhoto` fields
+- No `venueId` foreign key on events yet — logo lookup uses fuzzy name match for now (Plan 011 will add proper linking)
+- Firestore security rules: already `allow write: if true` for both collections
 
 ---
 
-## Out of Scope (for this plan)
+## Out of Scope (Plan 011)
 
-- Plan 011: "Create Event from Venue" — the "Create Event →" button is stubbed but not wired
-- Pagination / "Load more" for search results (API returns up to 20 per query)
-- Deduplication across the full `venues` collection (only deduplicates within current session results)
-- Editing or deleting imported venues
-- Realtime listeners for the venues collection
+- Linking `events` to `venues` via `venueId` foreign key
+- Creating a new event from a venue template
+- Instagram post auto-refresh (today: admin pastes post URL manually)
+- Full venue page (`/venues/:placeId`) with map, gallery, reviews
+- Bulk style tag assignment

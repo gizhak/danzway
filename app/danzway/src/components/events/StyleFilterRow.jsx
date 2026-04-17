@@ -1,7 +1,5 @@
 import styles from './StyleFilterRow.module.css'
 
-// Unsplash dance photos — swap `img` for your own asset path when ready
-// e.g.: img: '/assets/filters/salsa.jpg'
 const STYLE_FILTERS = [
   {
     id: 'all',
@@ -30,27 +28,39 @@ const STYLE_FILTERS = [
   },
 ]
 
-export default function StyleFilterRow({ active = 'all', onSelect }) {
+/**
+ * activeFilters — string[] of currently selected styles (empty = "all")
+ * onSelect     — called with the id of the tapped bubble
+ */
+export default function StyleFilterRow({ activeFilters = [], onSelect }) {
+  const noneSelected = activeFilters.length === 0
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.row}>
-        {STYLE_FILTERS.map(({ id, label, img }) => (
-          <button
-            key={id}
-            className={`${styles.bubble} ${active === id ? styles.active : ''}`}
-            onClick={() => onSelect(id)}
-            aria-pressed={active === id}
-          >
-            <div className={styles.ringWrap}>
-              <div className={styles.circle}>
-                <img src={img} alt={label} className={styles.photo} />
-                {/* Subtle inner dark vignette so the edges blend into background */}
-                <div className={styles.vignette} />
+        {STYLE_FILTERS.map(({ id, label, img }) => {
+          const isActive =
+            id === 'all'
+              ? noneSelected                    // "all" active when nothing selected
+              : activeFilters.includes(id)      // style active when in array
+
+          return (
+            <button
+              key={id}
+              className={`${styles.bubble} ${isActive ? styles.active : ''}`}
+              onClick={() => onSelect(id)}
+              aria-pressed={isActive}
+            >
+              <div className={styles.ringWrap}>
+                <div className={styles.circle}>
+                  <img src={img} alt={label} className={styles.photo} />
+                  <div className={styles.vignette} />
+                </div>
               </div>
-            </div>
-            <span className={styles.label}>{label}</span>
-          </button>
-        ))}
+              <span className={styles.label}>{label}</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

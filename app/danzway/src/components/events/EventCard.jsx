@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectIsSaved, toggleSave } from '../../store/appSlice'
+import { selectVenuesByName } from '../../store/venuesSlice'
 import Badge from '../ui/Badge'
 import styles from './EventCard.module.css'
 
@@ -46,7 +47,9 @@ export default function EventCard({ event }) {
     whatsapp,
   } = event
 
-  const saved = useSelector(selectIsSaved(id))
+  const saved         = useSelector(selectIsSaved(id))
+  const venuesByName  = useSelector(selectVenuesByName)
+  const venueLogo     = venuesByName[venue]?.logo ?? null
 
   const relDate = getRelativeDate(date)
   const parsedDate = new Date(date)
@@ -80,9 +83,9 @@ export default function EventCard({ event }) {
       {/* ── Image (tapping navigates to detail) ── */}
       <Link to={`/events/${id}`} className={styles.imageLink} aria-label={`View details for ${title}`}>
         <div className={styles.imageWrapper}>
-          {(placePhoto || image) ? (
+          {(venueLogo || placePhoto || image) ? (
             <>
-              <img src={placePhoto || image} alt={title} className={styles.image} />
+              <img src={venueLogo || placePhoto || image} alt={title} className={styles.image} />
               <div className={styles.imageOverlay} />
             </>
           ) : (

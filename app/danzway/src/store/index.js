@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
-import appReducer from './appSlice'
+import appReducer    from './appSlice'
+import venuesReducer from './venuesSlice'
 
 const STORAGE_KEY = 'danzway-app'
 
@@ -84,7 +85,8 @@ function saveState(state) {
 
 const store = configureStore({
   reducer: {
-    app: appReducer,
+    app:    appReducer,
+    venues: venuesReducer,
   },
   preloadedState: loadState(),
 })
