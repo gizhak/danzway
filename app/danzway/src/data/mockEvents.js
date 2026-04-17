@@ -11,7 +11,7 @@ export const mockEvents = [
     price: 60,
     currency: "ILS",
     description: "The hottest salsa night in Tel Aviv. Social dancing, live DJ, and beginner-friendly atmosphere.",
-    url: "https://example.com/evt-001",
+    whatsapp: "972501110001",
   },
   {
     id: "evt-002",
@@ -25,7 +25,7 @@ export const mockEvents = [
     price: 120,
     currency: "ILS",
     description: "Intensive bachata sensual workshop led by international instructors. All levels welcome.",
-    url: "https://example.com/evt-002",
+    whatsapp: "972502220002",
   },
   {
     id: "evt-003",
@@ -39,7 +39,7 @@ export const mockEvents = [
     price: 50,
     currency: "ILS",
     description: "Monthly kizomba social with live music and a special semba performance. Dress code: elegant.",
-    url: "https://example.com/evt-003",
+    whatsapp: "972503330003",
   },
   {
     id: "evt-004",
@@ -53,7 +53,7 @@ export const mockEvents = [
     price: 200,
     currency: "ILS",
     description: "Two-day zouk festival featuring workshops, performances, and social nights. Early bird pricing.",
-    url: "https://example.com/evt-004",
+    whatsapp: "972504440004",
   },
   {
     id: "evt-005",
@@ -67,7 +67,7 @@ export const mockEvents = [
     price: 70,
     currency: "ILS",
     description: "Monthly WCS jam session. Bring your own music requests. Beginner lesson at 20:00, social starts 21:00.",
-    url: "https://example.com/evt-005",
+    whatsapp: "972505550005",
   },
   {
     id: "evt-006",
@@ -81,7 +81,7 @@ export const mockEvents = [
     price: 80,
     currency: "ILS",
     description: "The biggest multi-style Latin night of the month. Three floors, four styles, one unforgettable night.",
-    url: "https://example.com/evt-006",
+    whatsapp: "972506660006",
   },
   {
     id: "evt-007",
@@ -95,6 +95,6 @@ export const mockEvents = [
     price: 350,
     currency: "ILS",
     description: "Full-day kizomba bootcamp. Musicality, connection, and footwork. Limited to 20 couples.",
-    url: "https://example.com/evt-007",
+    whatsapp: "972507770007",
   },
 ];

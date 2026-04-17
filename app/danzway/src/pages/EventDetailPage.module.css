@@ -1,54 +1,320 @@
+/* ─── Page wrapper ────────────────────────────────────── */
+.page {
+  /* Remove default page padding so hero bleeds edge-to-edge */
+  margin: -1.5rem -1.25rem 0;
+}
+
+/* ─── Back button — thumb-friendly hit area ───────────── */
 .back {
-  display: inline-block;
-  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  min-width: 72px;
+  padding: 0 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--color-brand-text);
   text-decoration: none;
-  margin-bottom: 1.5rem;
   transition: color 0.15s ease;
+  position: relative;
+  z-index: 2;
 }
 
 .back:hover {
   color: var(--color-brand-heading);
 }
 
-.title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-brand-heading);
-  margin: 0 0 1rem;
+.backArrow {
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
+/* ─── Hero image block ────────────────────────────────── */
+.hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.heroImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.heroPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  opacity: 0.15;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 8, 9, 0) 40%,
+    rgba(8, 8, 9, 0.75) 100%
+  );
+}
+
+/* Date badge — pinned top-right of hero */
+.dateBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 48px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+}
+
+.dateBadgeMonth {
+  background: #d97706;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  padding: 3px 0;
+}
+
+.dateBadgeDay {
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1;
+  padding: 4px 0 6px;
+}
+
+/* ─── Content area ────────────────────────────────────── */
+.content {
+  padding: 1.5rem 1.25rem 0;
+}
+
+.title {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--color-brand-heading);
+  margin: 0 0 1.1rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Meta rows ───────────────────────────────────────── */
 .meta {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  font-size: 0.9rem;
-  color: var(--color-brand-text);
+  gap: 0.5rem;
   margin-bottom: 1.25rem;
 }
 
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  color: var(--color-brand-text);
+}
+
+.metaIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ─── Badge row ───────────────────────────────────────── */
 .badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
 }
 
+/* ─── Description ─────────────────────────────────────── */
 .description {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--color-brand-text);
-  line-height: 1.7;
-  margin-bottom: 2rem;
+  line-height: 1.75;
+  margin: 0 0 1.25rem;
 }
 
-.price {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--color-brand-amber);
+/* ─── Price chip ──────────────────────────────────────── */
+.priceRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+.priceChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+}
+
+/* ─── Section divider ─────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 0 1.25rem;
+}
+
+/* ─── Map placeholder card ────────────────────────────── */
+.mapCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  text-decoration: none;
   margin-bottom: 1.5rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
+.mapCard:hover {
+  border-color: rgba(245, 158, 11, 0.30);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mapVisual {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.mapInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.mapVenue {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mapCity {
+  font-size: 0.78rem;
+  color: var(--color-brand-text);
+  margin-top: 1px;
+}
+
+.mapCta {
+  font-size: 0.75rem;
+  color: var(--color-brand-amber-light);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ─── WhatsApp CTA button ─────────────────────────────── */
+.whatsappBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  height: 54px;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  border: none;
+  box-shadow: 0 4px 24px rgba(245, 158, 11, 0.40);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.whatsappBtn:hover {
+  box-shadow: 0 6px 32px rgba(245, 158, 11, 0.55);
+  transform: translateY(-1px);
+}
+
+.whatsappBtn:active {
+  transform: scale(0.97);
+}
+
+/* Inline version shown on desktop only */
+.whatsappBtnInline {
+  display: none;
+}
+
+/* ─── Fixed CTA bar — mobile conversion anchor ────────── */
+/* Sits just above the floating BottomNav pill              */
+.ctaBar {
+  display: none;
+}
+
+/* Spacer so fixed CTA doesn't overlay content (mobile) */
+.ctaSpacer {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .ctaBar {
+    display: block;
+    position: fixed;
+    /* BottomNav: bottom 1.1rem + height 62px = ~80px. Add 0.6rem gap. */
+    bottom: calc(62px + 1.1rem + 0.6rem);
+    left: 1rem;
+    right: 1rem;
+    z-index: 40;
+  }
+
+  .ctaBar .whatsappBtn {
+    width: 100%;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4), 0 4px 24px rgba(245, 158, 11, 0.45);
+  }
+
+  .ctaSpacer {
+    display: block;
+    /* height of CTA (54px) + gap above BottomNav (0.6rem) */
+    height: calc(54px + 0.6rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .whatsappBtnInline {
+    display: flex;
+    margin-bottom: 2.5rem;
+  }
+
+  .ctaBar {
+    display: none;
+  }
+}
+
+/* ─── Not found ───────────────────────────────────────── */
 .notFound {
   color: var(--color-brand-text);
   opacity: 0.6;
+  padding: 2rem 1.25rem;
 }

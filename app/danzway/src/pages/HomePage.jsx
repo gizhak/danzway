@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { mockEvents } from '../data/mockEvents'
+import useAppStore from '../store/useAppStore'
 import EventList from '../components/events/EventList'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import SearchBar from '../components/ui/SearchBar'
@@ -31,8 +32,10 @@ function filterEvents(events, query, styleFilter) {
 }
 
 export default function HomePage() {
-  const [query, setQuery]             = useState('')
-  const [styleFilter, setStyleFilter] = useState('all')
+  const [query, setQuery] = useState('')
+
+  const styleFilter    = useAppStore((s) => s.styleFilter)
+  const setStyleFilter = useAppStore((s) => s.setStyleFilter)
 
   const filtered = useMemo(
     () => filterEvents(mockEvents, query, styleFilter),

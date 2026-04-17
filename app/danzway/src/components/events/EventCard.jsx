@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import useAppStore from '../../store/useAppStore'
 import Badge from '../ui/Badge'
 import styles from './EventCard.module.css'
 
@@ -24,7 +27,11 @@ function getAvatarInitials(name) {
 }
 
 export default function EventCard({ event }) {
+  const isSaved    = useAppStore((s) => s.isSaved)
+  const toggleSave = useAppStore((s) => s.toggleSave)
+
   const {
+    id,
     title,
     date,
     time,
@@ -35,7 +42,7 @@ export default function EventCard({ event }) {
     price,
     currency,
     description,
-    url,
+    whatsapp,
   } = event
 
   const relDate = getRelativeDate(date)
@@ -48,7 +55,9 @@ export default function EventCard({ event }) {
     .join(' ')
 
   const waMessage = encodeURIComponent(`Hi! I'm interested in: ${title} — ${venue}, ${location} on ${date} at ${time}`)
-  const waUrl = `https://wa.me/?text=${waMessage}`
+  const waUrl = whatsapp
+    ? `https://wa.me/${whatsapp}?text=${waMessage}`
+    : `https://wa.me/?text=${waMessage}`
 
   return (
     <article className={styles.card}>
@@ -57,29 +66,33 @@ export default function EventCard({ event }) {
       <div className={styles.header}>
         <div className={styles.avatar}>{getAvatarInitials(venue)}</div>
         <div className={styles.headerInfo}>
-          <div className={styles.venueName}>{venue} · {location}</div>
+          <Link to={`/events/${id}`} className={styles.venueNameLink}>
+            <div className={styles.venueName}>{venue} · {location}</div>
+          </Link>
           <div className={styles.venueDate}>{relDate} · {time}</div>
         </div>
         <button className={styles.menuBtn} aria-label="More options">···</button>
       </div>
 
-      {/* ── Image ── */}
-      <div className={styles.imageWrapper}>
-        {image ? (
-          <>
-            <img src={image} alt={title} className={styles.image} />
-            <div className={styles.imageOverlay} />
-          </>
-        ) : (
-          <div className={styles.imagePlaceholder}>♪</div>
-        )}
+      {/* ── Image (tapping navigates to detail) ── */}
+      <Link to={`/events/${id}`} className={styles.imageLink} aria-label={`View details for ${title}`}>
+        <div className={styles.imageWrapper}>
+          {image ? (
+            <>
+              <img src={image} alt={title} className={styles.image} />
+              <div className={styles.imageOverlay} />
+            </>
+          ) : (
+            <div className={styles.imagePlaceholder}>♪</div>
+          )}
 
-        {/* Date badge */}
-        <div className={styles.dateBadge}>
-          <div className={styles.dateBadgeMonth}>{month}</div>
-          <div className={styles.dateBadgeDay}>{day}</div>
+          {/* Date badge */}
+          <div className={styles.dateBadge}>
+            <div className={styles.dateBadgeMonth}>{month}</div>
+            <div className={styles.dateBadgeDay}>{day}</div>
+          </div>
         </div>
-      </div>
+      </Link>
 
       {/* ── Style badges ── */}
       <div className={styles.styleBadges}>
@@ -94,7 +107,15 @@ export default function EventCard({ event }) {
 
       {/* ── Action buttons ── */}
       <div className={styles.actions}>
-        <button className={styles.actionBtn}>♥ INTERESTED</button>
+        <motion.button
+          className={`${styles.actionBtn} ${isSaved(id) ? styles.actionBtnSaved : ''}`}
+          onClick={() => toggleSave(id)}
+          whileTap={{ scale: 0.88 }}
+          animate={isSaved(id) ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+        >
+          {isSaved(id) ? '♥' : '♡'} INTERESTED
+        </motion.button>
         <button className={styles.actionBtn}>➤ SHARE</button>
       </div>
 
