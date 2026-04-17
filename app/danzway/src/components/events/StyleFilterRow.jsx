@@ -6,27 +6,27 @@ const STYLE_FILTERS = [
   {
     id: 'all',
     label: 'כל הסגנונות',
-    img: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=200&h=200&fit=crop&crop=faces,center',
+    img: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?auto=format&fit=crop&w=200&h=200&q=80',
   },
   {
     id: 'Salsa',
     label: 'סלסה',
-    img: 'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=200&h=200&fit=crop&crop=faces,center',
+    img: 'https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?auto=format&fit=crop&w=200&h=200&q=80',
   },
   {
     id: 'Bachata',
     label: "באצ'טה",
-    img: 'https://images.unsplash.com/photo-1545128485-c35305837e86?w=200&h=200&fit=crop&crop=faces,center',
+    img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=200&h=200&q=80',
   },
   {
     id: 'Kizomba',
     label: 'קיזומבה',
-    img: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200&h=200&fit=crop&crop=faces,center',
+    img: 'https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=200&h=200&q=80',
   },
   {
     id: 'Zouk',
     label: 'זוק',
-    img: 'https://images.unsplash.com/photo-1535525153412-5a42439a210d?w=200&h=200&fit=crop&crop=faces,center',
+    img: 'https://images.unsplash.com/photo-1535525153412-5a42439a210d?auto=format&fit=crop&w=200&h=200&q=80',
   },
 ]
 
