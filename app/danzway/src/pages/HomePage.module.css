@@ -60,3 +60,99 @@
   opacity: 0.45;
   font-size: 0.9rem;
 }
+
+/* ─── Loading skeletons ───────────────────────────────── */
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skeletonCard {
+  height: 120px;
+  border-radius: 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Premium error card ──────────────────────────────── */
+.errorCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 1.25rem 1.1rem;
+  border-radius: 16px;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  box-shadow: 0 4px 24px rgba(245, 158, 11, 0.08);
+}
+
+.errorIconWrap {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f59e0b;
+}
+
+.errorBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.errorTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  margin: 0 0 0.25rem;
+}
+
+.errorMessage {
+  font-size: 0.78rem;
+  color: var(--color-brand-text);
+  opacity: 0.65;
+  margin: 0 0 0.85rem;
+  word-break: break-word;
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 1rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: none;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.retryBtn:hover {
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
+  transform: translateY(-1px);
+}
+
+.retryBtn:active {
+  transform: scale(0.97);
+}

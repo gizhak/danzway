@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm run *)",
       "Bash(npm install *)",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(node -e \"require\\('./node_modules/firebase/package.json'\\); console.log\\('firebase installed: ' + require\\('./node_modules/firebase/package.json'\\).version\\)\")"
     ]
   }
 }

@@ -29,8 +29,11 @@ function loadState() {
         : {}
       // Overwrite with the clean Redux format so next load is fast
       const migrated = {
-        savedIds: migratedSavedIds,
+        savedIds:    migratedSavedIds,
         styleFilter: typeof styleFilter === 'string' ? styleFilter : 'all',
+        events:      [],
+        status:      'idle',
+        error:       null,
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
       return { app: migrated }
@@ -42,6 +45,11 @@ function loadState() {
         app: {
           savedIds:    parsed.savedIds    ?? {},
           styleFilter: parsed.styleFilter ?? 'all',
+          // events/status/error are NOT persisted — always start fresh so
+          // fetchEvents is triggered on every page load.
+          events: [],
+          status: 'idle',
+          error:  null,
         },
       }
     }
