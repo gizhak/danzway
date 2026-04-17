@@ -75,10 +75,29 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
+/* ─── Venue name as link ──────────────────────────────── */
+.venueNameLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* ─── Image link wrapper ──────────────────────────────── */
+.imageLink {
+  display: block;
+  margin: 0 0.75rem;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.imageLink:hover .image {
+  transform: scale(1.03);
+}
+
 /* ─── Image block ─────────────────────────────────────── */
 .imageWrapper {
   position: relative;
-  margin: 0 0.75rem;
   border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 16 / 9;
@@ -90,6 +109,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.35s ease;
 }
 
 .imageOverlay {
@@ -194,6 +214,13 @@
 .actionBtn:hover {
   background: rgba(245, 158, 11, 0.18);
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.20);
+}
+
+.actionBtnSaved {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.80);
+  color: var(--color-brand-amber-light);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.25);
 }
 
 /* ─── WhatsApp RSVP button ────────────────────────────── */

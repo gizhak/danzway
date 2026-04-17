@@ -1,0 +1,32 @@
+/* Shared Coming Soon stub styles — used by MapPage and PostPage */
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 40vh;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+}
+
+.icon {
+  font-size: 2.8rem;
+  line-height: 1;
+  opacity: 0.45;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  margin: 0;
+}
+
+.text {
+  font-size: 0.85rem;
+  color: var(--color-brand-text);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 280px;
+}
