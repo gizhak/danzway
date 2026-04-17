@@ -1,0 +1,1266 @@
+/* ─── Page wrapper ────────────────────────────────────────────────────────── */
+.page {
+  padding: 1.5rem 1.25rem 7rem;
+}
+
+/* ─── Page header ─────────────────────────────────────────────────────────── */
+.pageHeader {
+  margin-bottom: 1.75rem;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-brand-heading);
+  margin: 0 0 0.3rem;
+  letter-spacing: -0.02em;
+}
+
+.pageSubtitle {
+  font-size: 0.82rem;
+  color: var(--color-brand-text);
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* ─── Section label ───────────────────────────────────────────────────────── */
+.sectionLabel {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-brand-text);
+  opacity: 0.45;
+  margin-bottom: 0.6rem;
+}
+
+/* ─── Auto-discovery progress bar ────────────────────────────────────────── */
+.autoDiscoveryBar {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+}
+
+.autoDiscoveryLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: rgba(245, 158, 11, 0.85);
+  margin-bottom: 0.5rem;
+}
+
+.autoDiscoverySpinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(245, 158, 11, 0.2);
+  border-top-color: rgba(245, 158, 11, 0.85);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.autoDiscoveryProgress {
+  margin-left: auto;
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+.autoProgressTrack {
+  height: 3px;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.12);
+  overflow: hidden;
+}
+
+.autoProgressFill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #fbbf24, #d97706);
+  transition: width 0.4s ease;
+}
+
+/* Done banner */
+.autoDiscoveryDone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  background: rgba(34, 197, 94, 0.07);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(34, 197, 94, 0.85);
+}
+
+.rerunBtn {
+  background: transparent;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 7px;
+  color: rgba(34, 197, 94, 0.7);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  min-height: 28px;
+}
+
+.rerunBtn:hover {
+  border-color: rgba(34, 197, 94, 0.5);
+  color: rgba(34, 197, 94, 1);
+}
+
+/* ─── Search section ──────────────────────────────────────────────────────── */
+.searchSection {
+  margin-bottom: 0;
+}
+
+/* ─── Preset query grid ───────────────────────────────────────────────────── */
+.presetGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.4rem;
+}
+
+.presetBtn {
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-brand-text);
+  font-size: 0.73rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  min-height: 34px;
+}
+
+.presetBtn:hover:not(:disabled) {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: rgba(245, 158, 11, 0.85);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.presetBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Query already run this session */
+.presetBtnDone {
+  border-color: rgba(34, 197, 94, 0.3);
+  color: rgba(34, 197, 94, 0.7);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.presetBtnDone:hover:not(:disabled) {
+  border-color: rgba(34, 197, 94, 0.5);
+  color: rgba(34, 197, 94, 0.9);
+}
+
+/* Currently running */
+.presetBtnActive {
+  border-color: rgba(245, 158, 11, 0.5);
+  color: rgba(245, 158, 11, 0.9);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+/* ─── Manual search row ───────────────────────────────────────────────────── */
+.manualRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.manualInput {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-brand-heading);
+  font-size: 0.85rem;
+  transition: border-color 0.15s ease;
+}
+
+.manualInput::placeholder {
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.manualInput:focus {
+  outline: none;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.manualInput:disabled {
+  opacity: 0.5;
+}
+
+.manualSearchBtn {
+  flex-shrink: 0;
+  height: 42px;
+  padding: 0 1.1rem;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #0a0a0a;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: box-shadow 0.15s ease;
+}
+
+.manualSearchBtn:hover:not(:disabled) {
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.45);
+}
+
+.manualSearchBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.clearBtn {
+  flex-shrink: 0;
+  height: 42px;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.clearBtn:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ─── Sticky bulk controls bar ───────────────────────────────────────────── */
+.bulkBar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  margin: 0 -1.25rem 1.25rem;
+  background: rgba(8, 8, 9, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bulkCount {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-brand-text);
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+.bulkImportedCount {
+  color: rgba(34, 197, 94, 0.75);
+  opacity: 1;
+}
+
+.bulkActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selectAllBtn {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.73rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.selectAllBtn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.selectAllBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.importBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 1rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #0a0a0a;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 14px rgba(245, 158, 11, 0.3);
+  transition: box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.importBtn:hover:not(:disabled) {
+  box-shadow: 0 4px 22px rgba(245, 158, 11, 0.55);
+}
+
+.importBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.importBtnLoading {
+  opacity: 0.85;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.importSpinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: #0a0a0a;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ─── Results section ─────────────────────────────────────────────────────── */
+.resultsSection {
+  margin-bottom: 2rem;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+/* ─── VenueResultCard ─────────────────────────────────────────────────────── */
+.card {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.cardSelected {
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  background: rgba(245, 158, 11, 0.04);
+}
+
+.cardImported {
+  /* imported venues are now fully managed — no opacity dim */
+}
+
+/* Thumbnail */
+.cardThumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.cardThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cardThumbPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  opacity: 0.15;
+}
+
+/* Checkbox overlay */
+.checkbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(10, 10, 10, 0.55);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.checkbox:hover {
+  border-color: rgba(245, 158, 11, 0.7);
+}
+
+.checkboxChecked {
+  border-color: #fbbf24;
+  background: #d97706;
+  color: #0a0a0a;
+}
+
+/* V-toggle overlay on search result card */
+.vToggleCard {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  min-height: 26px;
+}
+
+.vToggleCard:hover {
+  background: rgba(34, 197, 94, 0.25);
+  color: rgba(34, 197, 94, 0.9);
+}
+
+.vToggleCardOn {
+  color: #fff;
+  background: rgba(34, 197, 94, 0.75);
+  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.4);
+}
+
+.vToggleCardOn:hover {
+  background: rgba(34, 197, 94, 0.55);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Imported badge overlay */
+.importedBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: rgba(34, 197, 94, 0.8);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Card body */
+.cardBody {
+  padding: 0.85rem;
+}
+
+.cardName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  margin-bottom: 0.2rem;
+  line-height: 1.3;
+}
+
+.cardAddress {
+  font-size: 0.72rem;
+  color: var(--color-brand-text);
+  opacity: 0.55;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardCategories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.55rem;
+}
+
+.categoryBadge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(245, 158, 11, 0.85);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ─── StarRating ──────────────────────────────────────────────────────────── */
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ratingStar {
+  color: #fbbf24;
+  font-size: 0.82rem;
+}
+
+.ratingNum {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+}
+
+.ratingCount {
+  font-size: 0.7rem;
+  color: var(--color-brand-text);
+  opacity: 0.45;
+}
+
+/* ─── Details toggle ──────────────────────────────────────────────────────── */
+.detailsBtn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(245, 158, 11, 0.6);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  transition: color 0.15s ease;
+  min-height: 34px;
+}
+
+.detailsBtn:hover {
+  color: rgba(245, 158, 11, 1);
+}
+
+.detailsBtnOpen {
+  color: rgba(245, 158, 11, 1);
+}
+
+/* ─── Expanded details panel ──────────────────────────────────────────────── */
+.details {
+  padding: 0 0.85rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Loading dots */
+.detailsLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.25rem 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.9); }
+  50%       { opacity: 1;    transform: scale(1.1); }
+}
+
+.loadingDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.7);
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+.loadingDot:nth-child(2) { animation-delay: 0.18s; }
+.loadingDot:nth-child(3) { animation-delay: 0.36s; }
+
+.detailsError {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  padding: 1rem 0 0.5rem;
+  margin: 0;
+}
+
+/* Photo gallery — horizontal scroll strip */
+.gallery {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.75rem 0 0.5rem;
+  margin-bottom: 0.6rem;
+  scrollbar-width: none;
+}
+
+.gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.galleryPhoto {
+  flex-shrink: 0;
+  width: 150px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  scroll-snap-align: start;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Contact row */
+.contactRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.contactItem {
+  font-size: 0.73rem;
+  color: var(--color-brand-text);
+  opacity: 0.65;
+}
+
+.contactLink {
+  font-size: 0.73rem;
+  color: rgba(245, 158, 11, 0.75);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.contactLink:hover {
+  color: rgba(245, 158, 11, 1);
+}
+
+/* Reviews */
+.reviews {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.75rem;
+}
+
+.reviewsTitle {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+  margin-bottom: 0.6rem;
+}
+
+.review {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.review:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.reviewAuthorRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.reviewAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.reviewAvatarFallback {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.18);
+  color: rgba(245, 158, 11, 0.8);
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reviewMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.reviewAuthor {
+  display: block;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reviewTime {
+  display: block;
+  font-size: 0.63rem;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.reviewStars {
+  font-size: 0.62rem;
+  color: #fbbf24;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.reviewText {
+  font-size: 0.75rem;
+  color: var(--color-brand-text);
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* ─── Empty state ─────────────────────────────────────────────────────────── */
+.emptyState {
+  text-align: center;
+  padding: 3.5rem 1rem 2rem;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.emptyIcon {
+  font-size: 2.75rem;
+  margin-bottom: 0.85rem;
+  display: block;
+}
+
+.emptyState p {
+  font-size: 0.84rem;
+  line-height: 1.65;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+/* ─── Imported venues section ─────────────────────────────────────────────── */
+.importedSection {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.importedList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+/* Outer wrapper — owns the border/background/radius */
+.importedRowWrap {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.importedRowWrap:hover {
+  border-color: rgba(255, 255, 255, 0.11);
+}
+
+.importedRowWrapEditing {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  background: rgba(245, 158, 11, 0.02);
+}
+
+/* Inner flex row */
+.importedRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+}
+
+.importedThumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.importedThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.importedThumbPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  opacity: 0.18;
+}
+
+.importedInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.importedName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.1rem;
+}
+
+.importedCity {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.38);
+  margin-bottom: 0.3rem;
+}
+
+.importedCategories {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.importedRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.createEventBtn {
+  height: 28px;
+  padding: 0 0.65rem;
+  border-radius: 7px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: transparent;
+  color: rgba(245, 158, 11, 0.4);
+  font-size: 0.67rem;
+  font-weight: 700;
+  cursor: not-allowed;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Toast ───────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 5.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-brand-heading);
+  background: rgba(15, 15, 16, 0.92);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(245, 158, 11, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* ─── Mobile adjustments ──────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .resultsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .bulkBar {
+    padding: 0.55rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .bulkCount {
+    width: 100%;
+  }
+
+  .importBtn {
+    font-size: 0.72rem;
+    padding: 0 0.8rem;
+  }
+
+  .galleryPhoto {
+    width: 130px;
+  }
+
+  .importedRight {
+    display: none;
+  }
+}
+
+/* ─── Imported section header ─────────────────────────────────────────────── */
+.importedSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0;
+}
+
+.bulkEditToggleBtn {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.bulkEditToggleBtn:hover {
+  border-color: rgba(245, 158, 11, 0.35);
+  color: rgba(245, 158, 11, 0.75);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.bulkEditToggleBtnActive {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ─── Bulk edit bar ───────────────────────────────────────────────────────── */
+.bulkEditBar {
+  margin-top: 0.6rem;
+}
+
+.bulkEditHint {
+  font-size: 0.75rem;
+  color: var(--color-brand-text);
+  opacity: 0.55;
+  margin: 0 0 0.65rem;
+  line-height: 1.5;
+}
+
+.bulkEditHint strong {
+  color: rgba(245, 158, 11, 0.8);
+  opacity: 1;
+}
+
+/* ─── Per-venue edit button ───────────────────────────────────────────────── */
+.importedButtons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.editPhotoBtn {
+  height: 28px;
+  padding: 0 0.65rem;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.67rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.editPhotoBtn:hover {
+  border-color: rgba(245, 158, 11, 0.35);
+  color: rgba(245, 158, 11, 0.75);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.editPhotoBtnActive {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ─── Shared inline edit form ─────────────────────────────────────────────── */
+.editFormInner {
+  padding: 0.75rem 0.85rem 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.editInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 0.9rem;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-brand-heading);
+  font-size: 0.82rem;
+  margin-bottom: 0.6rem;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.editInput::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.editFormActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.editSaveBtn {
+  height: 34px;
+  padding: 0 1rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #0a0a0a;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 12px rgba(245, 158, 11, 0.3);
+}
+
+.editSaveBtn:hover:not(:disabled) {
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.5);
+}
+
+.editSaveBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.editCancelBtn {
+  height: 34px;
+  padding: 0 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.editCancelBtn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ─── Live venue highlight ─────────────────────────────────────────────────── */
+.importedRowWrapActive {
+  border-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+/* ─── Prominent V toggle pill (ImportedVenueRow) ──────────────────────────── */
+.vTogglePill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 32px;
+  padding: 0 0.85rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.vTogglePill:hover {
+  border-color: rgba(34, 197, 94, 0.4);
+  color: rgba(34, 197, 94, 0.7);
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.vTogglePillOn {
+  border-color: rgba(34, 197, 94, 0.55);
+  background: rgba(34, 197, 94, 0.12);
+  color: rgba(34, 197, 94, 0.95);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+}
+
+.vTogglePillOn:hover {
+  background: rgba(34, 197, 94, 0.08);
+  color: rgba(34, 197, 94, 0.7);
+}
+
+.vToggleDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ─── Style chip row ──────────────────────────────────────────────────────── */
+.styleChipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0 0.85rem 0.6rem;
+}
+
+.styleChip {
+  padding: 0.22rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  min-height: 28px;
+}
+
+.styleChip:hover {
+  border-color: rgba(245, 158, 11, 0.35);
+  color: rgba(245, 158, 11, 0.65);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.styleChipOn {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.1);
+  color: rgba(245, 158, 11, 0.92);
+}
+
+.styleChipOn:hover {
+  background: rgba(245, 158, 11, 0.06);
+  color: rgba(245, 158, 11, 0.65);
+}
+
+/* ─── Social inputs row ───────────────────────────────────────────────────── */
+.socialRow {
+  display: flex;
+  gap: 0.45rem;
+  padding: 0 0.85rem 0.7rem;
+  flex-wrap: wrap;
+}
+
+.socialInput {
+  flex: 1;
+  min-width: 100px;
+  height: 34px;
+  padding: 0 0.7rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-brand-heading);
+  font-size: 0.75rem;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.socialInput::placeholder {
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.socialInput:focus {
+  outline: none;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+/* ─── ImportedVenueRow actions row ────────────────────────────────────────── */
+.importedActionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.85rem 0.7rem;
+}
+
+/* ─── Edit form hint ──────────────────────────────────────────────────────── */
+.editFormHint {
+  font-size: 0.72rem;
+  color: var(--color-brand-text);
+  opacity: 0.5;
+  margin: 0 0 0.6rem;
+  line-height: 1.5;
+}

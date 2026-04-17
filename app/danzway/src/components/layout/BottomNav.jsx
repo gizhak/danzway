@@ -3,11 +3,14 @@ import { useSelector } from 'react-redux'
 import { selectSavedCount } from '../../store/appSlice'
 import styles from './BottomNav.module.css'
 
+const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
+
 const NAV_ITEMS = [
-  { to: '/',        label: 'FEED',    icon: '⊞', end: true  },
-  { to: '/map',     label: 'MAP',     icon: '📍', end: false },
-  { to: '/post',    label: 'POST',    icon: '✏️', end: false },
-  { to: '/profile', label: 'PROFILE', icon: '👤', end: false },
+  { to: '/',              label: 'FEED',    icon: '⊞', end: true  },
+  { to: '/map',           label: 'MAP',     icon: '📍', end: false },
+  { to: '/post',          label: 'POST',    icon: '✏️', end: false },
+  { to: '/profile',       label: 'PROFILE', icon: '👤', end: false },
+  ...(IS_ADMIN ? [{ to: '/admin/venues', label: 'VENUES', icon: '🏛', end: false }] : []),
 ]
 
 export default function BottomNav() {

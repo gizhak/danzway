@@ -1,0 +1,325 @@
+/* ─── Card shell ──────────────────────────────────────── */
+.card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 8px 40px rgba(245, 158, 11, 0.12);
+}
+
+/* ─── Header row ──────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem 0.75rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  letter-spacing: -0.02em;
+}
+
+.avatarImg {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 1.5px solid rgba(245, 158, 11, 0.3);
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.nameLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.venueName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-brand-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.venueMeta {
+  font-size: 0.75rem;
+  color: var(--color-brand-text);
+  margin-top: 1px;
+  opacity: 0.65;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-brand-text);
+  font-size: 1.1rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: background 0.15s ease;
+}
+
+.menuBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Image ───────────────────────────────────────────── */
+.imageLink {
+  display: block;
+  margin: 0 0.75rem;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.imageLink:hover .image {
+  transform: scale(1.03);
+}
+
+.imageWrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 8, 9, 0) 50%,
+    rgba(8, 8, 9, 0.45) 100%
+  );
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  opacity: 0.2;
+}
+
+/* ─── Rating badge (top-right of image) ──────────────── */
+.ratingBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0.22rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(10, 10, 10, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.ratingBadgeStar {
+  color: #fbbf24;
+  font-size: 0.7rem;
+}
+
+.ratingBadgeNum {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.ratingBadgeCount {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ─── Next-event date badge (top-right of image) ─────── */
+.dateBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.dateBadgeMonth {
+  background: #d97706;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  padding: 3px 0;
+}
+
+.dateBadgeDay {
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1;
+  padding: 4px 0 5px;
+}
+
+/* "Tonight" / "Tomorrow" variant — taller white section */
+.dateBadgeLabelSmall {
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 0.52rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.01em;
+  padding: 4px 2px 5px;
+  line-height: 1.1;
+}
+
+/* ─── Inline rating in header ────────────────────────── */
+.ratingInline {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+/* ─── Style badges row ────────────────────────────────── */
+.styleBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.75rem 1rem 0.25rem;
+}
+
+/* ─── Description + hashtags ──────────────────────────── */
+.description {
+  font-size: 0.82rem;
+  color: var(--color-brand-text);
+  line-height: 1.55;
+  padding: 0.25rem 1rem 0.75rem;
+  margin: 0;
+}
+
+.hashtags {
+  color: var(--color-brand-amber-light);
+  font-weight: 600;
+}
+
+/* ─── Action row ──────────────────────────────────────── */
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0.5rem;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 40px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  background: rgba(245, 158, 11, 0.10);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: var(--color-brand-amber-light);
+}
+
+.actionBtn:hover {
+  background: rgba(245, 158, 11, 0.18);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.20);
+}
+
+.actionBtnSaved {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.80);
+  color: var(--color-brand-amber-light);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.25);
+}
+
+/* ─── Directions CTA button ───────────────────────────── */
+.directionsBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 0.75rem 0.875rem;
+  height: 46px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-decoration: none;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  border: none;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.directionsBtn:hover {
+  box-shadow: 0 6px 28px rgba(245, 158, 11, 0.50);
+  transform: translateY(-1px);
+}
+
+.directionsSep {
+  opacity: 0.45;
+  font-weight: 400;
+}
+
+.directionsPhone {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
