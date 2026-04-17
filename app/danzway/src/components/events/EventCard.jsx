@@ -39,6 +39,7 @@ export default function EventCard({ event }) {
     venue,
     styles: danceStyles,
     image,
+    placePhoto,
     price,
     currency,
     description,
@@ -79,9 +80,9 @@ export default function EventCard({ event }) {
       {/* ── Image (tapping navigates to detail) ── */}
       <Link to={`/events/${id}`} className={styles.imageLink} aria-label={`View details for ${title}`}>
         <div className={styles.imageWrapper}>
-          {image ? (
+          {(placePhoto || image) ? (
             <>
-              <img src={image} alt={title} className={styles.image} />
+              <img src={placePhoto || image} alt={title} className={styles.image} />
               <div className={styles.imageOverlay} />
             </>
           ) : (
