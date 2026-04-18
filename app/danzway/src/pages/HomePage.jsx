@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import {
   selectStyleFilters,
   toggleStyleFilter,
@@ -36,11 +37,13 @@ function filterVenues(venues, query, styleFilters) {
   if (query.trim()) {
     const q = query.toLowerCase()
     result = result.filter(
-      ({ name, city, address, categories }) =>
+      ({ name, city, address, categories, categoriesHe, tags }) =>
         name?.toLowerCase().includes(q) ||
         city?.toLowerCase().includes(q) ||
         address?.toLowerCase().includes(q) ||
-        (categories ?? []).some((c) => c.toLowerCase().includes(q))
+        (categories    ?? []).some((c) => c.toLowerCase().includes(q)) ||
+        (categoriesHe  ?? []).some((c) => c.includes(query.trim())) ||
+        (tags          ?? []).some((tag) => tag.toLowerCase().includes(q))
     )
   }
 
@@ -50,6 +53,7 @@ function filterVenues(venues, query, styleFilters) {
 export default function HomePage() {
   const [query,   setQuery]   = useState('')
   const dispatch              = useDispatch()
+  const { t }                 = useTranslation()
   const styleFilters          = useSelector(selectStyleFilters)
   const activeVenues          = useSelector(selectActiveVenues)
   const venuesStatus          = useSelector(selectVenuesStatus)
@@ -77,12 +81,10 @@ export default function HomePage() {
       {/* ── Hero ── */}
       <section className={styles.hero}>
         <h1 className={styles.heroTitle}>
-          Find your next{' '}
-          <span className={styles.heroTitleGradient}>dance club</span>
+          {t('home.hero.title')}{' '}
+          <span className={styles.heroTitleGradient}>{t('home.hero.highlight')}</span>
         </h1>
-        <p className={styles.heroSubtitle}>
-          Salsa · Bachata · Kizomba · Zouk and more across Israel
-        </p>
+        <p className={styles.heroSubtitle}>{t('home.hero.subtitle')}</p>
       </section>
 
       {/* ── Style filter bubbles ── */}
@@ -101,7 +103,7 @@ export default function HomePage() {
       {/* ── Count row ── */}
       {isFiltering && !isLoading && (
         <div className={styles.countRow}>
-          {filtered.length} club{filtered.length !== 1 ? 's' : ''} found
+          {t('home.count', { count: filtered.length })}
         </div>
       )}
 
@@ -127,10 +129,8 @@ export default function HomePage() {
       {!isLoading && activeVenues.length === 0 && (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>🕺</div>
-          <p className={styles.emptyTitle}>No clubs yet</p>
-          <p className={styles.emptyText}>
-            The admin is still curating the best dance spots.{'\n'}Check back soon!
-          </p>
+          <p className={styles.emptyTitle}>{t('home.empty.noClubs.title')}</p>
+          <p className={styles.emptyText}>{t('home.empty.noClubs.text')}</p>
         </div>
       )}
 
@@ -138,10 +138,8 @@ export default function HomePage() {
       {!isLoading && activeVenues.length > 0 && filtered.length === 0 && (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>🔍</div>
-          <p className={styles.emptyTitle}>No matches</p>
-          <p className={styles.emptyText}>
-            No clubs match your current filters. Try a different style or clear your search.
-          </p>
+          <p className={styles.emptyTitle}>{t('home.empty.noMatch.title')}</p>
+          <p className={styles.emptyText}>{t('home.empty.noMatch.text')}</p>
         </div>
       )}
     </>

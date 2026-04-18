@@ -1,0 +1,148 @@
+{
+  "nav": {
+    "clubs":   "CLUBS",
+    "parties": "PARTIES",
+    "map":     "MAP",
+    "post":    "POST",
+    "profile": "PROFILE",
+    "venues":  "VENUES"
+  },
+  "home": {
+    "hero": {
+      "title":     "Find your next",
+      "highlight": "dance club",
+      "subtitle":  "Salsa · Bachata · Kizomba · Zouk and more across Israel"
+    },
+    "count_one":   "{{count}} club found",
+    "count_other": "{{count}} clubs found",
+    "empty": {
+      "noClubs": {
+        "title": "No clubs yet",
+        "text":  "The admin is still curating the best dance spots.\nCheck back soon!"
+      },
+      "noMatch": {
+        "title": "No matches",
+        "text":  "No clubs match your current filters. Try a different style or clear your search."
+      }
+    }
+  },
+  "parties": {
+    "hero": {
+      "title":     "Upcoming",
+      "highlight": "Parties",
+      "subtitle":  "Sorted by date · closest first"
+    },
+    "count_one":   "{{count}} party found",
+    "count_other": "{{count}} parties found",
+    "empty": {
+      "noParties": {
+        "title": "No parties yet",
+        "text":  "Check back soon for upcoming dance events!"
+      },
+      "noMatch": {
+        "title": "No matches",
+        "text":  "No parties match your filters. Try a different style or clear your search."
+      }
+    }
+  },
+  "event": {
+    "interested":   "INTERESTED",
+    "share":        "SHARE",
+    "whatsappRsvp": "WHATSAPP RSVP",
+    "moreOptions":  "More options",
+    "viewDetails":  "View details for {{title}}",
+    "empty":        "No events found.",
+    "waMessage":    "Hi! I'm interested in: {{title}} — {{venue}}, {{location}} on {{date}} at {{time}}"
+  },
+  "venue": {
+    "save":       "SAVE",
+    "share":      "SHARE",
+    "directions": "GET DIRECTIONS",
+    "detail": {
+      "loading":        "Loading…",
+      "notFound":       "Venue not found.",
+      "back":           "Back",
+      "backArrow":      "←",
+      "openInMaps":     "Open in Google Maps →",
+      "viewOnMaps":     "View on Google Maps →",
+      "instagram":      "📸 Instagram",
+      "facebook":       "👍 Facebook",
+      "specialPost":    "🎉 Special Post",
+      "website":        "🌐 Visit Website",
+      "refresh":        "↻ Refresh Venue from Google",
+      "refreshing":     "⏳ Refreshing…",
+      "reviews":        "reviews",
+      "linkCopied":     "🔗 Link copied!",
+      "notFoundGoogle": "⚠️ Venue not found on Google",
+      "refreshed":      "✓ Venue refreshed from Google!",
+      "refreshError":   "⚠️ Could not refresh venue"
+    }
+  },
+  "eventDetail": {
+    "loading":        "Loading…",
+    "notFound":       "Event not found.",
+    "back":           "Back",
+    "backArrow":      "←",
+    "openInMaps":     "Open in Google Maps →",
+    "viewOnMaps":     "View on Google Maps →",
+    "whatsappRsvp":   "WHATSAPP RSVP",
+    "refresh":        "Refresh Venue Metadata",
+    "fetching":       "Fetching from Google…",
+    "linkCopied":     "🔗 Link copied to clipboard",
+    "notFoundGoogle": "⚠️ Venue not found on Google",
+    "photoUpdated":   "✓ Venue photo updated!",
+    "writeError":     "⚠️ Firestore write denied — check security rules",
+    "fetchError":     "⚠️ Could not fetch from Google"
+  },
+  "profile": {
+    "name":     "Dance Enthusiast",
+    "subtitle": "DanzWay Member",
+    "saved":    "Saved Events",
+    "empty": {
+      "title":  "Nothing saved yet",
+      "text":   "Tap ♡ INTERESTED on any event to save it here.",
+      "browse": "Browse Events"
+    },
+    "viewEvent":   "View →",
+    "removeEvent": "Remove {{title}} from saved"
+  },
+  "post": {
+    "title":    "Post an Event",
+    "subtitle": "Coming soon — list your dance event and reach the community."
+  },
+  "map": {
+    "notConfigured": {
+      "title": "Map not configured",
+      "text":  "Add VITE_GOOGLE_MAPS_API_KEY to your .env.local to enable the map."
+    },
+    "loading":        "Loading venues…",
+    "count_one":      "{{count}} verified venue",
+    "count_other":    "{{count}} verified venues",
+    "directions":     "📍 Directions",
+    "viewVenue":      "View Venue →",
+    "tonight":        "Tonight · {{time}}",
+    "tomorrow":       "Tomorrow · {{time}}",
+    "eventDate":      "{{date}} · {{time}}"
+  },
+  "search": {
+    "placeholder": "Search events, styles, cities…",
+    "ariaLabel":   "Search events",
+    "clear":       "Clear search"
+  },
+  "common": {
+    "tonight":  "Tonight",
+    "tomorrow": "Tomorrow",
+    "loading":  "Loading…",
+    "next":     "NEXT"
+  },
+  "styles": {
+    "all":     "All Styles",
+    "Salsa":   "Salsa",
+    "Bachata": "Bachata",
+    "Kizomba": "Kizomba",
+    "Zouk":    "Zouk"
+  },
+  "footer": {
+    "copy": "© 2026 DanzWay — Find your next dance event."
+  }
+}

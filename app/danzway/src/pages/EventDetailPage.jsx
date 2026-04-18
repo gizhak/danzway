@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { selectAllEvents, selectEventsStatus, fetchEvents } from '../store/appSlice'
 import { refreshVenueMetadata } from '../services/googlePlaces'
+import { shortMonthDay } from '../i18n/dateUtils'
 import Badge from '../components/ui/Badge'
 import styles from './EventDetailPage.module.css'
 
@@ -44,6 +46,7 @@ function SpinnerIcon() {
 export default function EventDetailPage() {
   const dispatch      = useDispatch()
   const { id }        = useParams()
+  const { t, i18n }  = useTranslation()
   const events        = useSelector(selectAllEvents)
   const eventsStatus  = useSelector(selectEventsStatus)
   const event         = events.find((e) => e.id === id)
@@ -62,11 +65,11 @@ export default function EventDetailPage() {
   }
 
   if (eventsStatus === 'idle' || eventsStatus === 'loading') {
-    return <p className={styles.notFound}>Loading…</p>
+    return <p className={styles.notFound}>{t('eventDetail.loading')}</p>
   }
 
   if (!event) {
-    return <p className={styles.notFound}>Event not found.</p>
+    return <p className={styles.notFound}>{t('eventDetail.notFound')}</p>
   }
 
   const {
@@ -88,10 +91,10 @@ export default function EventDetailPage() {
   const heroImage = placePhoto || image || null
 
   const parsedDate = new Date(date)
-  const month = parsedDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-  const day   = parsedDate.getDate()
+  const { month, day } = shortMonthDay(date, i18n.language)
 
-  const formattedDate = parsedDate.toLocaleDateString('en-IL', {
+  const locale = i18n.language === 'he' ? 'he-IL' : 'en-US'
+  const formattedDate = parsedDate.toLocaleDateString(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -99,7 +102,7 @@ export default function EventDetailPage() {
   })
 
   const waMessage = encodeURIComponent(
-    `Hi! I'd like to join: ${title} at ${venue}, ${location} on ${date} at ${time}. Price: ${price} ${currency}`
+    t('event.waMessage', { title, venue, location, date, time })
   )
   const waUrl = whatsapp
     ? `https://wa.me/${whatsapp}?text=${waMessage}`
@@ -121,7 +124,7 @@ export default function EventDetailPage() {
       }
     } else {
       await navigator.clipboard.writeText(window.location.href)
-      showToast('🔗 Link copied to clipboard')
+      showToast(t('eventDetail.linkCopied'))
     }
   }
 
@@ -131,7 +134,7 @@ export default function EventDetailPage() {
       // ── Step 1: fetch from Google Places ──
       const { placeId, placePhoto: newPhoto } = await refreshVenueMetadata(event)
       if (!placeId && !newPhoto) {
-        showToast('⚠️ Venue not found on Google')
+        showToast(t('eventDetail.notFoundGoogle'))
         return
       }
       console.log('[RefreshMetadata] Places result:', { placeId, newPhoto })
@@ -140,14 +143,14 @@ export default function EventDetailPage() {
       try {
         await updateDoc(doc(db, 'events', event.id), { placeId, placePhoto: newPhoto })
         dispatch(fetchEvents())
-        showToast('✓ Venue photo updated!')
+        showToast(t('eventDetail.photoUpdated'))
       } catch (firestoreErr) {
         console.error('[RefreshMetadata] Firestore write failed:', firestoreErr)
-        showToast('⚠️ Firestore write denied — check security rules')
+        showToast(t('eventDetail.writeError'))
       }
     } catch (placesErr) {
       console.error('[RefreshMetadata] Places API error:', placesErr)
-      showToast('⚠️ Could not fetch from Google')
+      showToast(t('eventDetail.fetchError'))
     } finally {
       setRefreshing(false)
     }
@@ -159,8 +162,8 @@ export default function EventDetailPage() {
       {/* ── Header row: Back + Share ── */}
       <div className={styles.header}>
         <Link to="/" className={styles.back}>
-          <span className={styles.backArrow}>←</span>
-          <span>Back</span>
+          <span className={styles.backArrow}>{t('eventDetail.backArrow')}</span>
+          <span>{t('eventDetail.back')}</span>
         </Link>
         <button className={styles.shareFab} onClick={handleShare} aria-label="Share event">
           <ShareIcon />
@@ -216,10 +219,6 @@ export default function EventDetailPage() {
 
         <p className={styles.description}>{description}</p>
 
-        <div className={styles.priceRow}>
-          <span className={styles.priceChip}>{price} {currency}</span>
-        </div>
-
         <div className={styles.divider} />
 
         {/* ── Map ── */}
@@ -244,7 +243,7 @@ export default function EventDetailPage() {
               rel="noopener noreferrer"
               className={styles.mapLink}
             >
-              Open in Google Maps →
+              {t('eventDetail.openInMaps')}
             </a>
           </div>
         ) : (
@@ -260,7 +259,7 @@ export default function EventDetailPage() {
             <div className={styles.mapInfo}>
               <div className={styles.mapVenue}>{venue}</div>
               <div className={styles.mapCity}>{location}</div>
-              <div className={styles.mapCta}>View on Google Maps →</div>
+              <div className={styles.mapCta}>{t('eventDetail.viewOnMaps')}</div>
             </div>
           </a>
         )}
@@ -274,7 +273,7 @@ export default function EventDetailPage() {
             title="Fetch latest venue photo from Google Places and save to Firestore"
           >
             {refreshing ? <SpinnerIcon /> : <RefreshIcon />}
-            {refreshing ? 'Fetching from Google…' : 'Refresh Venue Metadata'}
+            {refreshing ? t('eventDetail.fetching') : t('eventDetail.refresh')}
           </button>
         )}
 
@@ -286,7 +285,7 @@ export default function EventDetailPage() {
           className={`${styles.whatsappBtn} ${styles.whatsappBtnInline}`}
         >
           <span>📱</span>
-          WHATSAPP RSVP · {price} {currency}
+          {t('eventDetail.whatsappRsvp')}
         </a>
       </motion.div>
 
@@ -302,7 +301,7 @@ export default function EventDetailPage() {
           className={styles.whatsappBtn}
         >
           <span>📱</span>
-          WHATSAPP RSVP · {price} {currency}
+          {t('eventDetail.whatsappRsvp')}
         </a>
       </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   APIProvider,
   Map,
@@ -165,14 +166,22 @@ function UserLocationMarker({ position }) {
 
 // ─── Bottom-sheet venue popup card ───────────────────────────────────────────
 function VenuePopup({ venue, nextEvent, onClose }) {
-  const diff = getDiff(nextEvent?.date)
+  const { t, i18n } = useTranslation()
+  const lang  = i18n.language
+  const diff  = getDiff(nextEvent?.date)
+  const time  = nextEvent?.time ?? ''
+
   let eventLabel = null
   if (nextEvent?.date) {
-    if (diff === 0)      eventLabel = `Tonight · ${nextEvent.time ?? ''}`
-    else if (diff === 1) eventLabel = `Tomorrow · ${nextEvent.time ?? ''}`
+    if (diff === 0)      eventLabel = t('map.tonight', { time })
+    else if (diff === 1) eventLabel = t('map.tomorrow', { time })
     else {
+      const locale = lang === 'he' ? 'he-IL' : 'en-US'
       const d = new Date(nextEvent.date)
-      eventLabel = `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${nextEvent.time ?? ''}`
+      eventLabel = t('map.eventDate', {
+        date: d.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+        time,
+      })
     }
   }
 
@@ -203,7 +212,7 @@ function VenuePopup({ venue, nextEvent, onClose }) {
       {venue.styles?.length > 0 && (
         <div className={styles.popupStyles}>
           {venue.styles.map((s) => (
-            <span key={s} className={styles.popupBadge}>{s}</span>
+            <span key={s} className={styles.popupBadge}>{t(`styles.${s}`, s)}</span>
           ))}
         </div>
       )}
@@ -212,7 +221,7 @@ function VenuePopup({ venue, nextEvent, onClose }) {
         <div className={styles.popupEvent}>
           <div className={styles.popupEventDot} />
           <div>
-            <div className={styles.popupEventTitle}>{nextEvent.title ?? 'Dance Night'}</div>
+            <div className={styles.popupEventTitle}>{nextEvent.title ?? t('common.tonight')}</div>
             <div className={styles.popupEventTime}>{eventLabel}</div>
           </div>
         </div>
@@ -225,14 +234,14 @@ function VenuePopup({ venue, nextEvent, onClose }) {
           rel="noopener noreferrer"
           className={styles.popupDirBtn}
         >
-          📍 Directions
+          {t('map.directions')}
         </a>
         <Link
           to={`/venues/${venue.placeId}`}
           className={styles.popupViewBtn}
           onClick={onClose}
         >
-          View Venue →
+          {t('map.viewVenue')}
         </Link>
       </div>
     </div>
@@ -290,23 +299,22 @@ export default function MapPage() {
   }, [])
 
   const handleClose = useCallback(() => setSelected(null), [])
+  const { t } = useTranslation()
 
   if (!API_KEY) {
     return (
       <div className={styles.errorState}>
         <div className={styles.errorIcon}>🗺️</div>
-        <p className={styles.errorTitle}>Map not configured</p>
-        <p className={styles.errorText}>
-          Add <code>VITE_GOOGLE_MAPS_API_KEY</code> to your .env.local to enable the map.
-        </p>
+        <p className={styles.errorTitle}>{t('map.notConfigured.title')}</p>
+        <p className={styles.errorText}>{t('map.notConfigured.text')}</p>
       </div>
     )
   }
 
-  const isLoading = venuesStatus === 'loading' || venuesStatus === 'idle'
+  const isLoading  = venuesStatus === 'loading' || venuesStatus === 'idle'
   const countLabel = isLoading
-    ? 'Loading venues…'
-    : `${filteredVenues.length} verified venue${filteredVenues.length !== 1 ? 's' : ''}`
+    ? t('map.loading')
+    : t('map.count', { count: filteredVenues.length })
 
   return (
     <APIProvider apiKey={API_KEY}>

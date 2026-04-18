@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import {
   selectEventsStatus,
   selectStyleFilters,
@@ -47,6 +48,7 @@ function applyFilters(events, query, styleFilters) {
 export default function PartiesPage() {
   const [query, setQuery] = useState('')
   const dispatch          = useDispatch()
+  const { t }             = useTranslation()
   const events            = useSelector(selectEventsForActiveVenues)
   const eventsStatus      = useSelector(selectEventsStatus)
   const venuesStatus      = useSelector(selectVenuesStatus)
@@ -73,12 +75,10 @@ export default function PartiesPage() {
       {/* ── Hero ── */}
       <section className={styles.hero}>
         <h1 className={styles.heroTitle}>
-          Upcoming{' '}
-          <span className={styles.heroTitleGradient}>Parties</span>
+          {t('parties.hero.title')}{' '}
+          <span className={styles.heroTitleGradient}>{t('parties.hero.highlight')}</span>
         </h1>
-        <p className={styles.heroSubtitle}>
-          Sorted by date · closest first
-        </p>
+        <p className={styles.heroSubtitle}>{t('parties.hero.subtitle')}</p>
       </section>
 
       {/* ── Style filter bubbles ── */}
@@ -97,7 +97,7 @@ export default function PartiesPage() {
       {/* ── Count row ── */}
       {isFiltering && !isLoading && (
         <div className={styles.countRow}>
-          {filtered.length} part{filtered.length !== 1 ? 'ies' : 'y'} found
+          {t('parties.count', { count: filtered.length })}
         </div>
       )}
 
@@ -123,10 +123,8 @@ export default function PartiesPage() {
       {!isLoading && events.length === 0 && (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>🎉</div>
-          <p className={styles.emptyTitle}>No parties yet</p>
-          <p className={styles.emptyText}>
-            Check back soon for upcoming dance events!
-          </p>
+          <p className={styles.emptyTitle}>{t('parties.empty.noParties.title')}</p>
+          <p className={styles.emptyText}>{t('parties.empty.noParties.text')}</p>
         </div>
       )}
 
@@ -134,10 +132,8 @@ export default function PartiesPage() {
       {!isLoading && events.length > 0 && filtered.length === 0 && (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>🔍</div>
-          <p className={styles.emptyTitle}>No matches</p>
-          <p className={styles.emptyText}>
-            No parties match your filters. Try a different style or clear your search.
-          </p>
+          <p className={styles.emptyTitle}>{t('parties.empty.noMatch.title')}</p>
+          <p className={styles.emptyText}>{t('parties.empty.noMatch.text')}</p>
         </div>
       )}
 

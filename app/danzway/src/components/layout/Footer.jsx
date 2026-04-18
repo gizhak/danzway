@@ -1,10 +1,12 @@
+import { useTranslation } from 'react-i18next'
 import styles from './Footer.module.css'
 
 export default function Footer() {
+  const { t } = useTranslation()
   return (
     <footer className={styles.footer}>
       <p className={styles.text}>
-        © 2026 <span>DanzWay</span> — Find your next dance event.
+        {t('footer.copy')}
       </p>
     </footer>
   )

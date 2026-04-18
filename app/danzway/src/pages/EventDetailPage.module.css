@@ -104,7 +104,7 @@
 .dateBadge {
   position: absolute;
   top: 12px;
-  right: 12px;
+  inset-inline-end: 12px;
   width: 48px;
   border-radius: 10px;
   overflow: hidden;

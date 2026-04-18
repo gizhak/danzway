@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { selectIsSaved, toggleSave, selectNextEventByVenueName } from '../../store/appSlice'
+import { shortMonthDay } from '../../i18n/dateUtils'
 import Badge from '../ui/Badge'
 import styles from './VenueCard.module.css'
 
-// Generic fallback for venues with no photo
 const GENERIC_IMAGE =
   'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
 
@@ -19,7 +20,9 @@ function getAvatarInitials(name = '') {
 }
 
 export default function VenueCard({ venue }) {
-  const dispatch = useDispatch()
+  const dispatch     = useDispatch()
+  const { t, i18n } = useTranslation()
+  const lang         = i18n.language
 
   const {
     placeId,
@@ -38,13 +41,10 @@ export default function VenueCard({ venue }) {
 
   const saved              = useSelector(selectIsSaved(placeId))
   const nextEventsByVenue  = useSelector(selectNextEventByVenueName)
-  // Try: exact name → normalised name → placeId (covers imported Hebrew names)
   const normName           = (name ?? '').toLowerCase().replace(/\s+/g, ' ').trim()
   const nextEvent          = nextEventsByVenue[name] ?? nextEventsByVenue[normName] ?? nextEventsByVenue[placeId] ?? null
 
-  // Image priority: first Google photo → generic nightclub image
-  // Logo is ONLY used in the circular avatar header, never stretched as hero
-  const heroImage = photos[0] ?? GENERIC_IMAGE
+  const heroImage = venue.customImageUrl ?? photos[0] ?? GENERIC_IMAGE
 
   const mapsUrl = coordinates
     ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
@@ -58,16 +58,17 @@ export default function VenueCard({ venue }) {
   // Date badge values from the next upcoming event
   let badgeMonth = null
   let badgeDay   = null
-  let badgeLabel = null   // "Tonight" / "Tomorrow" / null
+  let badgeLabel = null
   if (nextEvent?.date) {
     const today = new Date(); today.setHours(0, 0, 0, 0)
     const evDate = new Date(nextEvent.date); evDate.setHours(0, 0, 0, 0)
     const diff = Math.round((evDate - today) / 86400000)
-    if (diff === 0) { badgeLabel = 'Tonight' }
-    else if (diff === 1) { badgeLabel = 'Tomorrow' }
+    if (diff === 0)      badgeLabel = t('common.tonight')
+    else if (diff === 1) badgeLabel = t('common.tomorrow')
     else {
-      badgeMonth = evDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-      badgeDay   = evDate.getDate()
+      const md = shortMonthDay(nextEvent.date, lang)
+      badgeMonth = md.month
+      badgeDay   = md.day
     }
   }
 
@@ -93,7 +94,7 @@ export default function VenueCard({ venue }) {
             )}
           </div>
         </div>
-        <button className={styles.menuBtn} aria-label="More options">···</button>
+        <button className={styles.menuBtn} aria-label={t('event.moreOptions')}>···</button>
       </div>
 
       {/* ── Image ── */}
@@ -102,12 +103,11 @@ export default function VenueCard({ venue }) {
           <img src={heroImage} alt={name} className={styles.image} />
           <div className={styles.imageOverlay} />
 
-          {/* Next-event date badge — top-right, same style as EventCard */}
           {nextEvent && (
             <div className={styles.dateBadge}>
               {badgeLabel ? (
                 <>
-                  <div className={styles.dateBadgeMonth}>NEXT</div>
+                  <div className={styles.dateBadgeMonth}>{t('common.next')}</div>
                   <div className={styles.dateBadgeLabelSmall}>{badgeLabel}</div>
                 </>
               ) : (
@@ -124,7 +124,7 @@ export default function VenueCard({ venue }) {
       {/* ── Dance style badges ── */}
       {danceStyles.length > 0 && (
         <div className={styles.styleBadges}>
-          {danceStyles.map((s) => <Badge key={s} label={s} />)}
+          {danceStyles.map((s) => <Badge key={s} label={t(`styles.${s}`, s)} />)}
         </div>
       )}
 
@@ -143,9 +143,9 @@ export default function VenueCard({ venue }) {
           animate={saved ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
         >
-          {saved ? '♥' : '♡'} SAVE
+          {saved ? '♥' : '♡'} {t('venue.save')}
         </motion.button>
-        <button className={styles.actionBtn}>➤ SHARE</button>
+        <button className={styles.actionBtn}>➤ {t('venue.share')}</button>
       </div>
 
       {/* ── Directions CTA ── */}
@@ -156,7 +156,7 @@ export default function VenueCard({ venue }) {
         className={styles.directionsBtn}
       >
         <span>📍</span>
-        GET DIRECTIONS
+        {t('venue.directions')}
         {phone && <span className={styles.directionsSep}>·</span>}
         {phone && <span className={styles.directionsPhone}>{phone}</span>}
       </a>
