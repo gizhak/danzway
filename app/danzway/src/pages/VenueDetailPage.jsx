@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { selectAllVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
 import { selectNextEventByVenueName } from '../store/appSlice'
 import { getFullVenueDetails } from '../services/googlePlaces'
+import { shortMonthDay } from '../i18n/dateUtils'
 import Badge from '../components/ui/Badge'
 import styles from './VenueDetailPage.module.css'
 
@@ -45,6 +47,7 @@ function extractIgPostCode(postUrl = '') {
 export default function VenueDetailPage() {
   const { placeId }       = useParams()
   const dispatch          = useDispatch()
+  const { t, i18n }       = useTranslation()
   const venues            = useSelector(selectAllVenues)
   const venuesStatus      = useSelector(selectVenuesStatus)
   const nextEventsByVenue = useSelector(selectNextEventByVenueName)
@@ -65,7 +68,7 @@ export default function VenueDetailPage() {
     setRefreshing(true)
     try {
       const details = await getFullVenueDetails(placeId)
-      if (!details) { showToast('⚠️ Venue not found on Google'); return }
+      if (!details) { showToast(t('venue.detail.notFoundGoogle')); return }
 
       // Preserve admin-managed fields — only refresh Google data
       const { active, logo, styles: venueStyles, instagramPostUrl, ...googleData } = details
@@ -75,10 +78,10 @@ export default function VenueDetailPage() {
         { merge: true }
       )
       dispatch(fetchVenues())
-      showToast('✓ Venue refreshed from Google!')
+      showToast(t('venue.detail.refreshed'))
     } catch (err) {
       console.error('[VenueDetailPage] refresh error:', err)
-      showToast('⚠️ Could not refresh venue')
+      showToast(t('venue.detail.refreshError'))
     } finally {
       setRefreshing(false)
     }
@@ -94,19 +97,21 @@ export default function VenueDetailPage() {
       try { await navigator.share(shareData) } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(window.location.href)
-      showToast('🔗 Link copied!')
+      showToast(t('venue.detail.linkCopied'))
     }
   }
 
   if (venuesStatus === 'idle' || venuesStatus === 'loading') {
-    return <div className={styles.notFound}><p>Loading…</p></div>
+    return <div className={styles.notFound}><p>{t('venue.detail.loading')}</p></div>
   }
 
   if (!venue) {
     return (
       <div className={styles.notFound}>
-        <p>Venue not found.</p>
-        <Link to="/" className={styles.backLink}>← Back to feed</Link>
+        <p>{t('venue.detail.notFound')}</p>
+        <Link to="/" className={styles.backLink}>
+          {t('venue.detail.backArrow')} {t('venue.detail.back')}
+        </Link>
       </div>
     )
   }
@@ -129,8 +134,8 @@ export default function VenueDetailPage() {
     coordinates,
   } = venue
 
-  // Hero: first Google photo or generic — logo is NEVER stretched here
-  const heroImage  = photos[0] ?? GENERIC_IMAGE
+  // Hero: manual override → first Google photo → generic fallback
+  const heroImage  = venue.customImageUrl ?? photos[0] ?? GENERIC_IMAGE
   const gallery    = photos.length > 1 ? photos.slice(1, 6) : []
 
   const mapsUrl = coordinates
@@ -153,11 +158,12 @@ export default function VenueDetailPage() {
     const today = new Date(); today.setHours(0, 0, 0, 0)
     const evDate = new Date(nextEvent.date); evDate.setHours(0, 0, 0, 0)
     const diff = Math.round((evDate - today) / 86400000)
-    if (diff === 0)      badgeLabel = 'Tonight'
-    else if (diff === 1) badgeLabel = 'Tomorrow'
+    if (diff === 0)      badgeLabel = t('common.tonight')
+    else if (diff === 1) badgeLabel = t('common.tomorrow')
     else {
-      badgeMonth = evDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-      badgeDay   = evDate.getDate()
+      const md = shortMonthDay(nextEvent.date, i18n.language)
+      badgeMonth = md.month
+      badgeDay   = md.day
     }
   }
 
@@ -169,8 +175,8 @@ export default function VenueDetailPage() {
       {/* ── Header: Back + Share ── */}
       <div className={styles.header}>
         <Link to="/" className={styles.back}>
-          <span className={styles.backArrow}>←</span>
-          <span>Back</span>
+          <span className={styles.backArrow}>{t('venue.detail.backArrow')}</span>
+          <span>{t('venue.detail.back')}</span>
         </Link>
         <button className={styles.shareFab} onClick={handleShare} aria-label="Share venue">
           <ShareIcon />
@@ -192,7 +198,7 @@ export default function VenueDetailPage() {
           <div className={styles.dateBadge}>
             {badgeLabel ? (
               <>
-                <div className={styles.dateBadgeMonth}>NEXT</div>
+                <div className={styles.dateBadgeMonth}>{t('common.next')}</div>
                 <div className={styles.dateBadgeLabelSmall}>{badgeLabel}</div>
               </>
             ) : (
@@ -235,7 +241,7 @@ export default function VenueDetailPage() {
           {rating && (
             <div className={styles.metaRow}>
               <span className={styles.metaIcon}>★</span>
-              <span>{rating.toFixed(1)}{reviewCount > 0 ? ` · ${reviewCount.toLocaleString()} reviews` : ''}</span>
+              <span>{rating.toFixed(1)}{reviewCount > 0 ? ` · ${reviewCount.toLocaleString()} ${t('venue.detail.reviews')}` : ''}</span>
             </div>
           )}
           {categoryLine && (
@@ -276,7 +282,7 @@ export default function VenueDetailPage() {
               referrerPolicy="no-referrer-when-downgrade"
             />
             <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className={styles.mapLink}>
-              Open in Google Maps →
+              {t('venue.detail.openInMaps')}
             </a>
           </div>
         ) : (
@@ -309,17 +315,17 @@ export default function VenueDetailPage() {
           <div className={styles.socialRow}>
             {igHandle && (
               <a href={`https://instagram.com/${igHandle}`} target="_blank" rel="noopener noreferrer" className={styles.socialBtn}>
-                <span>📸</span> Instagram
+                {t('venue.detail.instagram')}
               </a>
             )}
             {fbHandle && (
               <a href={`https://facebook.com/${fbHandle}`} target="_blank" rel="noopener noreferrer" className={`${styles.socialBtn} ${styles.socialBtnFb}`}>
-                <span>👍</span> Facebook
+                {t('venue.detail.facebook')}
               </a>
             )}
             {instagramPostUrl && !igPostCode && (
               <a href={instagramPostUrl} target="_blank" rel="noopener noreferrer" className={styles.socialBtn}>
-                <span>🎉</span> Special Post
+                {t('venue.detail.specialPost')}
               </a>
             )}
           </div>
@@ -328,7 +334,7 @@ export default function VenueDetailPage() {
         {/* Website (only if not a social media link) */}
         {website && !website.includes('instagram') && !website.includes('facebook') && (
           <a href={website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
-            🌐 Visit Website
+            {t('venue.detail.website')}
           </a>
         )}
 
@@ -339,7 +345,7 @@ export default function VenueDetailPage() {
             disabled={refreshing}
             className={styles.adminRefreshBtn}
           >
-            {refreshing ? '⏳ Refreshing…' : '↻ Refresh Venue from Google'}
+            {refreshing ? t('venue.detail.refreshing') : t('venue.detail.refresh')}
           </button>
         )}
 

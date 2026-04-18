@@ -143,11 +143,11 @@
   opacity: 0.2;
 }
 
-/* ─── Rating badge (top-right of image) ──────────────── */
+/* ─── Rating badge (top-end of image — right in LTR, left in RTL) ── */
 .ratingBadge {
   position: absolute;
   top: 10px;
-  right: 10px;
+  inset-inline-end: 10px;
   display: flex;
   align-items: center;
   gap: 3px;
@@ -177,10 +177,11 @@
 }
 
 /* ─── Next-event date badge (top-right of image) ─────── */
+/* Date badge — top-end (right in LTR, left in RTL) */
 .dateBadge {
   position: absolute;
   top: 10px;
-  right: 10px;
+  inset-inline-end: 10px;
   width: 44px;
   border-radius: 10px;
   overflow: hidden;

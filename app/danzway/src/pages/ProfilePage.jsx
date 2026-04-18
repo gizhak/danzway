@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import {
   selectSavedIds,
   selectAllEvents,
@@ -9,18 +10,12 @@ import {
   toggleSave,
   fetchEvents,
 } from '../store/appSlice'
+import { profileDate } from '../i18n/dateUtils'
 import styles from './ProfilePage.module.css'
 
-function formatShortDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('en-IL', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  })
-}
-
 function SavedEventRow({ event }) {
-  const dispatch = useDispatch()
+  const dispatch    = useDispatch()
+  const { t, i18n } = useTranslation()
 
   return (
     <motion.div
@@ -34,25 +29,25 @@ function SavedEventRow({ event }) {
       <div className={styles.rowLeft}>
         <div className={styles.rowTitle}>{event.title}</div>
         <div className={styles.rowMeta}>
-          <span>{formatShortDate(event.date)} · {event.time}</span>
+          <span>{profileDate(event.date, i18n.language)} · {event.time}</span>
           <span className={styles.rowDot}>·</span>
           <span>{event.venue}, {event.location}</span>
         </div>
         <div className={styles.rowStyles}>
           {(event.styles ?? []).map((s) => (
-            <span key={s} className={styles.rowStyleChip}>{s}</span>
+            <span key={s} className={styles.rowStyleChip}>{t(`styles.${s}`, s)}</span>
           ))}
         </div>
       </div>
 
       <div className={styles.rowRight}>
         <Link to={`/events/${event.id}`} className={styles.viewBtn}>
-          View →
+          {t('profile.viewEvent')}
         </Link>
         <button
           className={styles.unsaveBtn}
           onClick={() => dispatch(toggleSave(event.id))}
-          aria-label={`Remove ${event.title} from saved`}
+          aria-label={t('profile.removeEvent', { title: event.title })}
         >
           ♥
         </button>
@@ -63,6 +58,7 @@ function SavedEventRow({ event }) {
 
 export default function ProfilePage() {
   const dispatch     = useDispatch()
+  const { t }        = useTranslation()
   const savedIds     = useSelector(selectSavedIds)
   const allEvents    = useSelector(selectAllEvents)
   const eventsStatus = useSelector(selectEventsStatus)
@@ -81,8 +77,8 @@ export default function ProfilePage() {
       <div className={styles.header}>
         <div className={styles.avatar}>DW</div>
         <div className={styles.identity}>
-          <div className={styles.name}>Dance Enthusiast</div>
-          <div className={styles.subtitle}>DanzWay Member</div>
+          <div className={styles.name}>{t('profile.name')}</div>
+          <div className={styles.subtitle}>{t('profile.subtitle')}</div>
         </div>
       </div>
 
@@ -92,7 +88,7 @@ export default function ProfilePage() {
       <div className={styles.sectionHeader}>
         <div className={styles.sectionTitle}>
           <span className={styles.heartIcon}>♥</span>
-          Saved Events
+          {t('profile.saved')}
         </div>
         {count > 0 && (
           <span className={styles.countChip}>{count}</span>
@@ -102,12 +98,12 @@ export default function ProfilePage() {
       {count === 0 ? (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>♡</div>
-          <p className={styles.emptyTitle}>Nothing saved yet</p>
+          <p className={styles.emptyTitle}>{t('profile.empty.title')}</p>
           <p className={styles.emptyText}>
-            Tap <span className={styles.emptyHint}>♡ INTERESTED</span> on any event to save it here.
+            {t('profile.empty.text')}
           </p>
           <Link to="/" className={styles.browseBtn}>
-            Browse Events
+            {t('profile.empty.browse')}
           </Link>
         </div>
       ) : (

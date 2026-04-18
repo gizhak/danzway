@@ -1,0 +1,148 @@
+{
+  "nav": {
+    "clubs":   "מועדונים",
+    "parties": "מסיבות",
+    "map":     "מפה",
+    "post":    "פרסם",
+    "profile": "פרופיל",
+    "venues":  "מקומות"
+  },
+  "home": {
+    "hero": {
+      "title":     "מצא את ה",
+      "highlight": "מועדון ריקוד",
+      "subtitle":  "סלסה · באצ'טה · קיזומבה · זוק ועוד ברחבי ישראל"
+    },
+    "count_one":   "נמצא מועדון אחד",
+    "count_other": "נמצאו {{count}} מועדונים",
+    "empty": {
+      "noClubs": {
+        "title": "אין מועדונים עדיין",
+        "text":  "המנהל עדיין אוצר את מקומות הריקוד הטובים ביותר.\nחזרו בקרוב!"
+      },
+      "noMatch": {
+        "title": "אין תוצאות",
+        "text":  "לא נמצאו מועדונים התואמים לסינון. נסו סגנון אחר."
+      }
+    }
+  },
+  "parties": {
+    "hero": {
+      "title":     "מסיבות",
+      "highlight": "קרובות",
+      "subtitle":  "ממוין לפי תאריך · הקרוב ביותר ראשון"
+    },
+    "count_one":   "נמצאה מסיבה אחת",
+    "count_other": "נמצאו {{count}} מסיבות",
+    "empty": {
+      "noParties": {
+        "title": "אין מסיבות עדיין",
+        "text":  "חזרו בקרוב לאירועי ריקוד קרובים!"
+      },
+      "noMatch": {
+        "title": "אין תוצאות",
+        "text":  "לא נמצאו מסיבות התואמות לסינון. נסו סגנון אחר."
+      }
+    }
+  },
+  "event": {
+    "interested":   "מתעניין",
+    "share":        "שתף",
+    "whatsappRsvp": "אישור הגעה ב-WhatsApp",
+    "moreOptions":  "אפשרויות נוספות",
+    "viewDetails":  "פרטים על {{title}}",
+    "empty":        "לא נמצאו אירועים.",
+    "waMessage":    "היי! אני מעוניין ב: {{title}} — {{venue}}, {{location}} בתאריך {{date}} בשעה {{time}}"
+  },
+  "venue": {
+    "save":       "שמור",
+    "share":      "שתף",
+    "directions": "קבל הוראות הגעה",
+    "detail": {
+      "loading":        "טוען…",
+      "notFound":       "המקום לא נמצא.",
+      "back":           "חזרה",
+      "backArrow":      "→",
+      "openInMaps":     "→ פתח ב-Google Maps",
+      "viewOnMaps":     "→ צפה ב-Google Maps",
+      "instagram":      "📸 אינסטגרם",
+      "facebook":       "👍 פייסבוק",
+      "specialPost":    "🎉 פוסט מיוחד",
+      "website":        "🌐 אתר הבית",
+      "refresh":        "↺ רענן מ-Google",
+      "refreshing":     "⏳ מרענן…",
+      "reviews":        "ביקורות",
+      "linkCopied":     "🔗 הקישור הועתק!",
+      "notFoundGoogle": "⚠️ המקום לא נמצא ב-Google",
+      "refreshed":      "✓ המקום רוענן מ-Google!",
+      "refreshError":   "⚠️ לא ניתן לרענן את המקום"
+    }
+  },
+  "eventDetail": {
+    "loading":        "טוען…",
+    "notFound":       "האירוע לא נמצא.",
+    "back":           "חזרה",
+    "backArrow":      "→",
+    "openInMaps":     "→ פתח ב-Google Maps",
+    "viewOnMaps":     "→ צפה ב-Google Maps",
+    "whatsappRsvp":   "אישור הגעה ב-WhatsApp",
+    "refresh":        "רענן מידע מקום",
+    "fetching":       "מושך מ-Google…",
+    "linkCopied":     "🔗 הקישור הועתק ללוח",
+    "notFoundGoogle": "⚠️ המקום לא נמצא ב-Google",
+    "photoUpdated":   "✓ תמונת המקום עודכנה!",
+    "writeError":     "⚠️ כתיבה ל-Firestore נדחתה",
+    "fetchError":     "⚠️ לא ניתן למשוך מ-Google"
+  },
+  "profile": {
+    "name":     "חובב ריקודים",
+    "subtitle": "חבר DanzWay",
+    "saved":    "אירועים שמורים",
+    "empty": {
+      "title":  "עדיין לא שמרת כלום",
+      "text":   "לחץ על ♡ מתעניין באירוע כלשהו כדי לשמור אותו כאן.",
+      "browse": "גלה אירועים"
+    },
+    "viewEvent":   "← צפה",
+    "removeEvent": "הסר {{title}} מהשמורים"
+  },
+  "post": {
+    "title":    "פרסם אירוע",
+    "subtitle": "בקרוב — פרסם את אירוע הריקוד שלך ותגיע לקהילה."
+  },
+  "map": {
+    "notConfigured": {
+      "title": "המפה לא מוגדרת",
+      "text":  "הוסף VITE_GOOGLE_MAPS_API_KEY לקובץ .env.local כדי להפעיל את המפה."
+    },
+    "loading":     "טוען מקומות…",
+    "count_one":   "מקום מאומת אחד",
+    "count_other": "{{count}} מקומות מאומתים",
+    "directions":  "📍 הוראות הגעה",
+    "viewVenue":   "← פרטי המקום",
+    "tonight":     "הערב · {{time}}",
+    "tomorrow":    "מחר · {{time}}",
+    "eventDate":   "{{date}} · {{time}}"
+  },
+  "search": {
+    "placeholder": "חפש אירועים, סגנונות, ערים…",
+    "ariaLabel":   "חיפוש אירועים",
+    "clear":       "נקה חיפוש"
+  },
+  "common": {
+    "tonight":  "הערב",
+    "tomorrow": "מחר",
+    "loading":  "טוען…",
+    "next":     "הבא"
+  },
+  "styles": {
+    "all":     "כל הסגנונות",
+    "Salsa":   "סלסה",
+    "Bachata": "באצ'טה",
+    "Kizomba": "קיזומבה",
+    "Zouk":    "זוק"
+  },
+  "footer": {
+    "copy": "© 2026 DanzWay — מצא את אירוע הריקוד הבא שלך."
+  }
+}

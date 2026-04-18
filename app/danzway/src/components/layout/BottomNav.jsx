@@ -1,25 +1,29 @@
 import { NavLink } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { selectSavedCount } from '../../store/appSlice'
+import { useTranslation } from 'react-i18next'
 import styles from './BottomNav.module.css'
 
 const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
 
-const NAV_ITEMS = [
-  { to: '/',              label: 'CLUBS',   icon: '⊞', end: true  },
-  { to: '/parties',       label: 'PARTIES', icon: '🎉', end: false },
-  { to: '/map',           label: 'MAP',     icon: '📍', end: false },
-  { to: '/post',          label: 'POST',    icon: '✏️', end: false },
-  { to: '/profile',       label: 'PROFILE', icon: '👤', end: false },
-  ...(IS_ADMIN ? [{ to: '/admin/venues', label: 'VENUES', icon: '🏛', end: false }] : []),
+// Post and Profile are hidden until launch — routes remain registered but tabs are not shown.
+// Re-add them to NAV_ITEMS when the features are ready.
+const PUBLIC_NAV = [
+  { to: '/',        key: 'clubs',   icon: '⊞', end: true  },
+  { to: '/parties', key: 'parties', icon: '🎉', end: false },
+  { to: '/map',     key: 'map',     icon: '📍', end: false },
+]
+
+const ADMIN_NAV = [
+  ...PUBLIC_NAV,
+  { to: '/admin/venues', key: 'venues', icon: '🏛', end: false },
 ]
 
 export default function BottomNav() {
-  const savedCount = useSelector(selectSavedCount)
+  const { t } = useTranslation()
+  const NAV_ITEMS = IS_ADMIN ? ADMIN_NAV : PUBLIC_NAV
 
   return (
     <nav className={styles.bottomNav} aria-label="Mobile navigation">
-      {NAV_ITEMS.map(({ to, label, icon, end }) => (
+      {NAV_ITEMS.map(({ to, key, icon, end }) => (
         <NavLink
           key={to}
           to={to}
@@ -30,13 +34,8 @@ export default function BottomNav() {
         >
           <span className={styles.iconWrap}>
             <span className={styles.navIcon}>{icon}</span>
-            {to === '/profile' && savedCount > 0 && (
-              <span className={styles.badge}>
-                {savedCount > 9 ? '9+' : savedCount}
-              </span>
-            )}
           </span>
-          <span>{label}</span>
+          <span>{t(`nav.${key}`)}</span>
         </NavLink>
       ))}
     </nav>

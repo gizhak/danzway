@@ -1583,6 +1583,48 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
+.uploadImageBtn {
+  height: 28px;
+  padding: 0 0.65rem;
+  border-radius: 7px;
+  border: 1px solid rgba(99, 179, 237, 0.3);
+  background: transparent;
+  color: rgba(99, 179, 237, 0.65);
+  font-size: 0.67rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.uploadImageBtn:hover:not(:disabled) {
+  border-color: rgba(99, 179, 237, 0.6);
+  color: rgba(99, 179, 237, 1);
+  background: rgba(99, 179, 237, 0.08);
+}
+
+.uploadImageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Small cloud badge on the thumbnail to indicate a custom image is set */
+.importedThumb {
+  position: relative;
+}
+
+.customImgBadge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 0.6rem;
+  line-height: 1;
+  background: rgba(99, 179, 237, 0.85);
+  border-radius: 3px;
+  padding: 1px 2px;
+  pointer-events: none;
+}
+
 /* ─── Shared inline edit form ─────────────────────────────────────────────── */
 .editFormInner {
   padding: 0.75rem 0.85rem 0.85rem;

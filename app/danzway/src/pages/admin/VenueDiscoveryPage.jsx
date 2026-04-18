@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
@@ -33,6 +33,30 @@ import {
   approveAllPending,
 } from '../../services/pendingEventsService'
 import styles from './VenueDiscoveryPage.module.css'
+
+// ─── Cloudinary ───────────────────────────────────────────────────────────────
+
+const CLOUDINARY_CLOUD  = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+
+async function uploadToCloudinary(file) {
+  if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) throw new Error('Cloudinary not configured — add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env.local')
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('upload_preset', CLOUDINARY_PRESET)
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+    { method: 'POST', body: fd }
+  )
+  if (!res.ok) throw new Error(`Cloudinary upload failed (${res.status})`)
+  return (await res.json()).secure_url
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function containsHebrew(str) {
+  return /[\u0590-\u05FF]/.test(str)
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -502,6 +526,9 @@ function ImportedVenueRow({
   onCancelEdit,
   onSaveLogo,
   isSaving,
+  // cloudinary image upload
+  isUploadingImage,
+  onUploadImage,
   // add party
   isAddingParty,
   onStartAddParty,
@@ -532,10 +559,11 @@ function ImportedVenueRow({
   const {
     name, city, categories, rating, reviewCount,
     logo, photos, active, styles: venueStyles = [],
-    recurringSchedule,
+    recurringSchedule, customImageUrl,
   } = venue
 
-  const thumb = logo ?? photos?.[0] ?? null
+  const fileInputRef = useRef(null)
+  const thumb = customImageUrl ?? logo ?? photos?.[0] ?? null
   const [inputUrl,  setInputUrl]  = useState('')
   const [igHandle,   setIgHandle]   = useState(venue.instagram         ?? '')
   const [fbHandle,   setFbHandle]   = useState(venue.facebook          ?? '')
@@ -573,11 +601,27 @@ function ImportedVenueRow({
     >
       {/* ── Main row ── */}
       <div className={styles.importedRow}>
+        {/* Hidden file input for Cloudinary upload */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) onUploadImage(file)
+            e.target.value = ''
+          }}
+        />
+
         <div className={styles.importedThumb}>
           {thumb ? (
             <img src={thumb} alt={name} className={styles.importedThumbImg} />
           ) : (
             <div className={styles.importedThumbPlaceholder}>🎵</div>
+          )}
+          {customImageUrl && (
+            <span className={styles.customImgBadge} title="Custom Cloudinary image">☁</span>
           )}
         </div>
 
@@ -744,6 +788,14 @@ function ImportedVenueRow({
             onClick={isEditing ? onCancelEdit : onStartEdit}
           >
             {isEditing ? '✕' : '🖼 Logo'}
+          </button>
+          <button
+            className={[styles.uploadImageBtn, isUploadingImage ? styles.editPhotoBtnActive : ''].join(' ')}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingImage}
+            title="Upload venue image to Cloudinary"
+          >
+            {isUploadingImage ? '⏳ Uploading…' : '☁ Upload'}
           </button>
           <button
             className={[styles.recurringBtn, isEditingSchedule ? styles.editPhotoBtnActive : '', hasSchedule ? styles.recurringBtnActive : ''].join(' ')}
@@ -1115,6 +1167,7 @@ export default function VenueDiscoveryPage() {
   // ── Logo / bulk edit state ──────────────────────────────────────────────────
   const [editingVenueId,    setEditingVenueId]    = useState(null)
   const [savingLogo,        setSavingLogo]        = useState(false)
+  const [uploadingImageId,  setUploadingImageId]  = useState(null)
   const [showBulkEdit,      setShowBulkEdit]      = useState(false)
   const [bulkPhotoUrl,      setBulkPhotoUrl]      = useState('')
   const [savingBulk,        setSavingBulk]        = useState(false)
@@ -1348,7 +1401,11 @@ export default function VenueDiscoveryPage() {
     const q = query.trim()
     if (!q || manualRunning) return
     setManualRunning(true)
-    const found = await searchDanceVenues(q, seenIds)
+    // Append country suffix when query is Hebrew and doesn't already include one
+    const searchQ = containsHebrew(q) && !q.includes('ישראל') && !q.toLowerCase().includes('israel')
+      ? `${q} ישראל`
+      : q
+    const found = await searchDanceVenues(searchQ, seenIds)
     setResults((prev) => [...prev, ...found])
     setSeenIds((prev) => {
       const next = new Set(prev)
@@ -1468,6 +1525,21 @@ export default function VenueDiscoveryPage() {
       showToast('⚠️ Could not update logo')
     } finally {
       setSavingLogo(false)
+    }
+  }
+
+  async function handleUploadImage(placeId, file) {
+    setUploadingImageId(placeId)
+    try {
+      const url = await uploadToCloudinary(file)
+      await updateDoc(doc(db, 'venues', placeId), { customImageUrl: url })
+      dispatch(updateVenueField({ placeId, field: 'customImageUrl', value: url }))
+      showToast('✓ Image uploaded!')
+    } catch (err) {
+      console.error('[UploadImage]', err)
+      showToast(`⚠️ ${err.message}`)
+    } finally {
+      setUploadingImageId(null)
     }
   }
 
@@ -1766,6 +1838,9 @@ export default function VenueDiscoveryPage() {
                 onCancelEdit={() => setEditingVenueId(null)}
                 onSaveLogo={handleSaveLogo}
                 isSaving={savingLogo && editingVenueId === venue.placeId}
+                // cloudinary image upload
+                isUploadingImage={uploadingImageId === venue.placeId}
+                onUploadImage={(file) => handleUploadImage(venue.placeId, file)}
                 // add party
                 isAddingParty={addingPartyVenueId === venue.placeId}
                 onStartAddParty={() => { setAddingPartyVenueId(venue.placeId); setEditingVenueId(null); setEditingScheduleId(null) }}

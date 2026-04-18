@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next'
 import EventCard from './EventCard'
 import styles from './EventList.module.css'
 
 export default function EventList({ events }) {
+  const { t } = useTranslation()
   if (!events || events.length === 0) {
-    return <p className={styles.empty}>No events found.</p>
+    return <p className={styles.empty}>{t('event.empty')}</p>
   }
 
   return (
