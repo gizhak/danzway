@@ -1,30 +1,25 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
-  selectAllEvents,
   selectEventsStatus,
   selectStyleFilters,
   toggleStyleFilter,
   fetchEvents,
 } from '../store/appSlice'
+import {
+  fetchVenues,
+  selectVenuesStatus,
+} from '../store/venuesSlice'
+import { selectEventsForActiveVenues } from '../store/selectors'
 import EventCard from '../components/events/EventCard'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import SearchBar from '../components/ui/SearchBar'
 import styles from './PartiesPage.module.css'
 
-function filterAndSortEvents(events, query, styleFilters) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+function applyFilters(events, query, styleFilters) {
+  let result = events  // already future-only and sorted by the selector
 
-  // Only upcoming events (today or future)
-  let result = events.filter((e) => {
-    if (!e.date) return false
-    const d = new Date(e.date)
-    d.setHours(0, 0, 0, 0)
-    return d >= today
-  })
-
-  // Style filter (AND logic — all selected styles must be present)
+  // Style filter (AND logic)
   const safeFilters = Array.isArray(styleFilters) ? styleFilters : []
   if (safeFilters.length > 0) {
     result = result.filter((e) =>
@@ -46,29 +41,31 @@ function filterAndSortEvents(events, query, styleFilters) {
     )
   }
 
-  // Sort ascending by date — closest first
-  result.sort((a, b) => new Date(a.date) - new Date(b.date))
-
   return result
 }
 
 export default function PartiesPage() {
   const [query, setQuery] = useState('')
   const dispatch          = useDispatch()
-  const events            = useSelector(selectAllEvents)
+  const events            = useSelector(selectEventsForActiveVenues)
   const eventsStatus      = useSelector(selectEventsStatus)
+  const venuesStatus      = useSelector(selectVenuesStatus)
   const styleFilters      = useSelector(selectStyleFilters)
 
   useEffect(() => {
     if (eventsStatus === 'idle') dispatch(fetchEvents())
   }, [eventsStatus, dispatch])
 
+  useEffect(() => {
+    if (venuesStatus === 'idle') dispatch(fetchVenues())
+  }, [venuesStatus, dispatch])
+
   const filtered = useMemo(
-    () => filterAndSortEvents(events, query, styleFilters),
+    () => applyFilters(events, query, styleFilters),
     [events, query, styleFilters]
   )
 
-  const isLoading   = eventsStatus === 'loading'
+  const isLoading   = eventsStatus === 'loading' || venuesStatus === 'loading'
   const isFiltering = (Array.isArray(styleFilters) && styleFilters.length > 0) || query.trim().length > 0
 
   return (
@@ -122,7 +119,7 @@ export default function PartiesPage() {
         </div>
       )}
 
-      {/* ── Empty: no events ── */}
+      {/* ── Empty: no events for active venues ── */}
       {!isLoading && events.length === 0 && (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>🎉</div>
@@ -143,6 +140,7 @@ export default function PartiesPage() {
           </p>
         </div>
       )}
+
     </>
   )
 }

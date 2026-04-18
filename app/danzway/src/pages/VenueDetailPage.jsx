@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../services/firebase'
-import { selectAllVenues, fetchVenues } from '../store/venuesSlice'
+import { selectAllVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
 import { selectNextEventByVenueName } from '../store/appSlice'
 import { getFullVenueDetails } from '../services/googlePlaces'
 import Badge from '../components/ui/Badge'
@@ -46,10 +46,15 @@ export default function VenueDetailPage() {
   const { placeId }       = useParams()
   const dispatch          = useDispatch()
   const venues            = useSelector(selectAllVenues)
+  const venuesStatus      = useSelector(selectVenuesStatus)
   const nextEventsByVenue = useSelector(selectNextEventByVenueName)
   const venue             = venues.find((v) => v.placeId === placeId)
   const [toastMsg,    setToastMsg]    = useState('')
   const [refreshing,  setRefreshing]  = useState(false)
+
+  useEffect(() => {
+    if (venuesStatus === 'idle') dispatch(fetchVenues())
+  }, [venuesStatus, dispatch])
 
   function showToast(msg) {
     setToastMsg(msg)
@@ -91,6 +96,10 @@ export default function VenueDetailPage() {
       await navigator.clipboard.writeText(window.location.href)
       showToast('🔗 Link copied!')
     }
+  }
+
+  if (venuesStatus === 'idle' || venuesStatus === 'loading') {
+    return <div className={styles.notFound}><p>Loading…</p></div>
   }
 
   if (!venue) {

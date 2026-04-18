@@ -20,7 +20,7 @@ function getRelativeDate(dateStr) {
 }
 
 function getAvatarInitials(name) {
-  return name
+  return (name ?? '?')
     .split(' ')
     .slice(0, 2)
     .map((w) => w[0])
@@ -38,7 +38,11 @@ export default function EventCard({ event }) {
     time,
     location,
     venue,
-    styles: danceStyles,
+    styles: danceStyles = [],
+    // enriched by selectEventsForActiveVenues
+    _venueLogo,
+    _venuePhoto,
+    // legacy fields (direct on event doc)
     image,
     placePhoto,
     price,
@@ -47,20 +51,27 @@ export default function EventCard({ event }) {
     whatsapp,
   } = event
 
-  const saved         = useSelector(selectIsSaved(id))
-  const venuesByName  = useSelector(selectVenuesByName)
-  const venueLogo     = venuesByName[venue]?.logo ?? null
+  const saved        = useSelector(selectIsSaved(id))
+  const venuesByName = useSelector(selectVenuesByName)
 
-  const relDate = getRelativeDate(date)
+  // Image resolution: enriched logo → enriched venue photo → redux lookup → event fields
+  const venueData  = venuesByName[venue]
+  const resolvedLogo  = _venueLogo  ?? venueData?.logo        ?? null
+  const resolvedPhoto = _venuePhoto ?? venueData?.photos?.[0] ?? placePhoto ?? null
+  const heroImage     = resolvedLogo || resolvedPhoto || image || null
+
+  const relDate    = getRelativeDate(date)
   const parsedDate = new Date(date)
-  const month = parsedDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-  const day   = parsedDate.getDate()
+  const month      = parsedDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+  const day        = parsedDate.getDate()
 
   const hashtags = danceStyles
     .map((s) => `#${s.toLowerCase().replace(/\s+/g, '')}`)
     .join(' ')
 
-  const waMessage = encodeURIComponent(`Hi! I'm interested in: ${title} — ${venue}, ${location} on ${date} at ${time}`)
+  const waMessage = encodeURIComponent(
+    `Hi! I'm interested in: ${title} — ${venue}, ${location} on ${date} at ${time}`
+  )
   const waUrl = whatsapp
     ? `https://wa.me/${whatsapp}?text=${waMessage}`
     : `https://wa.me/?text=${waMessage}`
@@ -68,14 +79,17 @@ export default function EventCard({ event }) {
   return (
     <article className={styles.card}>
 
-      {/* ── Header row ── */}
+      {/* ── Header row: avatar + venue + DATE/TIME ── */}
       <div className={styles.header}>
         <div className={styles.avatar}>{getAvatarInitials(venue)}</div>
         <div className={styles.headerInfo}>
-          <Link to={`/events/${id}`} className={styles.venueNameLink}>
+          <Link to={`/venues/${event.placeId ?? ''}`} className={styles.venueNameLink}>
             <div className={styles.venueName}>{venue} · {location}</div>
           </Link>
-          <div className={styles.venueDate}>{relDate} · {time}</div>
+          <div className={styles.venueDate}>
+            <span className={styles.relDate}>{relDate}</span>
+            {time && <span className={styles.timeChip}>🕐 {time}</span>}
+          </div>
         </div>
         <button className={styles.menuBtn} aria-label="More options">···</button>
       </div>
@@ -83,16 +97,16 @@ export default function EventCard({ event }) {
       {/* ── Image (tapping navigates to detail) ── */}
       <Link to={`/events/${id}`} className={styles.imageLink} aria-label={`View details for ${title}`}>
         <div className={styles.imageWrapper}>
-          {(venueLogo || placePhoto || image) ? (
+          {heroImage ? (
             <>
-              <img src={venueLogo || placePhoto || image} alt={title} className={styles.image} />
+              <img src={heroImage} alt={title} className={styles.image} />
               <div className={styles.imageOverlay} />
             </>
           ) : (
             <div className={styles.imagePlaceholder}>♪</div>
           )}
 
-          {/* Date badge */}
+          {/* Date badge — pinned top-right */}
           <div className={styles.dateBadge}>
             <div className={styles.dateBadgeMonth}>{month}</div>
             <div className={styles.dateBadgeDay}>{day}</div>
@@ -101,15 +115,19 @@ export default function EventCard({ event }) {
       </Link>
 
       {/* ── Style badges ── */}
-      <div className={styles.styleBadges}>
-        {danceStyles.map((s) => <Badge key={s} label={s} />)}
-      </div>
+      {danceStyles.length > 0 && (
+        <div className={styles.styleBadges}>
+          {danceStyles.map((s) => <Badge key={s} label={s} />)}
+        </div>
+      )}
 
       {/* ── Description + hashtags ── */}
-      <p className={styles.description}>
-        {description}{' '}
-        <span className={styles.hashtags}>{hashtags} #danzway</span>
-      </p>
+      {description && (
+        <p className={styles.description}>
+          {description}{' '}
+          <span className={styles.hashtags}>{hashtags} #danzway</span>
+        </p>
+      )}
 
       {/* ── Action buttons ── */}
       <div className={styles.actions}>
@@ -133,7 +151,7 @@ export default function EventCard({ event }) {
         className={styles.rsvpBtn}
       >
         <span>📱</span>
-        WHATSAPP RSVP · {price} {currency}
+        WHATSAPP RSVP{price ? ` · ${price} ${currency ?? ''}` : ''}
       </a>
 
     </article>

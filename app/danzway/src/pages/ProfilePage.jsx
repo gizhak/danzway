@@ -1,8 +1,14 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
-import { mockEvents } from '../data/mockEvents'
-import { selectSavedIds, toggleSave } from '../store/appSlice'
+import {
+  selectSavedIds,
+  selectAllEvents,
+  selectEventsStatus,
+  toggleSave,
+  fetchEvents,
+} from '../store/appSlice'
 import styles from './ProfilePage.module.css'
 
 function formatShortDate(dateStr) {
@@ -33,7 +39,7 @@ function SavedEventRow({ event }) {
           <span>{event.venue}, {event.location}</span>
         </div>
         <div className={styles.rowStyles}>
-          {event.styles.map((s) => (
+          {(event.styles ?? []).map((s) => (
             <span key={s} className={styles.rowStyleChip}>{s}</span>
           ))}
         </div>
@@ -56,10 +62,17 @@ function SavedEventRow({ event }) {
 }
 
 export default function ProfilePage() {
-  const savedIds = useSelector(selectSavedIds)
+  const dispatch     = useDispatch()
+  const savedIds     = useSelector(selectSavedIds)
+  const allEvents    = useSelector(selectAllEvents)
+  const eventsStatus = useSelector(selectEventsStatus)
 
-  const savedEvents = mockEvents.filter((e) => savedIds[e.id])
-  const count    = savedEvents.length
+  useEffect(() => {
+    if (eventsStatus === 'idle') dispatch(fetchEvents())
+  }, [eventsStatus, dispatch])
+
+  const savedEvents = allEvents.filter((e) => savedIds[e.id])
+  const count       = savedEvents.length
 
   return (
     <div className={styles.page}>
@@ -98,11 +111,13 @@ export default function ProfilePage() {
           </Link>
         </div>
       ) : (
-        <div className={styles.list}>
-          {savedEvents.map((event) => (
-            <SavedEventRow key={event.id} event={event} />
-          ))}
-        </div>
+        <AnimatePresence>
+          <div className={styles.list}>
+            {savedEvents.map((event) => (
+              <SavedEventRow key={event.id} event={event} />
+            ))}
+          </div>
+        </AnimatePresence>
       )}
     </div>
   )
