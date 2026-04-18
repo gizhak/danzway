@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
-import { selectAllEvents, fetchEvents } from '../store/appSlice'
+import { selectAllEvents, selectEventsStatus, fetchEvents } from '../store/appSlice'
 import { refreshVenueMetadata } from '../services/googlePlaces'
 import Badge from '../components/ui/Badge'
 import styles from './EventDetailPage.module.css'
@@ -42,17 +42,27 @@ function SpinnerIcon() {
 }
 
 export default function EventDetailPage() {
-  const dispatch   = useDispatch()
-  const { id }     = useParams()
-  const events     = useSelector(selectAllEvents)
-  const event      = events.find((e) => e.id === id)
+  const dispatch      = useDispatch()
+  const { id }        = useParams()
+  const events        = useSelector(selectAllEvents)
+  const eventsStatus  = useSelector(selectEventsStatus)
+  const event         = events.find((e) => e.id === id)
 
   const [toastMsg,   setToastMsg]   = useState('')
   const [refreshing, setRefreshing] = useState(false)
 
+  // Fetch events if store is empty (direct link / page refresh)
+  useEffect(() => {
+    if (eventsStatus === 'idle') dispatch(fetchEvents())
+  }, [eventsStatus, dispatch])
+
   function showToast(msg) {
     setToastMsg(msg)
     setTimeout(() => setToastMsg(''), 2500)
+  }
+
+  if (eventsStatus === 'idle' || eventsStatus === 'loading') {
+    return <p className={styles.notFound}>Loading…</p>
   }
 
   if (!event) {

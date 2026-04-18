@@ -11,8 +11,9 @@ export const fetchVenues = createAsyncThunk('venues/fetchVenues', async () => {
     // Convert Firestore Timestamps to plain numbers so Redux doesn't complain
     return {
       ...data,
-      importedAt:    data.importedAt?.toMillis?.()    ?? null,
-      lastRefreshed: data.lastRefreshed?.toMillis?.() ?? null,
+      importedAt:        data.importedAt?.toMillis?.()        ?? null,
+      lastRefreshed:     data.lastRefreshed?.toMillis?.()     ?? null,
+      lastScanTimestamp: data.lastScanTimestamp?.toMillis?.() ?? null,
     }
   })
 })

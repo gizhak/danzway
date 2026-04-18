@@ -5,7 +5,14 @@ import { db } from '../services/firebase'
 // ─── Async Thunk ───────────────────────────────────────────
 export const fetchEvents = createAsyncThunk('app/fetchEvents', async () => {
   const snapshot = await getDocs(collection(db, 'events'))
-  return snapshot.docs.map((doc) => doc.data())
+  return snapshot.docs.map((doc) => {
+    const data = doc.data()
+    return {
+      ...data,
+      createdAt:  data.createdAt?.toMillis?.()  ?? null,
+      approvedAt: data.approvedAt?.toMillis?.() ?? null,
+    }
+  })
 })
 
 // ─── Slice ─────────────────────────────────────────────────

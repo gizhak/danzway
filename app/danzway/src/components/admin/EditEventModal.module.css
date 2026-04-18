@@ -1,0 +1,243 @@
+/* ─── Backdrop ─────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+@media (min-width: 600px) {
+  .backdrop {
+    align-items: center;
+    padding: 1.5rem;
+  }
+}
+
+/* ─── Modal shell ──────────────────────────────────────── */
+.modal {
+  width: 100%;
+  max-width: 520px;
+  background: #141418;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 92dvh;
+  overflow: hidden;
+}
+
+@media (min-width: 600px) {
+  .modal {
+    border-radius: 20px;
+    max-height: 88vh;
+  }
+}
+
+/* ─── Header ───────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  flex-shrink: 0;
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 2px;
+}
+
+.closeBtn {
+  background: rgba(255, 255, 255, 0.07);
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.85rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* ─── Body ─────────────────────────────────────────────── */
+.body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.40);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0;
+}
+
+.input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  color: #fff;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: rgba(245, 158, 11, 0.50);
+}
+
+.textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  color: #fff;
+  font-size: 0.88rem;
+  outline: none;
+  resize: vertical;
+  min-height: 72px;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.textarea:focus {
+  border-color: rgba(245, 158, 11, 0.50);
+}
+
+.row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.note {
+  font-size: 0.78rem;
+  color: rgba(245, 158, 11, 0.70);
+  background: rgba(245, 158, 11, 0.07);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  line-height: 1.5;
+  margin-top: 0.25rem;
+}
+
+/* ─── Footer ───────────────────────────────────────────── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.875rem 1.25rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  flex-shrink: 0;
+}
+
+.footerRight {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cancelInstanceBtn {
+  background: rgba(239, 68, 68, 0.10);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: rgba(239, 68, 68, 0.80);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.cancelInstanceBtn:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+.cancelInstanceBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.closeTextBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.closeTextBtn:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.saveBtn {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  border: none;
+  color: #0a0a0a;
+  border-radius: 8px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 12px rgba(245, 158, 11, 0.30);
+}
+
+.saveBtn:hover {
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.45);
+}
+
+.saveBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

@@ -54,9 +54,28 @@
 }
 
 .venueDate {
-  font-size: 0.75rem;
-  color: var(--color-brand-text);
-  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 3px;
+  flex-wrap: wrap;
+}
+
+.relDate {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-brand-amber-light);
+}
+
+.timeChip {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 999px;
+  padding: 1px 7px;
+  white-space: nowrap;
 }
 
 .menuBtn {
@@ -221,6 +240,69 @@
   border-color: rgba(245, 158, 11, 0.80);
   color: var(--color-brand-amber-light);
   box-shadow: 0 0 18px rgba(245, 158, 11, 0.25);
+}
+
+/* ─── Recurring / Override chips ─────────────────────── */
+.recurringChip {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.overrideChip {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(245,158,11,0.75);
+  background: rgba(245,158,11,0.10);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 999px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* ─── Admin action buttons (edit / cancel) ────────────── */
+.adminActions {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.adminEditBtn,
+.adminCancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s ease;
+}
+
+.adminEditBtn {
+  background: rgba(245,158,11,0.12);
+  color: rgba(245,158,11,0.85);
+}
+
+.adminEditBtn:hover {
+  background: rgba(245,158,11,0.22);
+}
+
+.adminCancelBtn {
+  background: rgba(239,68,68,0.10);
+  color: rgba(239,68,68,0.75);
+}
+
+.adminCancelBtn:hover {
+  background: rgba(239,68,68,0.20);
 }
 
 /* ─── WhatsApp RSVP button ────────────────────────────── */
