@@ -28,6 +28,11 @@ const venuesSlice = createSlice({
     error:  null,
   },
   reducers: {
+    /** Full replacement from the real-time onSnapshot listener. */
+    setVenues(state, action) {
+      state.venues = action.payload
+      state.status = 'succeeded'
+    },
     /**
      * Optimistic local update for a single field on a venue.
      * Payload: { placeId: string, field: string, value: any }
@@ -55,7 +60,7 @@ const venuesSlice = createSlice({
   },
 })
 
-export const { updateVenueField } = venuesSlice.actions
+export const { setVenues, updateVenueField } = venuesSlice.actions
 
 export default venuesSlice.reducer
 

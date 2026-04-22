@@ -2227,3 +2227,53 @@
 .eventCancelBtn:hover {
   background: rgba(239, 68, 68, 0.18);
 }
+
+/* Header row inside the events panel (title + Clear All button) */
+.eventsPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+/* Destructive "Clear All Events" button */
+.clearAllBtn {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(239, 68, 68, 0.30);
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(239, 68, 68, 0.75);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.clearAllBtn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  color: rgba(239, 68, 68, 1);
+}
+
+/* "Clear before scan" toggle row above the Scan button */
+.clearBeforeScanLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.40);
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.clearBeforeScanLabel input[type='checkbox'] {
+  accent-color: #f59e0b;
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}

@@ -1,4 +1,7 @@
-import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import {
+  doc, setDoc, updateDoc, serverTimestamp,
+  writeBatch, collection, query, where, getDocs,
+} from 'firebase/firestore'
 import { db } from './firebase'
 
 /**
@@ -55,4 +58,55 @@ export async function cancelEventInstance(recurringEventId, { placeId, date, ven
  */
 export async function updateEventInFirestore(eventId, updates) {
   await updateDoc(doc(db, 'events', eventId), updates)
+}
+
+/**
+ * Clears ALL upcoming events for a venue in one batch:
+ *   1. Deletes every Firestore document where placeId matches (real events,
+ *      overrides, and any existing cancelled stubs).
+ *   2. Writes isCancelled stubs for every upcoming recurring slot (8 weeks)
+ *      so virtual recurring events are suppressed immediately in the UI.
+ *
+ * The onSnapshot listener propagates the change to Redux automatically —
+ * no manual dispatch needed after calling this.
+ */
+export async function deleteVenueEvents(placeId, recurringSchedule) {
+  const batch = writeBatch(db)
+
+  // ── 1. Delete all real Firestore docs for this venue ─────────────────────
+  const snap = await getDocs(
+    query(collection(db, 'events'), where('placeId', '==', placeId))
+  )
+  snap.docs.forEach((d) => batch.delete(d.ref))
+
+  // ── 2. Suppress upcoming recurring slots with isCancelled stubs ───────────
+  if (recurringSchedule?.days?.length) {
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    const limit = 8 * 7  // days ahead
+
+    recurringSchedule.days.forEach((dayOfWeek) => {
+      const daysToFirst = (dayOfWeek - today.getDay() + 7) % 7
+      const cur = new Date(today)
+      cur.setDate(today.getDate() + daysToFirst)
+
+      while (Math.round((cur - today) / 86400000) <= limit) {
+        const yyyy    = cur.getFullYear()
+        const mm      = String(cur.getMonth() + 1).padStart(2, '0')
+        const dd      = String(cur.getDate()).padStart(2, '0')
+        const dateStr = `${yyyy}-${mm}-${dd}`
+        const stubId  = `${placeId}-rec-${dayOfWeek}-${dateStr}`
+
+        batch.set(doc(db, 'events', stubId), {
+          id:          stubId,
+          placeId,
+          date:        dateStr,
+          isCancelled: true,
+          createdAt:   serverTimestamp(),
+        })
+        cur.setDate(cur.getDate() + 7)
+      }
+    })
+  }
+
+  await batch.commit()
 }
