@@ -22,6 +22,7 @@ import {
   saveEventOverride,
   cancelEventInstance,
   updateEventInFirestore,
+  deleteVenueEvents,
 } from '../../services/eventsService'
 import { crawlVenueWebsite } from '../../services/eventCrawler'
 import EditEventModal from '../../components/admin/EditEventModal'
@@ -458,7 +459,7 @@ function RecurringScheduleEditor({ venue, onSave, onCancel, isSaving }) {
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-function ManageEventsPanel({ venueEvents, onEdit, onCancel }) {
+function ManageEventsPanel({ venueEvents, onEdit, onCancel, onClearAll }) {
   if (venueEvents.length === 0) {
     return (
       <div className={styles.eventsPanel}>
@@ -470,8 +471,13 @@ function ManageEventsPanel({ venueEvents, onEdit, onCancel }) {
 
   return (
     <div className={styles.eventsPanel}>
-      <div className={styles.eventsPanelTitle}>
-        Upcoming Events ({venueEvents.length})
+      <div className={styles.eventsPanelHeader}>
+        <div className={styles.eventsPanelTitle}>
+          Upcoming Events ({venueEvents.length})
+        </div>
+        <button className={styles.clearAllBtn} onClick={onClearAll}>
+          🗑 Clear All
+        </button>
       </div>
       {venueEvents.map((event) => {
         const d = new Date(event.date)
@@ -545,12 +551,15 @@ function ImportedVenueRow({
   isScanning,
   scanResult,
   onScan,
+  clearBeforeScan,
+  onToggleClearBeforeScan,
   // manage events panel
   isManagingEvents,
   onToggleManageEvents,
   venueEvents,
   onEditEvent,
   onCancelEvent,
+  onClearVenueEvents,
   // other
   onToggleActive,
   onToggleStyle,
@@ -768,6 +777,14 @@ function ImportedVenueRow({
           )}
         </div>
         <div className={styles.importedButtons}>
+          <label className={styles.clearBeforeScanLabel}>
+            <input
+              type="checkbox"
+              checked={!!clearBeforeScan}
+              onChange={onToggleClearBeforeScan}
+            />
+            Clear before scan
+          </label>
           <button
             className={[styles.scanVenueBtn, isScanning ? styles.scanVenueBtnActive : ''].join(' ')}
             onClick={onScan}
@@ -905,6 +922,7 @@ function ImportedVenueRow({
               venueEvents={venueEvents}
               onEdit={onEditEvent}
               onCancel={onCancelEvent}
+              onClearAll={onClearVenueEvents}
             />
           </motion.div>
         )}
@@ -1191,6 +1209,7 @@ export default function VenueDiscoveryPage() {
   // Per-venue individual scan state
   const [venueScanning,    setVenueScanning]    = useState({}) // { [placeId]: bool }
   const [venueScanResult,  setVenueScanResult]  = useState({}) // { [placeId]: { status, count, newCount, error } }
+  const [clearBeforeScan,  setClearBeforeScan]  = useState({}) // { [placeId]: bool }
   const crawlRef = useRef(false)
 
   // Manage events panel state
@@ -1338,6 +1357,10 @@ export default function VenueDiscoveryPage() {
     setVenueScanResult(prev => ({ ...prev, [placeId]: null }))
 
     try {
+      if (clearBeforeScan[placeId]) {
+        await deleteVenueEvents(placeId, venue.recurringSchedule)
+      }
+
       const result = await crawlVenueWebsite(venue)
 
       if (result.status !== 'blocked') {
@@ -1700,12 +1723,25 @@ export default function VenueDiscoveryPage() {
         date:    event.date,
         venue:   event.venue,
       })
-      dispatch(fetchEvents())
       setEditingEvent(null)
       showToast('✓ Occurrence cancelled')
     } catch (err) {
       console.error('[CancelInstance]', err)
       showToast('⚠️ Could not cancel occurrence')
+    }
+  }
+
+  async function handleClearVenueEvents(venue) {
+    const count = (eventsByVenue[venue.placeId] ?? []).length
+    if (!window.confirm(
+      `Delete all ${count} upcoming event${count !== 1 ? 's' : ''} for "${venue.name}"?\n\nThis cannot be undone.`
+    )) return
+    try {
+      await deleteVenueEvents(venue.placeId, venue.recurringSchedule)
+      showToast(`✓ All events cleared for ${venue.name}`)
+    } catch (err) {
+      console.error('[ClearVenueEvents]', err)
+      showToast('⚠️ Could not clear events')
     }
   }
 
@@ -1857,6 +1893,10 @@ export default function VenueDiscoveryPage() {
                 isScanning={!!venueScanning[venue.placeId]}
                 scanResult={venueScanResult[venue.placeId] ?? null}
                 onScan={() => handleScanVenue(venue)}
+                clearBeforeScan={!!clearBeforeScan[venue.placeId]}
+                onToggleClearBeforeScan={() => setClearBeforeScan(prev => ({
+                  ...prev, [venue.placeId]: !prev[venue.placeId]
+                }))}
                 // manage events
                 isManagingEvents={managingEventsId === venue.placeId}
                 onToggleManageEvents={() => setManagingEventsId(
@@ -1865,6 +1905,7 @@ export default function VenueDiscoveryPage() {
                 venueEvents={eventsByVenue[venue.placeId] ?? []}
                 onEditEvent={setEditingEvent}
                 onCancelEvent={handleCancelInstance}
+                onClearVenueEvents={() => handleClearVenueEvents(venue)}
                 // other
                 onToggleActive={handleToggleActive}
                 onToggleStyle={handleToggleStyle}
