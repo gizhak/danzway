@@ -89,6 +89,41 @@
     0 4px 14px rgba(0, 0, 0, 0.55);
 }
 
+/* Venue with an active special (Facebook) event — glowing gold border */
+.pinSpecial {
+  border-color: #f59e0b;
+  border-width: 2.5px;
+  box-shadow:
+    0 0 0 3px rgba(245, 158, 11, 0.30),
+    0 0 12px 3px rgba(245, 158, 11, 0.40),
+    0 2px 10px rgba(0, 0, 0, 0.55);
+  animation: goldPulse 2.4s ease-in-out infinite;
+}
+
+/* Star badge: top-right corner of the pin */
+.pinStar {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f59e0b;
+  color: #0a0a10;
+  font-size: 8px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.30), 0 0 12px 3px rgba(245, 158, 11, 0.40), 0 2px 10px rgba(0,0,0,0.55); }
+  50%       { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.18), 0 0 20px 6px rgba(245, 158, 11, 0.55), 0 2px 10px rgba(0,0,0,0.55); }
+}
+
 .pinLogo {
   width: 26px;
   height: 26px;
@@ -295,6 +330,38 @@
 .popupEventTime {
   font-size: 0.73rem;
   color: #f59e0b;
+  font-weight: 500;
+}
+
+/* Special (Facebook) event card */
+.popupSpecial {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.popupFbLabel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f59e0b;
+  margin-bottom: 0.25rem;
+}
+
+.popupSpecialTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fde68a;
+  line-height: 1.35;
+}
+
+.popupSpecialTime {
+  font-size: 0.7rem;
+  color: rgba(253, 230, 138, 0.7);
+  margin-top: 0.15rem;
   font-weight: 500;
 }
 

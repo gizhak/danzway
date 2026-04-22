@@ -1177,6 +1177,157 @@
   pointer-events: none;
 }
 
+/* ─── Facebook Scan Panel ────────────────────────────────────────────────── */
+.fbPanel {
+  margin-bottom: 1.5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  background: rgba(245, 158, 11, 0.04);
+  overflow: hidden;
+}
+
+.fbPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  gap: 1rem;
+}
+
+.fbPanelTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(245, 158, 11, 0.85);
+}
+
+.fbPanelDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+}
+
+.fbScanBtn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #f59e0b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.fbScanBtn:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.55);
+}
+
+.fbScanBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fbScanBtnActive {
+  background: rgba(245, 158, 11, 0.18);
+}
+
+.fbStatusBar {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.4rem 1rem 0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fbStatusFound   { color: rgba(52, 211, 153, 0.85); }
+.fbStatusNone    { color: rgba(255, 255, 255, 0.4); }
+.fbStatusBlocked { color: rgba(248, 113, 113, 0.85); }
+
+.fbEventsList {
+  border-top: 1px solid rgba(245, 158, 11, 0.12);
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.fbEventCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+}
+
+.fbEventCardSpecial {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.fbEventMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+
+.fbSpecialBadge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #f59e0b;
+  letter-spacing: 0.05em;
+}
+
+.fbVenueMatch {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(52, 211, 153, 0.85);
+}
+
+.fbVenueNoMatch {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(248, 113, 113, 0.7);
+}
+
+.fbEventDate {
+  font-size: 0.63rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.fbEventText {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.45;
+  margin: 0 0 0.4rem;
+  direction: rtl;
+  text-align: right;
+}
+
+.fbEventActions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  justify-content: flex-end;
+}
+
 /* ─── Event Discovery Panel ───────────────────────────────────────────────── */
 .discoveryPanel {
   margin-bottom: 2rem;

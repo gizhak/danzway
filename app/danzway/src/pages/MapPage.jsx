@@ -17,7 +17,8 @@ import {
   selectEventsStatus,
 } from '../store/appSlice'
 import { selectActiveVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
-import { selectNextEventByVenueMap } from '../store/selectors'
+import { selectNextEventByVenueMap, selectSpecialEventsByVenueMap } from '../store/selectors'
+import { trackVenueClick } from '../services/analyticsService'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import styles from './MapPage.module.css'
 
@@ -69,7 +70,7 @@ function getDiff(dateStr) {
 }
 
 // ─── Individual venue marker pin ─────────────────────────────────────────────
-function VenueMarker({ venue, nextEvent, isSelected, onSetRef, onClick }) {
+function VenueMarker({ venue, nextEvent, specialEvent, isSelected, onSetRef, onClick }) {
   const [markerRef, marker] = useAdvancedMarkerRef()
 
   // Stable ref to callback so the effect doesn't re-run when parent re-renders
@@ -80,35 +81,38 @@ function VenueMarker({ venue, nextEvent, isSelected, onSetRef, onClick }) {
     return () => cbRef.current(null)
   }, [marker])
 
-  const diff   = getDiff(nextEvent?.date)
-  const isLive = diff === 0 || diff === 1
+  const diff      = getDiff(nextEvent?.date)
+  const isLive    = diff === 0 || diff === 1
+  const isSpecial = !!specialEvent
 
   const pinClass = [
     styles.pin,
+    isSpecial  ? styles.pinSpecial  : '',
     isLive     ? styles.pinLive     : '',
     isSelected ? styles.pinSelected : '',
-  ].join(' ')
+  ].filter(Boolean).join(' ')
 
   return (
     <AdvancedMarker
       ref={markerRef}
       position={{ lat: venue.coordinates.lat, lng: venue.coordinates.lng }}
       onClick={onClick}
-      zIndex={isSelected ? 100 : isLive ? 50 : 1}
+      zIndex={isSelected ? 100 : isSpecial ? 75 : isLive ? 50 : 1}
     >
       <div className={pinClass}>
         {venue.logo
           ? <img src={venue.logo} className={styles.pinLogo} alt="" />
           : <span className={styles.pinIcon}>🎵</span>
         }
-        {isLive && <span className={styles.pinPulse} />}
+        {isLive    && <span className={styles.pinPulse} />}
+        {isSpecial && <span className={styles.pinStar}>★</span>}
       </div>
     </AdvancedMarker>
   )
 }
 
 // ─── Cluster wrapper — collects marker refs and feeds them to MarkerClusterer ─
-function ClusteredMarkers({ venues, nextEventsByVenue, selectedPlaceId, onMarkerClick }) {
+function ClusteredMarkers({ venues, nextEventsByVenue, specialEventsByVenue, selectedPlaceId, onMarkerClick }) {
   const map = useMap()
   const clusterer = useRef(null)
   const [markerMap, setMarkerMap] = useState({})
@@ -138,12 +142,14 @@ function ClusteredMarkers({ venues, nextEventsByVenue, selectedPlaceId, onMarker
   }, [])
 
   return venues.map((venue) => {
-    const nextEvent = getNextEvent(venue, nextEventsByVenue)
+    const nextEvent    = getNextEvent(venue, nextEventsByVenue)
+    const specialEvent = specialEventsByVenue?.[venue.placeId] ?? null
     return (
       <VenueMarker
         key={venue.placeId}
         venue={venue}
         nextEvent={nextEvent}
+        specialEvent={specialEvent}
         isSelected={selectedPlaceId === venue.placeId}
         onSetRef={(m) => setMarkerRef(m, venue.placeId)}
         onClick={() => onMarkerClick(venue)}
@@ -165,7 +171,7 @@ function UserLocationMarker({ position }) {
 }
 
 // ─── Bottom-sheet venue popup card ───────────────────────────────────────────
-function VenuePopup({ venue, nextEvent, onClose }) {
+function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
   const { t, i18n } = useTranslation()
   const lang  = i18n.language
   const diff  = getDiff(nextEvent?.date)
@@ -217,6 +223,27 @@ function VenuePopup({ venue, nextEvent, onClose }) {
         </div>
       )}
 
+      {specialEvent && (
+        <div className={styles.popupSpecial}>
+          <div className={styles.popupFbLabel}>★ Event from Facebook</div>
+          <div className={styles.popupSpecialTitle}>{specialEvent.title?.slice(0, 80)}</div>
+          {specialEvent.date && (
+            <div className={styles.popupSpecialTime}>
+              {(() => {
+                const diff2 = getDiff(specialEvent.date)
+                const locale = lang === 'he' ? 'he-IL' : 'en-US'
+                if (diff2 === 0) return t('map.tonight', { time: specialEvent.time ?? '' })
+                if (diff2 === 1) return t('map.tomorrow', { time: specialEvent.time ?? '' })
+                return t('map.eventDate', {
+                  date: new Date(specialEvent.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+                  time: specialEvent.time ?? '',
+                })
+              })()}
+            </div>
+          )}
+        </div>
+      )}
+
       {eventLabel && (
         <div className={styles.popupEvent}>
           <div className={styles.popupEventDot} />
@@ -250,12 +277,13 @@ function VenuePopup({ venue, nextEvent, onClose }) {
 
 // ─── Main page ───────────────────────────────────────────────────────────────
 export default function MapPage() {
-  const dispatch          = useDispatch()
-  const styleFilters      = useSelector(selectStyleFilters)
-  const activeVenues      = useSelector(selectActiveVenues)
-  const venuesStatus      = useSelector(selectVenuesStatus)
-  const eventsStatus      = useSelector(selectEventsStatus)
-  const nextEventsByVenue = useSelector(selectNextEventByVenueMap)
+  const dispatch             = useDispatch()
+  const styleFilters         = useSelector(selectStyleFilters)
+  const activeVenues         = useSelector(selectActiveVenues)
+  const venuesStatus         = useSelector(selectVenuesStatus)
+  const eventsStatus         = useSelector(selectEventsStatus)
+  const nextEventsByVenue    = useSelector(selectNextEventByVenueMap)
+  const specialEventsByVenue = useSelector(selectSpecialEventsByVenueMap)
 
   const [selectedVenue, setSelectedVenue] = useState(null)
   const [userLocation,  setUserLoc]       = useState(null)
@@ -301,6 +329,7 @@ export default function MapPage() {
 
   const handleMarkerClick = useCallback((venue) => {
     setSelectedVenue(venue)
+    trackVenueClick(venue.name, venue.placeId)
   }, [])
 
   const handleClose = useCallback(() => setSelectedVenue(null), [])
@@ -344,6 +373,7 @@ export default function MapPage() {
           <ClusteredMarkers
             venues={filteredVenues}
             nextEventsByVenue={nextEventsByVenue}
+            specialEventsByVenue={specialEventsByVenue}
             selectedPlaceId={selectedVenue?.placeId}
             onMarkerClick={handleMarkerClick}
           />
@@ -364,6 +394,7 @@ export default function MapPage() {
             <VenuePopup
               venue={selectedVenue}
               nextEvent={selectedNextEvent}
+              specialEvent={specialEventsByVenue[selectedVenue.placeId] ?? null}
               onClose={handleClose}
             />
           </div>

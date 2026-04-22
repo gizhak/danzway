@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
-import { doc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore'
+import { doc, setDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '../../services/firebase'
 import {
   fetchVenues,
@@ -34,6 +34,7 @@ import {
   approveAllPending,
 } from '../../services/pendingEventsService'
 import { getNextWeekdayDate } from '../../i18n/dateUtils'
+import { trackVenueScan, trackFacebookScan } from '../../services/analyticsService'
 import styles from './VenueDiscoveryPage.module.css'
 
 // ─── Cloudinary ───────────────────────────────────────────────────────────────
@@ -1016,6 +1017,102 @@ function ImportedVenueRow({
   )
 }
 
+// ─── FacebookScanPanel ────────────────────────────────────────────────────────
+
+function FacebookScanPanel({ fbScanning, fbScanStatus, fbPendingEvents, approvingIds, onScan, onApproveOne, onRejectOne }) {
+  const [recurringToggles, setRecurringToggles] = useState(new Set())
+
+  function toggleRecurring(id) {
+    setRecurringToggles(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  return (
+    <section className={styles.fbPanel}>
+      <div className={styles.fbPanelHeader}>
+        <div className={styles.fbPanelTitle}>
+          <span className={styles.fbPanelDot} />
+          Facebook Group Scanner
+        </div>
+        <button
+          className={[styles.fbScanBtn, fbScanning ? styles.fbScanBtnActive : ''].join(' ')}
+          onClick={onScan}
+          disabled={fbScanning}
+        >
+          {fbScanning
+            ? <><span className={styles.scanVenueSpinner} /> Scanning…</>
+            : '📘 Scan bachataisrael'}
+        </button>
+      </div>
+
+      {fbScanStatus && (
+        <div className={[
+          styles.fbStatusBar,
+          fbScanStatus === 'found'     ? styles.fbStatusFound    :
+          fbScanStatus === 'no_events' ? styles.fbStatusNone     :
+          fbScanStatus === 'blocked'   ? styles.fbStatusBlocked  :
+          fbScanStatus === 'error'     ? styles.fbStatusBlocked  : '',
+        ].join(' ')}>
+          {fbScanStatus === 'scanning'  && '⏳ Scanning Facebook group…'}
+          {fbScanStatus === 'found'     && `✓ ${fbPendingEvents.length} post${fbPendingEvents.length !== 1 ? 's' : ''} pending review`}
+          {fbScanStatus === 'no_events' && '○ No dance events found'}
+          {fbScanStatus === 'blocked'   && '✗ Facebook requires login — group may be private'}
+          {fbScanStatus === 'error'     && '! Scan failed — is the Python server running?'}
+        </div>
+      )}
+
+      {fbPendingEvents.length > 0 && (
+        <div className={styles.fbEventsList}>
+          {fbPendingEvents.map(ev => {
+            const isApproving = approvingIds.has(ev.id)
+            const isRec       = recurringToggles.has(ev.id)
+            return (
+              <div key={ev.id} className={[styles.fbEventCard, ev.isSpecial ? styles.fbEventCardSpecial : ''].join(' ')}>
+                <div className={styles.fbEventMeta}>
+                  {ev.isSpecial && <span className={styles.fbSpecialBadge}>★ Special</span>}
+                  {ev.placeId
+                    ? <span className={styles.fbVenueMatch}>✓ {ev.venue}</span>
+                    : <span className={styles.fbVenueNoMatch}>? No venue match</span>
+                  }
+                  {ev.date && <span className={styles.fbEventDate}>{ev.date}{ev.time ? ` · ${ev.time}` : ''}</span>}
+                </div>
+                <p className={styles.fbEventText}>{ev.rawText?.slice(0, 180) ?? ev.title}</p>
+                <div className={styles.fbEventActions}>
+                  <button
+                    className={[styles.recurringToggle, isRec ? styles.recurringToggleOn : ''].join(' ')}
+                    onClick={() => toggleRecurring(ev.id)}
+                    title="Toggle: approve as weekly recurring instead of one-time"
+                  >
+                    {isRec ? '↻ Recurring' : '↺ One-time'}
+                  </button>
+                  <button
+                    className={styles.approveBtn}
+                    onClick={() => onApproveOne(ev, { makeRecurring: isRec })}
+                    disabled={isApproving || !ev.placeId}
+                    title={!ev.placeId ? 'No venue matched — cannot approve' : 'Approve'}
+                  >
+                    {isApproving ? '…' : '✓'}
+                  </button>
+                  <button
+                    className={styles.rejectBtn}
+                    onClick={() => onRejectOne(ev)}
+                    disabled={isApproving}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </section>
+  )
+}
+
 // ─── DiscoveredEventsPanel ────────────────────────────────────────────────────
 
 const STATUS_ICON = {
@@ -1291,6 +1388,10 @@ export default function VenueDiscoveryPage() {
   const [forceRescan,      setForceRescan]      = useState(false)
   const [approvingIds,     setApprovingIds]     = useState(new Set())
   const [approvingAll,     setApprovingAll]     = useState(false)
+
+  // ── Facebook scan state ───────────────────────────────────────────────────────
+  const [fbScanning,       setFbScanning]       = useState(false)
+  const [fbScanStatus,     setFbScanStatus]     = useState(null) // null | 'scanning' | 'found' | 'blocked' | 'no_events' | 'error'
   // Per-venue individual scan state
   const [venueScanning,    setVenueScanning]    = useState({}) // { [placeId]: bool }
   const [venueScanResult,  setVenueScanResult]  = useState({}) // { [placeId]: { status, count, newCount, error } }
@@ -1453,6 +1554,7 @@ export default function VenueDiscoveryPage() {
   function handleStartScan() {
     if (scanStatus === 'scanning') return
     crawlRef.current = false
+    trackVenueScan(importedVenues.filter(v => v.active !== false).length)
     runCrawler(false)
   }
 
@@ -1840,6 +1942,73 @@ export default function VenueDiscoveryPage() {
     }
   }
 
+  // ── Facebook Group Scan ─────────────────────────────────────────────────────
+  const FB_GROUP_URL = 'https://www.facebook.com/groups/bachataisrael/'
+
+  async function handleScanFacebook() {
+    setFbScanning(true)
+    setFbScanStatus('scanning')
+    trackFacebookScan()
+    try {
+      const venuesList = importedVenues
+        .filter(v => v.active !== false)
+        .map(v => ({ placeId: v.placeId, name: v.name, city: v.city }))
+
+      const res = await fetch('http://localhost:5001/scan-facebook', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ url: FB_GROUP_URL, venues: venuesList }),
+      })
+      const result = await res.json()
+
+      if (result.status === 'blocked') {
+        setFbScanStatus('blocked')
+        showToast('⚠ Facebook requires login — cannot scrape public group')
+        return
+      }
+      if (result.status === 'no_events' || !result.posts?.length) {
+        setFbScanStatus('no_events')
+        showToast('○ No dance events found in Facebook group')
+        return
+      }
+
+      // Reject stale FB pending events before saving fresh results
+      const staleFb = pendingEvents.filter(e => e.source === 'facebook')
+      await Promise.all(staleFb.map(e => rejectEvent(e.id)))
+
+      // Save each post as a pending event
+      for (let i = 0; i < result.posts.length; i++) {
+        const post = result.posts[i]
+        const id   = `fb-pend-${Date.now()}-${i}`
+        await setDoc(doc(db, 'pending_events', id), {
+          id,
+          title:     post.text?.slice(0, 80) ?? 'Facebook Event',
+          date:      post.date      ?? null,
+          time:      post.time      ?? null,
+          venue:     post.venue     ?? '',
+          location:  post.location  ?? '',
+          placeId:   post.placeId   ?? null,
+          isSpecial: post.isSpecial ?? false,
+          source:    'facebook',
+          sourceUrl: post.sourceUrl ?? FB_GROUP_URL,
+          rawText:   post.text      ?? '',
+          styles:    [],
+          status:    'pending',
+          crawledAt: serverTimestamp(),
+        })
+      }
+
+      setFbScanStatus('found')
+      showToast(`📘 ${result.posts.length} Facebook post${result.posts.length !== 1 ? 's' : ''} saved for review`)
+    } catch (err) {
+      console.error('[FbScan]', err)
+      setFbScanStatus('error')
+      showToast('⚠ Facebook scan failed — is the Python server running?')
+    } finally {
+      setFbScanning(false)
+    }
+  }
+
   async function handleApproveAll() {
     if (pendingEvents.length === 0) return
     setApprovingAll(true)
@@ -2147,9 +2316,20 @@ export default function VenueDiscoveryPage() {
         </section>
       )}
 
+      {/* ── Facebook Group Scanner ── */}
+      <FacebookScanPanel
+        fbScanning={fbScanning}
+        fbScanStatus={fbScanStatus}
+        fbPendingEvents={pendingEvents.filter(e => e.source === 'facebook')}
+        approvingIds={approvingIds}
+        onScan={handleScanFacebook}
+        onApproveOne={handleApproveOne}
+        onRejectOne={handleRejectOne}
+      />
+
       {/* ── Discovered Events (crawler results) ── */}
       <DiscoveredEventsPanel
-        pendingEvents={pendingEvents}
+        pendingEvents={pendingEvents.filter(e => e.source !== 'facebook')}
         scanStatus={scanStatus}
         scanProgress={scanProgress}
         scanResults={scanResults}

@@ -141,6 +141,30 @@ export const selectEventsForActiveVenues = createSelector(
 )
 
 /**
+ * Returns { [placeId]: event } for active isSpecial events (e.g. Facebook birthdays, workshops).
+ * Used by MapPage to render gold-glow markers for venues with a special upcoming event.
+ */
+export const selectSpecialEventsByVenueMap = createSelector(
+  (state) => state.app.events,
+  (events) => {
+    const map = {}
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    events.forEach((e) => {
+      if (!e.isSpecial || !e.date || !e.placeId) return
+      const d = new Date(e.date)
+      d.setHours(0, 0, 0, 0)
+      if (d < today) return
+      // Keep earliest upcoming special event per venue
+      if (!map[e.placeId] || e.date < map[e.placeId].date) {
+        map[e.placeId] = e
+      }
+    })
+    return map
+  }
+)
+
+/**
  * Lookup map: venue name / normalised name / placeId → soonest upcoming event.
  * Built from the fully-merged list (real Firestore + recurring virtual) so that
  * map markers glow for recurring-only venues, matching what the events list shows.

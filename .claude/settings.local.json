@@ -6,7 +6,9 @@
       "Bash(npm uninstall *)",
       "Bash(node -e \"require\\('./node_modules/firebase/package.json'\\); console.log\\('firebase installed: ' + require\\('./node_modules/firebase/package.json'\\).version\\)\")",
       "Bash(npx vite *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(xargs grep *)",
+      "Bash(curl -s -X POST http://localhost:5001/scan-facebook-debug -H \"Content-Type: application/json\" -d \"{}\")"
     ]
   }
 }
