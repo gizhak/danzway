@@ -32,7 +32,10 @@ function generateRecurringEvents(venues) {
 
       const limit = RECURRING_WEEKS * 7
       while (Math.round((current - today) / 86400000) <= limit) {
-        const dateStr = current.toISOString().slice(0, 10)
+        const yyyy    = current.getFullYear()
+        const mm      = String(current.getMonth() + 1).padStart(2, '0')
+        const dd      = String(current.getDate()).padStart(2, '0')
+        const dateStr = `${yyyy}-${mm}-${dd}`
         virtual.push({
           id:          `${venue.placeId}-rec-${dayOfWeek}-${dateStr}`,
           title:       title || `${venue.name} — ${DAY_LABELS[dayOfWeek]} Night`,
@@ -134,5 +137,27 @@ export const selectEventsForActiveVenues = createSelector(
       return byDate !== 0 ? byDate : (a.time ?? '').localeCompare(b.time ?? '')
     })
     return all
+  }
+)
+
+/**
+ * Lookup map: venue name / normalised name / placeId → soonest upcoming event.
+ * Built from the fully-merged list (real Firestore + recurring virtual) so that
+ * map markers glow for recurring-only venues, matching what the events list shows.
+ */
+export const selectNextEventByVenueMap = createSelector(
+  selectEventsForActiveVenues,
+  (events) => {
+    const map = {}
+    // List is already sorted ascending — first hit per key is the soonest event
+    events.forEach((e) => {
+      if (e.venue) {
+        if (!map[e.venue])                map[e.venue]          = e
+        const nk = normKey(e.venue)
+        if (!map[nk])                     map[nk]               = e
+      }
+      if (e.placeId && !map[e.placeId])   map[e.placeId]        = e
+    })
+    return map
   }
 )

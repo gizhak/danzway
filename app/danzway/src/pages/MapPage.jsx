@@ -15,9 +15,9 @@ import {
   toggleStyleFilter,
   fetchEvents,
   selectEventsStatus,
-  selectNextEventByVenueName,
 } from '../store/appSlice'
 import { selectActiveVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
+import { selectNextEventByVenueMap } from '../store/selectors'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import styles from './MapPage.module.css'
 
@@ -146,7 +146,7 @@ function ClusteredMarkers({ venues, nextEventsByVenue, selectedPlaceId, onMarker
         nextEvent={nextEvent}
         isSelected={selectedPlaceId === venue.placeId}
         onSetRef={(m) => setMarkerRef(m, venue.placeId)}
-        onClick={() => onMarkerClick(venue, nextEvent)}
+        onClick={() => onMarkerClick(venue)}
       />
     )
   })
@@ -255,11 +255,16 @@ export default function MapPage() {
   const activeVenues      = useSelector(selectActiveVenues)
   const venuesStatus      = useSelector(selectVenuesStatus)
   const eventsStatus      = useSelector(selectEventsStatus)
-  const nextEventsByVenue = useSelector(selectNextEventByVenueName)
+  const nextEventsByVenue = useSelector(selectNextEventByVenueMap)
 
-  const [selected,    setSelected]    = useState(null)  // { venue, nextEvent }
-  const [userLocation, setUserLoc]    = useState(null)
-  const [mapCenter,   setMapCenter]   = useState(DEFAULT_CENTER)
+  const [selectedVenue, setSelectedVenue] = useState(null)
+  const [userLocation,  setUserLoc]       = useState(null)
+  const [mapCenter,     setMapCenter]     = useState(DEFAULT_CENTER)
+
+  // Derive nextEvent live from the selector — never stale when Firestore updates
+  const selectedNextEvent = selectedVenue
+    ? getNextEvent(selectedVenue, nextEventsByVenue)
+    : null
 
   useEffect(() => {
     if (venuesStatus === 'idle') dispatch(fetchVenues())
@@ -294,11 +299,11 @@ export default function MapPage() {
     return result
   }, [activeVenues, styleFilters])
 
-  const handleMarkerClick = useCallback((venue, nextEvent) => {
-    setSelected({ venue, nextEvent })
+  const handleMarkerClick = useCallback((venue) => {
+    setSelectedVenue(venue)
   }, [])
 
-  const handleClose = useCallback(() => setSelected(null), [])
+  const handleClose = useCallback(() => setSelectedVenue(null), [])
   const { t } = useTranslation()
 
   if (!API_KEY) {
@@ -339,7 +344,7 @@ export default function MapPage() {
           <ClusteredMarkers
             venues={filteredVenues}
             nextEventsByVenue={nextEventsByVenue}
-            selectedPlaceId={selected?.venue?.placeId}
+            selectedPlaceId={selectedVenue?.placeId}
             onMarkerClick={handleMarkerClick}
           />
         </Map>
@@ -354,11 +359,11 @@ export default function MapPage() {
         </div>
 
         {/* ── Bottom sheet: selected venue card ── */}
-        {selected && (
-          <div className={styles.sheet} key={selected.venue.placeId}>
+        {selectedVenue && (
+          <div className={styles.sheet} key={selectedVenue.placeId}>
             <VenuePopup
-              venue={selected.venue}
-              nextEvent={selected.nextEvent}
+              venue={selectedVenue}
+              nextEvent={selectedNextEvent}
               onClose={handleClose}
             />
           </div>

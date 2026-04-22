@@ -27,6 +27,10 @@ const appSlice = createSlice({
     error: null,
   },
   reducers: {
+    setEvents(state, action) {
+      state.events = action.payload
+      state.status = 'succeeded'
+    },
     toggleSave(state, action) {
       const id = action.payload
       if (state.savedIds[id]) {
@@ -67,7 +71,7 @@ const appSlice = createSlice({
   },
 })
 
-export const { toggleSave, toggleStyleFilter } = appSlice.actions
+export const { setEvents, toggleSave, toggleStyleFilter } = appSlice.actions
 export default appSlice.reducer
 
 // ─── Selectors ────────────────────────────────────────────

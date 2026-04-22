@@ -6,6 +6,7 @@ import MapPage from './pages/MapPage'
 import VenueDiscoveryPage from './pages/admin/VenueDiscoveryPage'
 import VenueDetailPage from './pages/VenueDetailPage'
 import PartiesPage from './pages/PartiesPage'
+import { useEventsSync } from './hooks/useEventsSync'
 
 // Post and Profile are disabled until launch — imports kept for future re-activation.
 // import ProfilePage from './pages/ProfilePage'
@@ -14,6 +15,7 @@ import PartiesPage from './pages/PartiesPage'
 const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
 
 export default function App() {
+  useEventsSync()
   return (
     <BrowserRouter>
       <Routes>
