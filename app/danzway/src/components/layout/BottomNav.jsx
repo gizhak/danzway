@@ -2,14 +2,16 @@ import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import styles from './BottomNav.module.css'
 
+import { auth } from "../../services/firebase";
+
 const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
 
 // Post and Profile are hidden until launch — routes remain registered but tabs are not shown.
 // Re-add them to NAV_ITEMS when the features are ready.
 const PUBLIC_NAV = [
-  { to: '/',        key: 'clubs',   icon: '⊞', end: true  },
+  { to: '/', key: 'clubs', icon: '⊞', end: true },
   { to: '/parties', key: 'parties', icon: '🎉', end: false },
-  { to: '/map',     key: 'map',     icon: '📍', end: false },
+  { to: '/map', key: 'map', icon: '📍', end: false },
 ]
 
 const ADMIN_NAV = [
@@ -19,7 +21,12 @@ const ADMIN_NAV = [
 
 export default function BottomNav() {
   const { t } = useTranslation()
-  const NAV_ITEMS = IS_ADMIN ? ADMIN_NAV : PUBLIC_NAV
+
+  const currentUser = auth.currentUser
+  const isAdmin = currentUser?.email === 'guy.izhak.tech@gmail.com'
+
+  // const NAV_ITEMS = IS_ADMIN ? ADMIN_NAV : PUBLIC_NAV
+  const NAV_ITEMS = isAdmin ? ADMIN_NAV : PUBLIC_NAV
 
   return (
     <nav className={styles.bottomNav} aria-label="Mobile navigation">
