@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '../../services/firebase'
 import {
   fetchVenues,
@@ -33,6 +33,7 @@ import {
   rejectEvent,
   approveAllPending,
 } from '../../services/pendingEventsService'
+import { getNextWeekdayDate } from '../../i18n/dateUtils'
 import styles from './VenueDiscoveryPage.module.css'
 
 // ─── Cloudinary ───────────────────────────────────────────────────────────────
@@ -459,8 +460,30 @@ function RecurringScheduleEditor({ venue, onSave, onCancel, isSaving }) {
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-function ManageEventsPanel({ venueEvents, onEdit, onCancel, onClearAll }) {
-  if (venueEvents.length === 0) {
+function ManageEventsPanel({
+  venueEvents,
+  pendingEvents = [],
+  onEdit,
+  onCancel,
+  onClearAll,
+  onApproveOne,
+  onRejectOne,
+  approvingIds = new Set(),
+}) {
+  const [recurringToggles, setRecurringToggles] = useState(new Set())
+
+  function toggleRecurring(id) {
+    setRecurringToggles(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  const hasPending = pendingEvents.length > 0
+  const hasEvents  = venueEvents.length > 0
+
+  if (!hasPending && !hasEvents) {
     return (
       <div className={styles.eventsPanel}>
         <div className={styles.eventsPanelTitle}>Upcoming Events</div>
@@ -471,53 +494,106 @@ function ManageEventsPanel({ venueEvents, onEdit, onCancel, onClearAll }) {
 
   return (
     <div className={styles.eventsPanel}>
-      <div className={styles.eventsPanelHeader}>
-        <div className={styles.eventsPanelTitle}>
-          Upcoming Events ({venueEvents.length})
-        </div>
-        <button className={styles.clearAllBtn} onClick={onClearAll}>
-          🗑 Clear All
-        </button>
-      </div>
-      {venueEvents.map((event) => {
-        const d = new Date(event.date)
-        const dayLabel = DAY_SHORT[d.getDay()]
-        const dateLabel = d.toLocaleDateString('en-IL', { day: 'numeric', month: 'short' })
-        const isRecurring = !!event.isRecurring
-        const isOverride  = !!event.isOverride
 
-        return (
-          <div key={event.id} className={styles.eventRow}>
-            <div className={styles.eventRowDate}>{dayLabel} {dateLabel}</div>
-            <div className={styles.eventRowTime}>{event.time}</div>
-            <div className={styles.eventRowTitle}>{event.title}</div>
-            <span className={[
-              styles.eventRowBadge,
-              isOverride  ? styles.eventRowBadgeOverride  :
-              isRecurring ? styles.eventRowBadgeRecurring :
-                            styles.eventRowBadgeReal,
-            ].join(' ')}>
-              {isOverride ? '✎ Edited' : isRecurring ? '↺ Weekly' : '● Saved'}
-            </span>
-            <div className={styles.eventRowActions}>
-              <button
-                className={styles.eventEditBtn}
-                onClick={() => onEdit(event)}
-                title="Edit this occurrence"
-              >
-                ✎
-              </button>
-              <button
-                className={styles.eventCancelBtn}
-                onClick={() => onCancel(event)}
-                title={isRecurring ? 'Cancel this date only' : 'Delete this event'}
-              >
-                ✕
-              </button>
+      {/* ── Pending Approval section ── */}
+      {hasPending && (
+        <div className={styles.pendingSection}>
+          <div className={styles.pendingSectionTitle}>⏳ Pending Approval ({pendingEvents.length})</div>
+          {pendingEvents.map(ev => {
+            const [y, m, d] = (ev.date ?? '').split('-').map(Number)
+            const dateObj   = y ? new Date(y, m - 1, d) : null
+            const dateLabel = dateObj
+              ? dateObj.toLocaleDateString('en-IL', { weekday: 'short', day: 'numeric', month: 'short' })
+              : '—'
+            const isApproving = approvingIds.has(ev.id)
+            return (
+              <div key={ev.id} className={styles.pendingRow}>
+                <div className={styles.pendingRowInfo}>
+                  <span className={styles.eventRowDate}>{dateLabel}</span>
+                  {ev.time && <span className={styles.eventRowTime}>🕐 {ev.time}</span>}
+                  <span className={styles.pendingRowTitle}>{ev.title}</span>
+                  {ev.styles?.[0] && (
+                    <span className={styles.pendingRowStyle}>{ev.styles[0]}</span>
+                  )}
+                </div>
+                <label
+                  className={[
+                    styles.recurringToggle,
+                    recurringToggles.has(ev.id) ? styles.recurringToggleOn : '',
+                  ].join(' ')}
+                  title="Approve as a weekly recurring event instead of a one-time event"
+                >
+                  <input
+                    type="checkbox"
+                    checked={recurringToggles.has(ev.id)}
+                    onChange={() => toggleRecurring(ev.id)}
+                  />
+                  ↻ Weekly
+                </label>
+                <div className={styles.pendingRowActions}>
+                  <button
+                    className={styles.approveBtn}
+                    onClick={() => onApproveOne(ev, { makeRecurring: recurringToggles.has(ev.id) })}
+                    disabled={isApproving}
+                    title={recurringToggles.has(ev.id) ? 'Approve as weekly recurring' : 'Approve as one-time event'}
+                  >
+                    {isApproving ? '…' : '✓'}
+                  </button>
+                  <button
+                    className={styles.rejectBtn}
+                    onClick={() => onRejectOne(ev)}
+                    disabled={isApproving}
+                    title="Reject"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── Upcoming approved events section ── */}
+      {hasEvents && (
+        <>
+          <div className={styles.eventsPanelHeader}>
+            <div className={styles.eventsPanelTitle}>
+              Upcoming Events ({venueEvents.length})
             </div>
+            <button className={styles.clearAllBtn} onClick={onClearAll}>
+              🗑 Clear All
+            </button>
           </div>
-        )
-      })}
+          {venueEvents.map((event) => {
+            const d = new Date(event.date)
+            const dayLabel  = DAY_SHORT[d.getDay()]
+            const dateLabel = d.toLocaleDateString('en-IL', { day: 'numeric', month: 'short' })
+            const isRecurring = !!event.isRecurring
+            const isOverride  = !!event.isOverride
+
+            return (
+              <div key={event.id} className={styles.eventRow}>
+                <div className={styles.eventRowDate}>{dayLabel} {dateLabel}</div>
+                <div className={styles.eventRowTime}>{event.time}</div>
+                <div className={styles.eventRowTitle}>{event.title}</div>
+                <span className={[
+                  styles.eventRowBadge,
+                  isOverride  ? styles.eventRowBadgeOverride  :
+                  isRecurring ? styles.eventRowBadgeRecurring :
+                                styles.eventRowBadgeReal,
+                ].join(' ')}>
+                  {isOverride ? '✎ Edited' : isRecurring ? '↺ Weekly' : '● Saved'}
+                </span>
+                <div className={styles.eventRowActions}>
+                  <button className={styles.eventEditBtn} onClick={() => onEdit(event)} title="Edit this occurrence">✎</button>
+                  <button className={styles.eventCancelBtn} onClick={() => onCancel(event)} title={isRecurring ? 'Cancel this date only' : 'Delete this event'}>✕</button>
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
     </div>
   )
 }
@@ -560,6 +636,11 @@ function ImportedVenueRow({
   onEditEvent,
   onCancelEvent,
   onClearVenueEvents,
+  // pending approval
+  venuePendingEvents = [],
+  onApprovePending,
+  onRejectPending,
+  approvingIds = new Set(),
   // other
   onToggleActive,
   onToggleStyle,
@@ -798,7 +879,7 @@ function ImportedVenueRow({
             onClick={onToggleManageEvents}
             title="See and manage all upcoming events for this venue"
           >
-            📅 Events {venueEvents.length > 0 && `(${venueEvents.length})`}
+            📅 Events {venueEvents.length > 0 && `(${venueEvents.length})`}{venuePendingEvents.length > 0 && <span className={styles.pendingBadge}>{venuePendingEvents.length} pending</span>}
           </button>
           <button
             className={[styles.editPhotoBtn, isEditing ? styles.editPhotoBtnActive : ''].join(' ')}
@@ -920,9 +1001,13 @@ function ImportedVenueRow({
           >
             <ManageEventsPanel
               venueEvents={venueEvents}
+              pendingEvents={venuePendingEvents}
               onEdit={onEditEvent}
               onCancel={onCancelEvent}
               onClearAll={onClearVenueEvents}
+              onApproveOne={onApprovePending}
+              onRejectOne={onRejectPending}
+              approvingIds={approvingIds}
             />
           </motion.div>
         )}
@@ -1239,10 +1324,36 @@ export default function VenueDiscoveryPage() {
     runAutoDiscovery()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Load existing pending events on mount (no auto-crawl) ──────────────────
+  // ── Live listener for pending_events — updates UI instantly on any write ──
   useEffect(() => {
-    loadPendingEvents().then(setPendingEvents).catch(() => {})
+    const q = query(
+      collection(db, 'pending_events'),
+      where('status', '==', 'pending')
+    )
+    const unsub = onSnapshot(q, snap => {
+      const docs = snap.docs.map(d => {
+        const data = d.data()
+        return {
+          ...data,
+          crawledAt:  data.crawledAt?.toMillis?.()  ?? data.crawledAt  ?? null,
+          approvedAt: data.approvedAt?.toMillis?.() ?? data.approvedAt ?? null,
+          rejectedAt: data.rejectedAt?.toMillis?.() ?? data.rejectedAt ?? null,
+        }
+      })
+      docs.sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''))
+      setPendingEvents(docs)
+    }, err => console.error('[PendingListener]', err))
+    return unsub
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-open the Events panel for the first venue that has pending events
+  useEffect(() => {
+    if (pendingEvents.length === 0) return
+    const firstPlaceId = pendingEvents[0]?.placeId
+    if (firstPlaceId && managingEventsId !== firstPlaceId) {
+      setManagingEventsId(firstPlaceId)
+    }
+  }, [pendingEvents]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function delay(ms) { return new Promise(r => setTimeout(r, ms)) }
 
@@ -1351,6 +1462,67 @@ export default function VenueDiscoveryPage() {
     runCrawler(true)
   }
 
+  async function scanVenueWithPython(venue) {
+    const url = venue.ticketUrl?.trim() || venue.website?.trim()
+    if (!url) return { status: 'no_events', events: [] }
+
+    const keywords = ['Salsa', 'Bachata', 'Zouk', 'Kizomba', 'סלסה', "באצ'טה", 'זוק', 'קיזומבה', 'מסיבה']
+
+    let raw
+    try {
+      const res = await fetch('http://localhost:5001/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, keywords }),
+      })
+      raw = await res.json()
+    } catch {
+      return { status: 'error', events: [], error: 'Python scraper server not reachable on localhost:5001' }
+    }
+
+    console.log('[PythonScan] raw response:', raw)
+
+    if (raw.status !== 'found' || !raw.events?.length) {
+      return { status: raw.status, events: [], error: raw.error }
+    }
+
+    // Fallback date: next week today (YYYY-MM-DD local midnight)
+    function fallbackDate() {
+      const d = new Date()
+      d.setDate(d.getDate() + 7)
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+    }
+
+    // Collapse 21+ raw keyword matches → unique (date + time + style) combinations
+    const seen = new Set()
+    const mapped = raw.events
+      .map(ev => {
+        // Prefer specific date from scraper (DD.MM / Hebrew month), then weekday, then fallback
+        const date = ev.date ?? (ev.day ? getNextWeekdayDate(ev.day) : null) ?? fallbackDate()
+        const dedupeKey = `${date}|${ev.time ?? ''}|${ev.type ?? ''}`
+        if (seen.has(dedupeKey)) return null
+        seen.add(dedupeKey)
+        return {
+          placeId:      venue.placeId,
+          venue:        venue.name,
+          location:     venue.address ?? '',
+          date,
+          time:         ev.time ?? '',
+          title:        ev.title ?? `${ev.type} @ ${venue.name}`,
+          styles:       [ev.type],
+          description:  ev.rawText ?? '',
+          price:        '0',
+          currency:     'ILS',
+          sourceUrl:    url,
+          isDiscovered: true,
+        }
+      })
+      .filter(Boolean)
+
+    console.log('[PythonScan] mapped events:', mapped)
+    return { status: mapped.length ? 'found' : 'no_events', events: mapped }
+  }
+
   async function handleScanVenue(venue) {
     const { placeId } = venue
     setVenueScanning(prev => ({ ...prev, [placeId]: true }))
@@ -1361,7 +1533,7 @@ export default function VenueDiscoveryPage() {
         await deleteVenueEvents(placeId, venue.recurringSchedule)
       }
 
-      const result = await crawlVenueWebsite(venue)
+      const result = await scanVenueWithPython(venue)
 
       if (result.status !== 'blocked') {
         await updateVenueScanTimestamp(placeId)
@@ -1369,15 +1541,27 @@ export default function VenueDiscoveryPage() {
 
       let newCount = 0
       if (result.status === 'found' && result.events.length > 0) {
-        // Reload existing pending so dedup is accurate
         const existing = await loadPendingEvents()
-        const saved = await upsertPendingEvents(result.events, existing, liveEvents)
+
+        // Reject stale pending events for this venue so re-scanning always wins.
+        const stale = existing.filter(e => e.placeId === placeId)
+        await Promise.all(stale.map(e => rejectEvent(e.id)))
+        const freshExisting = existing.filter(e => e.placeId !== placeId)
+
+        // Exclude virtual recurring events from dedup — they are generated on-the-fly
+        // and should not block newly discovered real events.
+        const realLiveEvents = liveEvents.filter(e => !e.id?.includes('-rec-'))
+        const saved = await upsertPendingEvents(result.events, freshExisting, realLiveEvents)
+        console.log('[PythonScan] saved to Firestore:', saved.length, saved)
         if (saved.length > 0) {
           setPendingEvents(prev => {
-            const withoutNew = prev.filter(e => !saved.find(s => s.id === e.id))
+            const withoutStale = prev.filter(e => e.placeId !== placeId)
+            const withoutNew   = withoutStale.filter(e => !saved.find(s => s.id === e.id))
             return [...withoutNew, ...saved]
           })
           newCount = saved.length
+          // Auto-open the Events panel so pending events are immediately visible
+          setManagingEventsId(placeId)
         }
       }
 
@@ -1589,7 +1773,10 @@ export default function VenueDiscoveryPage() {
   }
 
   // ── Discovered event approval ───────────────────────────────────────────────
-  async function handleApproveOne(event) {
+  async function handleApproveOne(event, options = {}) {
+    if (options.makeRecurring) {
+      return handleApproveAsRecurring(event)
+    }
     setApprovingIds(prev => new Set(prev).add(event.id))
     try {
       await approveEvent(event)
@@ -1599,6 +1786,45 @@ export default function VenueDiscoveryPage() {
     } catch (err) {
       console.error('[ApproveOne]', err)
       showToast('⚠️ Could not approve event')
+    } finally {
+      setApprovingIds(prev => { const s = new Set(prev); s.delete(event.id); return s })
+    }
+  }
+
+  async function handleApproveAsRecurring(event) {
+    setApprovingIds(prev => new Set(prev).add(event.id))
+    try {
+      const venue = importedVenuesByPlaceId[event.placeId]
+      if (!venue) throw new Error('Venue not found')
+
+      // Derive JS weekday (0=Sun…6=Sat) from the event's date string
+      const [y, m, d] = (event.date ?? '').split('-').map(Number)
+      const dayIndex = new Date(y, m - 1, d).getDay()
+
+      const prev = venue.recurringSchedule ?? { days: [], time: '21:00', title: '', description: '' }
+      const newDays = prev.days.includes(dayIndex)
+        ? prev.days
+        : [...prev.days, dayIndex].sort((a, b) => a - b)
+
+      const newSchedule = {
+        ...prev,
+        days:        newDays,
+        time:        prev.time  || event.time  || '21:00',
+        title:       prev.title || event.title || '',
+        description: prev.description || event.description || '',
+      }
+
+      dispatch(updateVenueField({ placeId: event.placeId, field: 'recurringSchedule', value: newSchedule }))
+      await updateDoc(doc(db, 'venues', event.placeId), { recurringSchedule: newSchedule })
+
+      // Discard the one-time pending — recurring slots will auto-generate
+      await rejectEvent(event.id)
+
+      const DAY_LABEL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      showToast(`↻ Every ${DAY_LABEL[dayIndex]} ${newSchedule.time} added to recurring schedule!`)
+    } catch (err) {
+      console.error('[ApproveRecurring]', err)
+      showToast('⚠️ Could not save recurring schedule')
     } finally {
       setApprovingIds(prev => { const s = new Set(prev); s.delete(event.id); return s })
     }
@@ -1906,6 +2132,11 @@ export default function VenueDiscoveryPage() {
                 onEditEvent={setEditingEvent}
                 onCancelEvent={handleCancelInstance}
                 onClearVenueEvents={() => handleClearVenueEvents(venue)}
+                // pending approval
+                venuePendingEvents={pendingEvents.filter(e => e.placeId === venue.placeId)}
+                onApprovePending={handleApproveOne}
+                onRejectPending={handleRejectOne}
+                approvingIds={approvingIds}
                 // other
                 onToggleActive={handleToggleActive}
                 onToggleStyle={handleToggleStyle}

@@ -37,6 +37,25 @@ export function shortMonthDay(dateStr, lang) {
   }
 }
 
+/**
+ * Given a Hebrew day name (e.g. "חמישי"), returns the YYYY-MM-DD string for
+ * the next upcoming occurrence of that weekday, always in the future.
+ * Uses local midnight to avoid UTC+3 off-by-one shift.
+ */
+export function getNextWeekdayDate(hebrewDay) {
+  const dayMap = { 'ראשון': 0, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6 }
+  const target = dayMap[hebrewDay]
+  if (target === undefined) return null
+  const today    = new Date()
+  const todayDay = today.getDay()
+  const daysAhead = (target - todayDay + 7) % 7 || 7
+  const result = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysAhead)
+  const y = result.getFullYear()
+  const m = String(result.getMonth() + 1).padStart(2, '0')
+  const d = String(result.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 /** Profile-style short date: "Sun, 5 Jan" / equivalent in he-IL. */
 export function profileDate(dateStr, lang) {
   const locale = LOCALE[lang] ?? 'en-US'

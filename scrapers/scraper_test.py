@@ -18,9 +18,8 @@ def run_poc(url):
             lines = content.split('\n')
             
             # הגדרת "המסננת" שלנו
-            keywords = ["סלסה", "Salsa", "באצ'טה", "Bachata", "זוק", "Zouk", "קיזומבה", "Kizomba"]
+            keywords = ["סלסה", "Salsa", "באצ'טה", "Bachata", "זוק", "Zouk", "קיזומבה", "Kizomba", "מסיבה", "מסיבות", "ערב ריקוד", "נרקוד"]            
             days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"]
-            
             matches = []
             
             for i, line in enumerate(lines):
@@ -49,5 +48,5 @@ def run_poc(url):
         browser.close()
 
 # כאן תדביק את ה-URL שאתה רוצה לבדוק (למשל הלינק המפולטר מ-DanceFinder)
-test_url = "https://meety.co.il/b/Baila-Salsa-08"
+test_url = "https://www.bebachata.co.il//קורסים/המסיבות-שלנו/"
 run_poc(test_url)
