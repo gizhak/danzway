@@ -1,5 +1,5 @@
 import {
-  doc, setDoc, updateDoc, serverTimestamp,
+  doc, setDoc, updateDoc, deleteDoc, serverTimestamp,
   writeBatch, collection, query, where, getDocs,
 } from 'firebase/firestore'
 import { db } from './firebase'
@@ -54,6 +54,30 @@ export async function cancelEventInstance(recurringEventId, { placeId, date, ven
 }
 
 /**
+ * Permanently deletes a single event document from Firestore.
+ * Use for non-recurring one-time events. For recurring slots, use cancelEventInstance instead.
+ */
+export async function deleteEventFromFirestore(eventId) {
+  await deleteDoc(doc(db, 'events', eventId))
+}
+
+/**
+ * Deletes all isCancelled stubs for a venue so that a freshly-saved recurring
+ * schedule can generate virtual events without being suppressed.
+ * Call this whenever the user sets or updates a recurring schedule.
+ */
+export async function clearVenueStubs(placeId) {
+  const snap = await getDocs(
+    query(collection(db, 'events'), where('placeId', '==', placeId), where('isCancelled', '==', true))
+  )
+  if (snap.empty) return
+  const batch = writeBatch(db)
+  snap.docs.forEach((d) => batch.delete(d.ref))
+  await batch.commit()
+  console.log(`[clearVenueStubs] Deleted ${snap.docs.length} isCancelled stub(s) for placeId="${placeId}"`)
+}
+
+/**
  * Updates fields on an already-real Firestore event document.
  */
 export async function updateEventInFirestore(eventId, updates) {
@@ -77,6 +101,7 @@ export async function deleteVenueEvents(placeId, recurringSchedule) {
   const snap = await getDocs(
     query(collection(db, 'events'), where('placeId', '==', placeId))
   )
+  console.log(`[deleteVenueEvents] Found ${snap.docs.length} Firestore doc(s) to delete for placeId="${placeId}"`)
   snap.docs.forEach((d) => batch.delete(d.ref))
 
   // ── 2. Suppress upcoming recurring slots with isCancelled stubs ───────────
@@ -109,4 +134,5 @@ export async function deleteVenueEvents(placeId, recurringSchedule) {
   }
 
   await batch.commit()
+  console.log(`[deleteVenueEvents] Batch committed successfully for placeId="${placeId}"`)
 }

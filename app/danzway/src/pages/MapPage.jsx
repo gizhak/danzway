@@ -18,6 +18,7 @@ import {
 } from '../store/appSlice'
 import { selectActiveVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
 import { selectNextEventByVenueMap, selectSpecialEventsByVenueMap } from '../store/selectors'
+import { parseLocalDate } from '../i18n/dateUtils'
 import { trackVenueClick } from '../services/analyticsService'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import styles from './MapPage.module.css'
@@ -65,7 +66,7 @@ function getNextEvent(venue, nextEventsByVenue) {
 function getDiff(dateStr) {
   if (!dateStr) return null
   const today = new Date(); today.setHours(0, 0, 0, 0)
-  const d = new Date(dateStr); d.setHours(0, 0, 0, 0)
+  const d = parseLocalDate(dateStr)
   return Math.round((d - today) / 86400000)
 }
 
@@ -183,7 +184,7 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
     else if (diff === 1) eventLabel = t('map.tomorrow', { time })
     else {
       const locale = lang === 'he' ? 'he-IL' : 'en-US'
-      const d = new Date(nextEvent.date)
+      const d = parseLocalDate(nextEvent.date)
       eventLabel = t('map.eventDate', {
         date: d.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         time,
@@ -235,7 +236,7 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
                 if (diff2 === 0) return t('map.tonight', { time: specialEvent.time ?? '' })
                 if (diff2 === 1) return t('map.tomorrow', { time: specialEvent.time ?? '' })
                 return t('map.eventDate', {
-                  date: new Date(specialEvent.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+                  date: parseLocalDate(specialEvent.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
                   time: specialEvent.time ?? '',
                 })
               })()}

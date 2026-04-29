@@ -10,7 +10,7 @@ const LOCALE = { en: 'en-US', he: 'he-IL' }
  * new Date("YYYY-MM-DD") is treated as UTC by the spec — this avoids the
  * off-by-one-day shift that occurs in UTC+ timezones like Israel (UTC+3).
  */
-function parseLocalDate(dateStr) {
+export function parseLocalDate(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number)
   return new Date(y, m - 1, d)
 }

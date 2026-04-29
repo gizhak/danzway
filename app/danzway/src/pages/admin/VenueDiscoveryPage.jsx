@@ -10,7 +10,7 @@ import {
   selectImportedPlaceIds,
   updateVenueField,
 } from '../../store/venuesSlice'
-import { fetchEvents, selectAllEvents } from '../../store/appSlice'
+import { fetchEvents, selectAllEvents, setEvents } from '../../store/appSlice'
 import { selectEventsForActiveVenues } from '../../store/selectors'
 import {
   searchDanceVenues,
@@ -23,6 +23,8 @@ import {
   cancelEventInstance,
   updateEventInFirestore,
   deleteVenueEvents,
+  deleteEventFromFirestore,
+  clearVenueStubs,
 } from '../../services/eventsService'
 import { crawlVenueWebsite } from '../../services/eventCrawler'
 import EditEventModal from '../../components/admin/EditEventModal'
@@ -283,8 +285,13 @@ function VenueResultCard({
 
 // ─── AddPartyForm ─────────────────────────────────────────────────────────────
 
+function localTodayStr() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function AddPartyForm({ venue, onSave, onCancel, isSaving }) {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localTodayStr()
   const [form, setForm] = useState({
     title:       `${venue.name} — Party Night`,
     date:        today,
@@ -484,15 +491,6 @@ function ManageEventsPanel({
   const hasPending = pendingEvents.length > 0
   const hasEvents  = venueEvents.length > 0
 
-  if (!hasPending && !hasEvents) {
-    return (
-      <div className={styles.eventsPanel}>
-        <div className={styles.eventsPanelTitle}>Upcoming Events</div>
-        <p className={styles.eventsPanelEmpty}>No upcoming events. Add a party or set a recurring schedule.</p>
-      </div>
-    )
-  }
-
   return (
     <div className={styles.eventsPanel}>
 
@@ -555,45 +553,46 @@ function ManageEventsPanel({
         </div>
       )}
 
-      {/* ── Upcoming approved events section ── */}
-      {hasEvents && (
-        <>
-          <div className={styles.eventsPanelHeader}>
-            <div className={styles.eventsPanelTitle}>
-              Upcoming Events ({venueEvents.length})
-            </div>
-            <button className={styles.clearAllBtn} onClick={onClearAll}>
-              🗑 Clear All
-            </button>
-          </div>
-          {venueEvents.map((event) => {
-            const d = new Date(event.date)
-            const dayLabel  = DAY_SHORT[d.getDay()]
-            const dateLabel = d.toLocaleDateString('en-IL', { day: 'numeric', month: 'short' })
-            const isRecurring = !!event.isRecurring
-            const isOverride  = !!event.isOverride
+      {/* ── Upcoming approved events section — header always visible so Clear All is reachable even when selector shows 0 (stuck Firestore docs) ── */}
+      <div className={styles.eventsPanelHeader}>
+        <div className={styles.eventsPanelTitle}>
+          Upcoming Events {hasEvents ? `(${venueEvents.length})` : ''}
+        </div>
+        <button className={styles.clearAllBtn} onClick={onClearAll} title="Delete all Firestore events for this venue">
+          🗑 Clear All
+        </button>
+      </div>
 
-            return (
-              <div key={event.id} className={styles.eventRow}>
-                <div className={styles.eventRowDate}>{dayLabel} {dateLabel}</div>
-                <div className={styles.eventRowTime}>{event.time}</div>
-                <div className={styles.eventRowTitle}>{event.title}</div>
-                <span className={[
-                  styles.eventRowBadge,
-                  isOverride  ? styles.eventRowBadgeOverride  :
-                  isRecurring ? styles.eventRowBadgeRecurring :
-                                styles.eventRowBadgeReal,
-                ].join(' ')}>
-                  {isOverride ? '✎ Edited' : isRecurring ? '↺ Weekly' : '● Saved'}
-                </span>
-                <div className={styles.eventRowActions}>
-                  <button className={styles.eventEditBtn} onClick={() => onEdit(event)} title="Edit this occurrence">✎</button>
-                  <button className={styles.eventCancelBtn} onClick={() => onCancel(event)} title={isRecurring ? 'Cancel this date only' : 'Delete this event'}>✕</button>
-                </div>
+      {hasEvents ? (
+        venueEvents.map((event) => {
+          const d = new Date(event.date)
+          const dayLabel  = DAY_SHORT[d.getDay()]
+          const dateLabel = d.toLocaleDateString('en-IL', { day: 'numeric', month: 'short' })
+          const isRecurring = !!event.isRecurring
+          const isOverride  = !!event.isOverride
+
+          return (
+            <div key={event.id} className={styles.eventRow}>
+              <div className={styles.eventRowDate}>{dayLabel} {dateLabel}</div>
+              <div className={styles.eventRowTime}>{event.time}</div>
+              <div className={styles.eventRowTitle}>{event.title}</div>
+              <span className={[
+                styles.eventRowBadge,
+                isOverride  ? styles.eventRowBadgeOverride  :
+                isRecurring ? styles.eventRowBadgeRecurring :
+                              styles.eventRowBadgeReal,
+              ].join(' ')}>
+                {isOverride ? '✎ Edited' : isRecurring ? '↺ Weekly' : '● Saved'}
+              </span>
+              <div className={styles.eventRowActions}>
+                <button className={styles.eventEditBtn} onClick={() => onEdit(event)} title="Edit this occurrence">✎</button>
+                <button className={styles.eventCancelBtn} onClick={() => onCancel(event)} title={isRecurring ? 'Cancel this date only' : 'Delete this event'}>✕</button>
               </div>
-            )
-          })}
-        </>
+            </div>
+          )
+        })
+      ) : (
+        <p className={styles.eventsPanelEmpty}>No upcoming events. Add a party or set a recurring schedule.</p>
       )}
     </div>
   )
@@ -727,7 +726,17 @@ function ImportedVenueRow({
             </div>
           )}
           {hasSchedule && (
-            <div className={styles.schedulePill}>↻ {scheduleLabel} · {recurringSchedule.time}</div>
+            <div className={styles.schedulePill}>
+              ↻ {scheduleLabel} · {recurringSchedule.time}
+              <button
+                className={styles.schedulePillClear}
+                title="Remove recurring schedule"
+                disabled={isSavingSchedule}
+                onClick={() => onSaveSchedule({ days: [], time: '21:00', title: '', description: '' })}
+              >
+                ✕
+              </button>
+            </div>
           )}
         </div>
 
@@ -2031,6 +2040,7 @@ export default function VenueDiscoveryPage() {
     if (!venue) return
     setSavingParty(true)
     try {
+      console.log('[CreateParty] Saving event:', { venue: venue.name, placeId, date: formData.date, time: formData.time })
       await saveEventToFirestore({
         title:       formData.title.trim(),
         date:        formData.date,
@@ -2062,9 +2072,20 @@ export default function VenueDiscoveryPage() {
     dispatch(updateVenueField({ placeId, field: 'recurringSchedule', value: schedule }))
     setSavingSchedule(true)
     try {
+      const daysSet = schedule.days?.length ?? 0
+
+      // When setting a new schedule, remove any isCancelled stubs that were left
+      // by a previous "Clear All" — otherwise the stubs suppress the new virtual events.
+      if (daysSet > 0) {
+        await clearVenueStubs(placeId)
+      }
+
       await updateDoc(doc(db, 'venues', placeId), { recurringSchedule: schedule })
       setEditingScheduleId(null)
-      const daysSet = schedule.days?.length ?? 0
+
+      // Refresh events so the selector has the latest stub state
+      dispatch(fetchEvents())
+
       showToast(daysSet > 0 ? `↻ Schedule saved (${daysSet} day${daysSet !== 1 ? 's' : ''})!` : '↻ Schedule cleared')
     } catch (err) {
       console.error('[SaveSchedule]', err)
@@ -2109,34 +2130,55 @@ export default function VenueDiscoveryPage() {
   }
 
   async function handleCancelInstance(event) {
-    if (!window.confirm(
-      `Cancel "${event.title}" on ${event.date}?\n\nOnly this date is cancelled — the weekly schedule continues.`
-    )) return
+    const isRecurring = !!event.isRecurring
+    const confirmMsg = isRecurring
+      ? `Cancel "${event.title}" on ${event.date}?\n\nOnly this date is cancelled — the weekly schedule continues.`
+      : `Delete "${event.title}" on ${event.date}?\n\nThis cannot be undone.`
+    if (!window.confirm(confirmMsg)) return
     try {
-      await cancelEventInstance(event.id, {
-        placeId: event.placeId,
-        date:    event.date,
-        venue:   event.venue,
-      })
+      if (isRecurring) {
+        await cancelEventInstance(event.id, {
+          placeId: event.placeId,
+          date:    event.date,
+          venue:   event.venue,
+        })
+        showToast('✓ Occurrence cancelled')
+      } else {
+        await deleteEventFromFirestore(event.id)
+        showToast('✓ Event deleted')
+      }
       setEditingEvent(null)
-      showToast('✓ Occurrence cancelled')
+      dispatch(fetchEvents())
     } catch (err) {
       console.error('[CancelInstance]', err)
-      showToast('⚠️ Could not cancel occurrence')
+      showToast('⚠️ Could not delete event')
     }
   }
 
   async function handleClearVenueEvents(venue) {
-    const count = (eventsByVenue[venue.placeId] ?? []).length
+    const { placeId, name, recurringSchedule } = venue
+    const count = (eventsByVenue[placeId] ?? []).length
     if (!window.confirm(
-      `Delete all ${count} upcoming event${count !== 1 ? 's' : ''} for "${venue.name}"?\n\nThis cannot be undone.`
+      `Delete all ${count} upcoming event${count !== 1 ? 's' : ''} for "${name}"?\n\nThis cannot be undone.`
     )) return
     try {
-      await deleteVenueEvents(venue.placeId, venue.recurringSchedule)
-      showToast(`✓ All events cleared for ${venue.name}`)
+      await deleteVenueEvents(placeId, recurringSchedule)
+
+      // Optimistically remove this venue's events from Redux so the UI clears instantly
+      // without waiting for the round-trip fetchEvents call.
+      dispatch(setEvents(liveEvents.filter(e => e.placeId !== placeId)))
+
+      // Fetch authoritative state (includes isCancelled stubs that suppress recurring slots)
+      await dispatch(fetchEvents())
+
+      showToast(`✓ All events cleared for ${name}`)
     } catch (err) {
       console.error('[ClearVenueEvents]', err)
-      showToast('⚠️ Could not clear events')
+      if (err?.code === 'permission-denied') {
+        alert(`Firestore permission denied — check your security rules.\n\n${err.message}`)
+      } else {
+        showToast(`⚠️ Could not clear events: ${err?.message ?? err}`)
+      }
     }
   }
 

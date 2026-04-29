@@ -1022,14 +1022,43 @@
 /* ─── Schedule pill (visible on main row when schedule is set) ──────────── */
 .schedulePill {
   margin-top: 0.3rem;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.63rem;
   font-weight: 700;
   color: rgba(99, 179, 237, 0.8);
   background: rgba(99, 179, 237, 0.08);
   border: 1px solid rgba(99, 179, 237, 0.2);
   border-radius: 9999px;
-  padding: 0.15rem 0.55rem;
+  padding: 0.15rem 0.4rem 0.15rem 0.55rem;
+}
+
+.schedulePillClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.15);
+  color: rgba(239, 68, 68, 0.80);
+  font-size: 0.55rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.schedulePillClear:hover {
+  background: rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+}
+
+.schedulePillClear:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ─── Add Party / Recurring form layout ───────────────────────────────────── */
@@ -2484,12 +2513,13 @@
 }
 
 .eventCancelBtn {
-  background: rgba(239, 68, 68, 0.08);
-  color: rgba(239, 68, 68, 0.70);
+  background: rgba(239, 68, 68, 0.14);
+  color: rgba(239, 68, 68, 0.90);
 }
 
 .eventCancelBtn:hover {
-  background: rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.28);
+  color: #ef4444;
 }
 
 /* Header row inside the events panel (title + Clear All button) */
@@ -2505,19 +2535,20 @@
   font-size: 0.67rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 6px;
-  border: 1px solid rgba(239, 68, 68, 0.30);
-  background: rgba(239, 68, 68, 0.08);
-  color: rgba(239, 68, 68, 0.75);
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  background: rgba(239, 68, 68, 0.14);
+  color: rgba(239, 68, 68, 0.95);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   white-space: nowrap;
 }
 
 .clearAllBtn:hover {
-  background: rgba(239, 68, 68, 0.18);
-  color: rgba(239, 68, 68, 1);
+  background: rgba(239, 68, 68, 0.28);
+  border-color: #ef4444;
+  color: #fff;
 }
 
 /* "Clear before scan" toggle row above the Scan button */

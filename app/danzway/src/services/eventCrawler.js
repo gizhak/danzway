@@ -102,11 +102,12 @@ export function parseDate(raw) {
 
   if (/^\d{10,13}$/.test(s)) {
     const ms = s.length === 10 ? Number(s) * 1000 : Number(s)
-    return new Date(ms).toISOString().slice(0, 10)
+    const d = new Date(ms)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
 
   const d = new Date(s)
-  if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10)
+  if (!isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   return null
 }
 
