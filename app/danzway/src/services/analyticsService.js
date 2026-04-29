@@ -23,6 +23,11 @@ export const trackVenueScan   = (venueCount) =>
 export const trackFacebookScan = () =>
   track('facebook_scan_triggered', { group: 'bachataisrael' });
 
+// ── Feedback ──────────────────────────────────────────────────────────────────
+
+export const trackFeedbackClick = () =>
+  track('feedback_click');
+
 // ── Navigation / tabs ─────────────────────────────────────────────────────────
 
 export const trackPageView = (path, title = '') =>

@@ -50,4 +50,81 @@
   border-color: rgba(245, 158, 11, 0.65);
 }
 
+/* ── Beta badge ── */
+.betaBadge {
+  display: inline-block;
+  margin-inline-start: 0.4rem;
+  padding: 1px 6px;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+  vertical-align: middle;
+  line-height: 1.6;
+  /* override the gradient clip from parent <a> */
+  -webkit-text-fill-color: #fbbf24;
+}
+
+/* ── Feedback button ── */
+.feedbackWrap {
+  position: absolute;
+  inset-inline-start: 1.25rem;
+}
+
+.feedbackBtn {
+  height: 32px;
+  width: 32px;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.feedbackBtn:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+.feedbackBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+}
+
+.feedbackPopup {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-start: 0;
+  z-index: 99;
+  min-width: 240px;
+  padding: 0.85rem 1rem;
+  background: #1a1a24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.feedbackText {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  color: #d1d5db;
+  direction: rtl;
+}
+
+.feedbackEmail {
+  display: block;
+  font-size: 0.8rem;
+  color: #fbbf24;
+  word-break: break-all;
+  text-decoration: none;
+}
+.feedbackEmail:hover { text-decoration: underline; }
+
 /* Hamburger styles preserved here — re-enable in Navbar.jsx when side-menu is needed */

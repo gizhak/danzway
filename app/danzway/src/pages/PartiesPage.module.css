@@ -103,3 +103,15 @@
   margin: 0;
   line-height: 1.6;
 }
+
+/* ── Beta disclaimer bar ── */
+.disclaimer {
+  margin-top: 2rem;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid rgba(245, 158, 11, 0.12);
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  direction: rtl;
+  line-height: 1.5;
+}

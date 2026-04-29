@@ -416,6 +416,13 @@ export default function MapPage() {
           </div>
         )}
 
+        {/* ── Beta disclaimer ── */}
+        {!selectedVenue && (
+          <div className={styles.disclaimer}>
+            DanzWay Beta | המידע נסרק אוטומטית ממקורות ציבוריים. מומלץ לוודא פרטים מול המועדון לפני ההגעה.
+          </div>
+        )}
+
       </div>
     </APIProvider>
   )

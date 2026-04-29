@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { selectIsSaved, toggleSave, selectNextEventByVenueName } from '../../store/appSlice'
-import { shortMonthDay, venueCity } from '../../i18n/dateUtils'
+import { shortMonthDay, venueCity, parseLocalDate } from '../../i18n/dateUtils'
 import Badge from '../ui/Badge'
 import styles from './VenueCard.module.css'
 
@@ -62,7 +62,7 @@ export default function VenueCard({ venue }) {
   let badgeLabel = null
   if (nextEvent?.date) {
     const today = new Date(); today.setHours(0, 0, 0, 0)
-    const evDate = new Date(nextEvent.date); evDate.setHours(0, 0, 0, 0)
+    const evDate = parseLocalDate(nextEvent.date)
     const diff = Math.round((evDate - today) / 86400000)
     if (diff === 0)      badgeLabel = t('common.tonight')
     else if (diff === 1) badgeLabel = t('common.tomorrow')
