@@ -5,6 +5,8 @@
   -ms-overflow-style: none;
   padding: 0.5rem 0 1.1rem;
   margin: 0 -1.25rem;
+  /* Allow vertical scroll to pass through but keep horizontal for the row itself */
+  touch-action: pan-x;
 }
 
 .wrapper::-webkit-scrollbar {
@@ -30,6 +32,10 @@
   border: none;
   padding: 0;
   flex-shrink: 0;
+  /* Prevents iOS Safari from delaying/consuming taps on scroll containers */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ── Ring wrapper ────────────────────────────────────────

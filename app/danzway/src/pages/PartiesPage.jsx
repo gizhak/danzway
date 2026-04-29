@@ -85,7 +85,7 @@ export default function PartiesPage() {
       <div className={styles.filterRow}>
         <StyleFilterRow
           activeFilters={styleFilters}
-          onSelect={(id) => dispatch(toggleStyleFilter(id))}
+          onSelect={(id) => { dispatch(toggleStyleFilter(id)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
         />
       </div>
 

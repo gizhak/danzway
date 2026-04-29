@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import appReducer    from './appSlice'
 import venuesReducer from './venuesSlice'
 
-const STORAGE_KEY = 'danzway-app'
+const STORAGE_KEY = 'danzway-app-v2'
 
 /**
  * Load persisted state from localStorage.
@@ -30,11 +30,11 @@ function loadState() {
         : {}
       // Overwrite with the clean Redux format so next load is fast
       const migrated = {
-        savedIds:    migratedSavedIds,
-        styleFilter: typeof styleFilter === 'string' ? styleFilter : 'all',
-        events:      [],
-        status:      'idle',
-        error:       null,
+        savedIds:     migratedSavedIds,
+        styleFilters: [],
+        events:       [],
+        status:       'idle',
+        error:        null,
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
       return { app: migrated }
@@ -44,13 +44,11 @@ function loadState() {
     if (parsed && typeof parsed.savedIds === 'object' && !Array.isArray(parsed.savedIds)) {
       return {
         app: {
-          savedIds:    parsed.savedIds    ?? {},
-          styleFilter: parsed.styleFilter ?? 'all',
-          // events/status/error are NOT persisted — always start fresh so
-          // fetchEvents is triggered on every page load.
-          events: [],
-          status: 'idle',
-          error:  null,
+          savedIds:     parsed.savedIds ?? {},
+          styleFilters: [],   // never restore filter state — always reset to "All Styles"
+          events:       [],
+          status:       'idle',
+          error:        null,
         },
       }
     }
@@ -74,8 +72,8 @@ function saveState(state) {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
-        savedIds:    state.app.savedIds,
-        styleFilter: state.app.styleFilter,
+        savedIds: state.app.savedIds,
+        // styleFilters intentionally not persisted — resets to "All Styles" on reload
       })
     )
   } catch {

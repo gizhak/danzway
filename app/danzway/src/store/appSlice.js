@@ -21,7 +21,7 @@ const appSlice = createSlice({
   initialState: {
     // Record<eventId, true> — fully serializable, O(1) lookup.
     savedIds: {},
-    styleFilters: [],  // string[] — empty = show all; multiple = AND logic
+    styleFilters: [],  // string[] — empty = show all; single-select (tap again to deselect)
     events: [],
     status: 'idle',   // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
@@ -40,17 +40,14 @@ const appSlice = createSlice({
       }
     },
     toggleStyleFilter(state, action) {
+      if (!Array.isArray(state.styleFilters)) state.styleFilters = []
       const style = action.payload
       if (style === 'all') {
-        // "All" clears every active filter
+        state.styleFilters = []
+      } else if (state.styleFilters.length === 1 && state.styleFilters[0] === style) {
         state.styleFilters = []
       } else {
-        const idx = state.styleFilters.indexOf(style)
-        if (idx >= 0) {
-          state.styleFilters.splice(idx, 1)   // deselect
-        } else {
-          state.styleFilters.push(style)       // select
-        }
+        state.styleFilters = [style]
       }
     },
   },

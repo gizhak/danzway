@@ -32,6 +32,30 @@ export default function StyleFilterRow({ activeFilters = [], onSelect }) {
   const { t } = useTranslation()
   const noneSelected = activeFilters.length === 0
 
+  // Track pointer-down position so we can distinguish a tap from a scroll drag.
+  // iOS Safari swallows onClick on buttons inside overflow-x:auto containers when
+  // it decides the touch is a horizontal scroll. onPointerDown fires before that
+  // decision is made, and we cancel it ourselves if the finger moved too far.
+  function makePointerHandlers(id) {
+    let startX = 0
+    let startY = 0
+    return {
+      onPointerDown(e) {
+        startX = e.clientX
+        startY = e.clientY
+      },
+      onPointerUp(e) {
+        const dx = Math.abs(e.clientX - startX)
+        const dy = Math.abs(e.clientY - startY)
+        if (dx < 8 && dy < 8) {          // moved less than 8px → genuine tap
+          e.preventDefault()
+          console.log('[Filter] tap confirmed on:', id)
+          onSelect(id)
+        }
+      },
+    }
+  }
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.row}>
@@ -45,8 +69,8 @@ export default function StyleFilterRow({ activeFilters = [], onSelect }) {
             <button
               key={id}
               className={`${styles.bubble} ${isActive ? styles.active : ''}`}
-              onClick={() => onSelect(id)}
               aria-pressed={isActive}
+              {...makePointerHandlers(id)}
             >
               <div className={styles.ringWrap}>
                 <div className={styles.circle}>
