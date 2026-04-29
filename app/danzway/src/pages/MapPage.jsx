@@ -83,7 +83,7 @@ function VenueMarker({ venue, nextEvent, specialEvent, isSelected, onSetRef, onC
   }, [marker])
 
   const diff      = getDiff(nextEvent?.date)
-  const isLive    = diff === 0 || diff === 1
+  const isLive    = diff === 0
   const isSpecial = !!specialEvent
 
   const pinClass = [
