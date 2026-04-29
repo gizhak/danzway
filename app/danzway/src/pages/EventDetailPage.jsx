@@ -137,8 +137,6 @@ export default function EventDetailPage() {
         showToast(t('eventDetail.notFoundGoogle'))
         return
       }
-      console.log('[RefreshMetadata] Places result:', { placeId, newPhoto })
-
       // ── Step 2: write to Firestore ──
       try {
         await updateDoc(doc(db, 'events', event.id), { placeId, placePhoto: newPhoto })

@@ -68,7 +68,6 @@ export async function searchPlaceId(venueName, city) {
       return null
     }
     const data = await res.json()
-    console.log('[Places] searchPlaceId result:', data.places?.[0])
     return data.places?.[0]?.id ?? null
   } catch (err) {
     console.error('[Places] searchPlaceId fetch error:', err)
@@ -336,7 +335,6 @@ export async function importVenuesToFirestore(placeIds) {
         { merge: true }   // preserves any admin-managed fields not in this write
       )
       imported++
-      console.log(`[Import] ✓ ${details.name} (${placeId}) — ${isNew ? 'new' : 're-imported'}`)
     } catch (err) {
       failed++
       failedIds.push(placeId)
@@ -345,6 +343,5 @@ export async function importVenuesToFirestore(placeIds) {
     }
   }
 
-  console.log(`[Import] Done — ${imported} imported, ${failed} failed`)
   return { imported, failed, failedIds }
 }

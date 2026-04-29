@@ -70,12 +70,7 @@ export default function HomePage() {
 
   const filtered = useMemo(
     () => {
-      const result = filterVenues(activeVenues, query, styleFilters)
-      console.log('[Filter] styleFilters from Redux:', JSON.stringify(styleFilters))
-      console.log('[Filter] activeVenues count:', activeVenues.length)
-      console.log('[Filter] filtered result count:', result.length)
-      console.log('[Filter] venue styles sample:', activeVenues.slice(0, 3).map(v => ({ name: v.name, styles: v.styles })))
-      return result
+      return filterVenues(activeVenues, query, styleFilters)
     },
     [activeVenues, query, styleFilters]
   )
@@ -99,7 +94,6 @@ export default function HomePage() {
         <StyleFilterRow
           activeFilters={styleFilters}
           onSelect={(id) => {
-            console.log('[Filter] bubble clicked:', id)
             dispatch(toggleStyleFilter(id))
             window.scrollTo({ top: 0, behavior: 'smooth' })
           }}

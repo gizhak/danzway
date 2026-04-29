@@ -1601,8 +1601,6 @@ export default function VenueDiscoveryPage() {
       return { status: 'error', events: [], error: 'Python scraper server not reachable on localhost:5001' }
     }
 
-    console.log('[PythonScan] raw response:', raw)
-
     if (raw.status !== 'found' || !raw.events?.length) {
       return { status: raw.status, events: [], error: raw.error }
     }
@@ -1640,7 +1638,6 @@ export default function VenueDiscoveryPage() {
       })
       .filter(Boolean)
 
-    console.log('[PythonScan] mapped events:', mapped)
     return { status: mapped.length ? 'found' : 'no_events', events: mapped }
   }
 
@@ -1673,7 +1670,6 @@ export default function VenueDiscoveryPage() {
         // and should not block newly discovered real events.
         const realLiveEvents = liveEvents.filter(e => !e.id?.includes('-rec-'))
         const saved = await upsertPendingEvents(result.events, freshExisting, realLiveEvents)
-        console.log('[PythonScan] saved to Firestore:', saved.length, saved)
         if (saved.length > 0) {
           setPendingEvents(prev => {
             const withoutStale = prev.filter(e => e.placeId !== placeId)
@@ -2063,7 +2059,6 @@ export default function VenueDiscoveryPage() {
     if (!venue) return
     setSavingParty(true)
     try {
-      console.log('[CreateParty] Saving event:', { venue: venue.name, placeId, date: formData.date, time: formData.time })
       await saveEventToFirestore({
         title:       formData.title.trim(),
         date:        formData.date,

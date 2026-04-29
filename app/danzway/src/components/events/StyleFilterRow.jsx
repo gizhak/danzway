@@ -49,7 +49,6 @@ export default function StyleFilterRow({ activeFilters = [], onSelect }) {
         const dy = Math.abs(e.clientY - startY)
         if (dx < 8 && dy < 8) {          // moved less than 8px → genuine tap
           e.preventDefault()
-          console.log('[Filter] tap confirmed on:', id)
           onSelect(id)
         }
       },
