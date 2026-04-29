@@ -1788,6 +1788,26 @@
   cursor: not-allowed;
 }
 
+.removeImageBtn {
+  height: 28px;
+  padding: 0 0.65rem;
+  border-radius: 7px;
+  border: 1px solid rgba(239, 68, 68, 0.40);
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(239, 68, 68, 0.85);
+  font-size: 0.67rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.removeImageBtn:hover {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.18);
+  color: #fff;
+}
+
 /* Small cloud badge on the thumbnail to indicate a custom image is set */
 .importedThumb {
   position: relative;

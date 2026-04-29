@@ -102,9 +102,15 @@ function VenueMarker({ venue, nextEvent, specialEvent, isSelected, onSetRef, onC
     >
       <div className={pinClass}>
         {venue.logo
-          ? <img src={venue.logo} className={styles.pinLogo} alt="" />
-          : <span className={styles.pinIcon}>🎵</span>
+          ? <img
+              src={venue.logo}
+              className={styles.pinLogo}
+              alt=""
+              onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'inline' }}
+            />
+          : null
         }
+        <span className={styles.pinIcon} style={venue.logo ? { display: 'none' } : {}}>🎵</span>
         {isLive    && <span className={styles.pinPulse} />}
         {isSpecial && <span className={styles.pinStar}>★</span>}
       </div>
@@ -202,7 +208,12 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
 
       <div className={styles.popupHeader}>
         {venue.logo
-          ? <img src={venue.logo} className={styles.popupLogo} alt="" />
+          ? <img
+              src={venue.logo}
+              className={styles.popupLogo}
+              alt=""
+              onError={(e) => { e.currentTarget.replaceWith(Object.assign(document.createElement('div'), { className: styles.popupAvatar, textContent: (venue.name ?? '').slice(0, 2).toUpperCase() })) }}
+            />
           : <div className={styles.popupAvatar}>{(venue.name ?? '').slice(0, 2).toUpperCase()}</div>
         }
         <div className={styles.popupMeta}>

@@ -611,6 +611,7 @@ function ImportedVenueRow({
   // cloudinary image upload
   isUploadingImage,
   onUploadImage,
+  onRemoveImage,
   // add party
   isAddingParty,
   onStartAddParty,
@@ -905,6 +906,15 @@ function ImportedVenueRow({
           >
             {isUploadingImage ? '⏳ Uploading…' : '☁ Upload'}
           </button>
+          {(customImageUrl || logo) && (
+            <button
+              className={styles.removeImageBtn}
+              onClick={onRemoveImage}
+              title="Remove venue image (clears logo & custom upload)"
+            >
+              🗑 Remove Image
+            </button>
+          )}
           <button
             className={[styles.recurringBtn, isEditingSchedule ? styles.editPhotoBtnActive : '', hasSchedule ? styles.recurringBtnActive : ''].join(' ')}
             onClick={isEditingSchedule ? onCancelEditSchedule : onStartEditSchedule}
@@ -1861,6 +1871,19 @@ export default function VenueDiscoveryPage() {
     }
   }
 
+  async function handleRemoveImage(placeId) {
+    if (!window.confirm('Remove venue image? This clears both the logo URL and any uploaded image.')) return
+    try {
+      await updateDoc(doc(db, 'venues', placeId), { logo: null, customImageUrl: null })
+      dispatch(updateVenueField({ placeId, field: 'logo', value: null }))
+      dispatch(updateVenueField({ placeId, field: 'customImageUrl', value: null }))
+      showToast('✓ Image removed')
+    } catch (err) {
+      console.error('[RemoveImage]', err)
+      showToast('⚠️ Could not remove image')
+    }
+  }
+
   async function handleBulkSaveLogo() {
     const url = bulkPhotoUrl.trim()
     if (!url) return
@@ -2314,6 +2337,7 @@ export default function VenueDiscoveryPage() {
                 // cloudinary image upload
                 isUploadingImage={uploadingImageId === venue.placeId}
                 onUploadImage={(file) => handleUploadImage(venue.placeId, file)}
+                onRemoveImage={() => handleRemoveImage(venue.placeId)}
                 // add party
                 isAddingParty={addingPartyVenueId === venue.placeId}
                 onStartAddParty={() => { setAddingPartyVenueId(venue.placeId); setEditingVenueId(null); setEditingScheduleId(null) }}
