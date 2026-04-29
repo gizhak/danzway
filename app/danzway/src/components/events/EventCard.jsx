@@ -85,7 +85,19 @@ export default function EventCard({ event }) {
         <div className={styles.imageWrapper}>
           {heroImage ? (
             <>
-              <img src={heroImage} alt={title} className={styles.image} />
+              <img
+                src={heroImage}
+                alt={title}
+                className={styles.image}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  e.currentTarget.nextSibling?.style && (e.currentTarget.nextSibling.style.display = 'none')
+                  const ph = document.createElement('div')
+                  ph.className = styles.imagePlaceholder
+                  ph.textContent = '♪'
+                  e.currentTarget.parentNode.appendChild(ph)
+                }}
+              />
               <div className={styles.imageOverlay} />
             </>
           ) : (

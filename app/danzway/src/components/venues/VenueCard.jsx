@@ -78,7 +78,18 @@ export default function VenueCard({ venue }) {
       {/* ── Header row ── */}
       <div className={styles.header}>
         {logo ? (
-          <img src={logo} alt={name} className={styles.avatarImg} />
+          <img
+            src={logo}
+            alt={name}
+            className={styles.avatarImg}
+            onError={(e) => {
+              e.currentTarget.style.display = 'none'
+              const av = document.createElement('div')
+              av.className = styles.avatar
+              av.textContent = getAvatarInitials(name)
+              e.currentTarget.parentNode.insertBefore(av, e.currentTarget)
+            }}
+          />
         ) : (
           <div className={styles.avatar}>{getAvatarInitials(name)}</div>
         )}
@@ -100,7 +111,12 @@ export default function VenueCard({ venue }) {
       {/* ── Image ── */}
       <Link to={`/venues/${placeId}`} className={styles.imageLink} aria-label={`View ${name}`}>
         <div className={styles.imageWrapper}>
-          <img src={heroImage} alt={name} className={styles.image} />
+          <img
+            src={heroImage}
+            alt={name}
+            className={styles.image}
+            onError={(e) => { e.currentTarget.src = GENERIC_IMAGE }}
+          />
           <div className={styles.imageOverlay} />
 
           {nextEvent && (
