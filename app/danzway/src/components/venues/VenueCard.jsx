@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { selectIsSaved, toggleSave, selectNextEventByVenueName } from '../../store/appSlice'
-import { shortMonthDay } from '../../i18n/dateUtils'
+import { shortMonthDay, venueCity } from '../../i18n/dateUtils'
 import Badge from '../ui/Badge'
 import styles from './VenueCard.module.css'
 
@@ -99,7 +99,7 @@ export default function VenueCard({ venue }) {
             <div className={styles.venueName}>{name}</div>
           </Link>
           <div className={styles.venueMeta}>
-            {(() => { const c = lang === 'he' ? (cityHe ?? city) : city; return c && !/^\d+$/.test(c) ? <span>📍 {c}</span> : null })()}
+            {venueCity(venue, lang) && <span>📍 {venueCity(venue, lang)}</span>}
             {categoryLine && <span> · {categoryLine}</span>}
             {rating && (
               <span className={styles.ratingInline}> · ★ {rating.toFixed(1)}</span>

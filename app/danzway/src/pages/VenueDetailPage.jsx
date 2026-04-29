@@ -8,7 +8,7 @@ import { db } from '../services/firebase'
 import { selectAllVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
 import { selectNextEventByVenueName } from '../store/appSlice'
 import { getFullVenueDetails } from '../services/googlePlaces'
-import { shortMonthDay } from '../i18n/dateUtils'
+import { shortMonthDay, venueCity } from '../i18n/dateUtils'
 import Badge from '../components/ui/Badge'
 import styles from './VenueDetailPage.module.css'
 
@@ -293,7 +293,7 @@ export default function VenueDetailPage() {
             <div className={styles.mapVisual}><span>📍</span></div>
             <div className={styles.mapInfo}>
               <div className={styles.mapVenue}>{name}</div>
-              <div className={styles.mapCity}>{(() => { const c = lang === 'he' ? (cityHe ?? city) : city; return c && !/^\d+$/.test(c) ? c : '' })()}</div>
+              <div className={styles.mapCity}>{venueCity(venue, lang)}</div>
               <div className={styles.mapCta}>View on Google Maps →</div>
             </div>
           </a>

@@ -18,7 +18,7 @@ import {
 } from '../store/appSlice'
 import { selectActiveVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
 import { selectNextEventByVenueMap, selectSpecialEventsByVenueMap } from '../store/selectors'
-import { parseLocalDate } from '../i18n/dateUtils'
+import { parseLocalDate, venueCity } from '../i18n/dateUtils'
 import { trackVenueClick } from '../services/analyticsService'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import styles from './MapPage.module.css'
@@ -50,10 +50,6 @@ const DARK_MAP_STYLES = [
   { featureType: 'water',             elementType: 'labels.text.fill',      stylers: [{ color: '#4b5563' }] },
 ]
 
-function safeCity(venue, lang) {
-  const raw = lang === 'he' ? (venue.cityHe ?? venue.city) : venue.city
-  return raw && !/^\d+$/.test(raw) ? raw : null
-}
 
 function normKey(str) {
   return (str ?? '').toLowerCase().replace(/\s+/g, ' ').trim()
@@ -225,7 +221,7 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
           <div className={styles.popupName}>{venue.name}</div>
           <div className={styles.popupCity}>
             {(() => {
-              const city = safeCity(venue, lang)
+              const city = venueCity(venue, lang)
               return <>
                 {city ? <>📍 {city}</> : null}
                 {venue.rating ? <span className={styles.popupRating}>{city ? ' · ' : ''}★ {venue.rating.toFixed(1)}</span> : null}

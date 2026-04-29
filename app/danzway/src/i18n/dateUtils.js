@@ -136,6 +136,21 @@ export function parseHebrewRelativeDate(text) {
   return null
 }
 
+/**
+ * Returns the best city string for a venue in the given language.
+ * Falls back to extracting city from the full address when the city
+ * field is a postal code (all digits) or missing.
+ */
+export function venueCity(venue, lang) {
+  const preferred = lang === 'he' ? (venue.cityHe ?? venue.city) : venue.city
+  if (preferred && !/^\d+$/.test(preferred.trim())) return preferred.trim()
+  const parts = (venue.address ?? '').split(',').map((s) => s.trim())
+  for (let i = parts.length - 2; i >= 0; i--) {
+    if (parts[i] && !/^\d+$/.test(parts[i])) return parts[i]
+  }
+  return ''
+}
+
 /** Profile-style short date: "Sun, 5 Jan" / equivalent in he-IL. */
 export function profileDate(dateStr, lang) {
   const locale = LOCALE[lang] ?? 'en-US'
