@@ -28,7 +28,7 @@ function filterVenues(venues, query, styleFilters) {
   const safeFilters = Array.isArray(styleFilters) ? styleFilters : []
   if (safeFilters.length > 0) {
     result = result.filter((v) =>
-      safeFilters.every((style) =>
+      safeFilters.some((style) =>
         (v.styles ?? []).some((s) => s.toLowerCase() === style.toLowerCase())
       )
     )

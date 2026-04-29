@@ -24,7 +24,7 @@ function applyFilters(events, query, styleFilters) {
   const safeFilters = Array.isArray(styleFilters) ? styleFilters : []
   if (safeFilters.length > 0) {
     result = result.filter((e) =>
-      safeFilters.every((style) =>
+      safeFilters.some((style) =>
         (e.styles ?? []).some((s) => s.toLowerCase() === style.toLowerCase())
       )
     )

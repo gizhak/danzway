@@ -43,11 +43,14 @@ const appSlice = createSlice({
       if (!Array.isArray(state.styleFilters)) state.styleFilters = []
       const style = action.payload
       if (style === 'all') {
-        state.styleFilters = []
-      } else if (state.styleFilters.length === 1 && state.styleFilters[0] === style) {
-        state.styleFilters = []
+        state.styleFilters = []                          // clear all → show everything
       } else {
-        state.styleFilters = [style]
+        const idx = state.styleFilters.indexOf(style)
+        if (idx >= 0) {
+          state.styleFilters.splice(idx, 1)             // deselect
+        } else {
+          state.styleFilters.push(style)                // add to selection
+        }
       }
     },
   },

@@ -331,7 +331,7 @@ export default function MapPage() {
     let result = activeVenues.filter((v) => v.coordinates)
     if (styleFilters.length > 0) {
       result = result.filter((v) =>
-        styleFilters.every((style) =>
+        styleFilters.some((style) =>
           (v.styles ?? []).some((s) => s.toLowerCase() === style.toLowerCase())
         )
       )
