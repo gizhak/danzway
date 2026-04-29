@@ -50,6 +50,11 @@ const DARK_MAP_STYLES = [
   { featureType: 'water',             elementType: 'labels.text.fill',      stylers: [{ color: '#4b5563' }] },
 ]
 
+function safeCity(venue, lang) {
+  const raw = lang === 'he' ? (venue.cityHe ?? venue.city) : venue.city
+  return raw && !/^\d+$/.test(raw) ? raw : null
+}
+
 function normKey(str) {
   return (str ?? '').toLowerCase().replace(/\s+/g, ' ').trim()
 }
@@ -219,10 +224,13 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
         <div className={styles.popupMeta}>
           <div className={styles.popupName}>{venue.name}</div>
           <div className={styles.popupCity}>
-            📍 {venue.city}
-            {venue.rating && (
-              <span className={styles.popupRating}> · ★ {venue.rating.toFixed(1)}</span>
-            )}
+            {(() => {
+              const city = safeCity(venue, lang)
+              return <>
+                {city ? <>📍 {city}</> : null}
+                {venue.rating ? <span className={styles.popupRating}>{city ? ' · ' : ''}★ {venue.rating.toFixed(1)}</span> : null}
+              </>
+            })()}
           </div>
         </div>
       </div>

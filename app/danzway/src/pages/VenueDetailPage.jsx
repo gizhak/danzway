@@ -116,9 +116,12 @@ export default function VenueDetailPage() {
     )
   }
 
+  const lang = i18n.language
+
   const {
     name,
     city,
+    cityHe,
     address,
     logo,
     photos = [],
@@ -290,7 +293,7 @@ export default function VenueDetailPage() {
             <div className={styles.mapVisual}><span>📍</span></div>
             <div className={styles.mapInfo}>
               <div className={styles.mapVenue}>{name}</div>
-              <div className={styles.mapCity}>{city}</div>
+              <div className={styles.mapCity}>{(() => { const c = lang === 'he' ? (cityHe ?? city) : city; return c && !/^\d+$/.test(c) ? c : '' })()}</div>
               <div className={styles.mapCta}>View on Google Maps →</div>
             </div>
           </a>

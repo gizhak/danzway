@@ -222,11 +222,31 @@ export async function getFullVenueDetails(placeId) {
       relativeTime: r.relativePublishTimeDescription ?? '',
     }))
 
-    // Best-effort city extraction: last non-numeric comma-separated segment before country
-    const addressParts = (p.formattedAddress ?? '').split(',').map((s) => s.trim())
-    const city = addressParts.length >= 2
-      ? addressParts[addressParts.length - 2]
-      : addressParts[0] ?? ''
+    // Extract city: skip postal codes (all-digit segments) and the last segment (country)
+    function extractCity(formattedAddress) {
+      const parts = (formattedAddress ?? '').split(',').map((s) => s.trim())
+      for (let i = parts.length - 2; i >= 0; i--) {
+        if (!/^\d+$/.test(parts[i])) return parts[i]
+      }
+      return parts[0] ?? ''
+    }
+
+    const city   = extractCity(p.formattedAddress)
+
+    // Fetch Hebrew address for cityHe
+    let cityHe = city
+    try {
+      const resHe = await fetch(`https://places.googleapis.com/v1/places/${placeId}?languageCode=he`, {
+        headers: {
+          'X-Goog-Api-Key': PLACES_KEY,
+          'X-Goog-FieldMask': 'formattedAddress',
+        },
+      })
+      if (resHe.ok) {
+        const pHe = await resHe.json()
+        cityHe = extractCity(pHe.formattedAddress)
+      }
+    } catch { /* use English fallback */ }
 
     // Auto-detect social media from websiteUri
     const websiteUri = p.websiteUri ?? null
@@ -242,6 +262,7 @@ export async function getFullVenueDetails(placeId) {
       name:             p.displayName?.text ?? 'Unknown Venue',
       address:          p.formattedAddress ?? '',
       city,
+      cityHe,
       active:           true,    // visible by default — admin can hide via toggle
       logo:             null,
       styles:           [],

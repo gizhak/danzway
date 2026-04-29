@@ -28,6 +28,7 @@ export default function VenueCard({ venue }) {
     placeId,
     name,
     city,
+    cityHe,
     address,
     logo,
     photos = [],
@@ -98,7 +99,7 @@ export default function VenueCard({ venue }) {
             <div className={styles.venueName}>{name}</div>
           </Link>
           <div className={styles.venueMeta}>
-            {city && <span>📍 {city}</span>}
+            {(() => { const c = lang === 'he' ? (cityHe ?? city) : city; return c && !/^\d+$/.test(c) ? <span>📍 {c}</span> : null })()}
             {categoryLine && <span> · {categoryLine}</span>}
             {rating && (
               <span className={styles.ratingInline}> · ★ {rating.toFixed(1)}</span>
