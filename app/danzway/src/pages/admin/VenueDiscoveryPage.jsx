@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { doc, setDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore'
-import { db } from '../../services/firebase'
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
+import { db, auth } from '../../services/firebase'
 import {
   fetchVenues,
   selectAllVenues,
@@ -1343,7 +1344,86 @@ function DiscoveredEventsPanel({
 
 // ─── VenueDiscoveryPage ───────────────────────────────────────────────────────
 
+const ADMIN_UID = 'RNCYFNwZh6UQkoZ6aGDf5GxQE583'
+
+// ── Auth gate — only this component has auth hooks, no early-return hook violation ──
 export default function VenueDiscoveryPage() {
+  const [authUser,     setAuthUser]     = useState(null)
+  const [authChecked,  setAuthChecked]  = useState(false)
+  const [loginEmail,   setLoginEmail]   = useState('')
+  const [loginPass,    setLoginPass]    = useState('')
+  const [loginError,   setLoginError]   = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user && user.uid === ADMIN_UID) {
+        console.log('Logged in as Admin:', user.uid)
+        setAuthUser(user)
+      } else {
+        setAuthUser(null)
+      }
+      setAuthChecked(true)
+    })
+    return unsub
+  }, [])
+
+  async function handleLogin(e) {
+    e.preventDefault()
+    setLoginError('')
+    setLoginLoading(true)
+    try {
+      await signInWithEmailAndPassword(auth, loginEmail, loginPass)
+    } catch (err) {
+      setLoginError(err.code === 'auth/invalid-credential' ? 'Wrong email or password.' : err.message)
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  if (!authChecked) {
+    return <div style={{ padding: '2rem', color: '#fbbf24', textAlign: 'center' }}>Checking auth…</div>
+  }
+
+  if (!authUser) {
+    return (
+      <div style={{ maxWidth: 340, margin: '4rem auto', padding: '2rem', background: '#1a1a24', borderRadius: 16, border: '1px solid rgba(245,158,11,0.25)' }}>
+        <h2 style={{ color: '#fbbf24', marginTop: 0, textAlign: 'center' }}>Admin Login</h2>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={loginEmail}
+            onChange={e => setLoginEmail(e.target.value)}
+            required
+            style={{ padding: '0.6rem 0.9rem', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#12121a', color: '#fff', fontSize: '0.9rem' }}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={loginPass}
+            onChange={e => setLoginPass(e.target.value)}
+            required
+            style={{ padding: '0.6rem 0.9rem', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#12121a', color: '#fff', fontSize: '0.9rem' }}
+          />
+          {loginError && <p style={{ color: '#f87171', fontSize: '0.8rem', margin: 0 }}>{loginError}</p>}
+          <button
+            type="submit"
+            disabled={loginLoading}
+            style={{ padding: '0.65rem', borderRadius: 8, background: '#f59e0b', border: 'none', color: '#000', fontWeight: 700, cursor: 'pointer', opacity: loginLoading ? 0.6 : 1 }}
+          >
+            {loginLoading ? 'Signing in…' : 'Sign In'}
+          </button>
+        </form>
+      </div>
+    )
+  }
+
+  return <VenueDashboard />
+}
+
+// ── Dashboard — only rendered when admin is authenticated ─────────────────────
+function VenueDashboard() {
   const dispatch       = useDispatch()
   const importedVenues = useSelector(selectAllVenues)
   const venuesStatus   = useSelector(selectVenuesStatus)
@@ -1593,7 +1673,10 @@ export default function VenueDiscoveryPage() {
     try {
       const res = await fetch('http://localhost:5001/scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Scraper-Token': import.meta.env.VITE_SCRAPER_API_KEY ?? '',
+        },
         body: JSON.stringify({ url, keywords }),
       })
       raw = await res.json()
@@ -1984,7 +2067,10 @@ export default function VenueDiscoveryPage() {
 
       const res = await fetch('http://localhost:5001/scan-facebook', {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Scraper-Token': import.meta.env.VITE_SCRAPER_API_KEY ?? '',
+        },
         body:    JSON.stringify({ url: FB_GROUP_URL, venues: venuesList }),
       })
       const result = await res.json()

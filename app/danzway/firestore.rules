@@ -2,16 +2,37 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    match /events/{docId} {
-      allow read, write: if true;
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'RNCYFNwZh6UQkoZ6aGDf5GxQE583';
     }
 
+    // ── Venues ───────────────────────────────────────────────────────────────
     match /venues/{docId} {
-      allow read, write: if true;
+      allow read:             if true;       // anyone can read venue listings
+      allow write, delete:    if isAdmin();  // only admin can create / update / delete
     }
 
+    // ── Events ───────────────────────────────────────────────────────────────
+    match /events/{docId} {
+      allow read:             if true;
+      allow write, delete:    if isAdmin();
+    }
+
+    // ── Pending events (admin review queue) ──────────────────────────────────
     match /pending_events/{docId} {
-      allow read, write: if true;
+      allow read:             if true;
+      allow write, delete:    if isAdmin();
+    }
+
+    // ── Special events (Facebook-sourced) ────────────────────────────────────
+    match /special_events/{docId} {
+      allow read:             if true;
+      allow write, delete:    if isAdmin();
+    }
+
+    // ── Catch-all: deny everything else ──────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
