@@ -1,0 +1,10 @@
+# Secrets — never commit
+scrapers/.env
+*.env.local
+fb_auth.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
