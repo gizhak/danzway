@@ -17,6 +17,7 @@ import {
   searchDanceVenues,
   getFullVenueDetails,
   importVenuesToFirestore,
+  importVenueByPlaceId,
 } from '../../services/googlePlaces'
 import {
   saveEventToFirestore,
@@ -1444,6 +1445,8 @@ function VenueDashboard() {
   const [expandedCard,   setExpandedCard]   = useState(null)
   const [detailsCache,   setDetailsCache]   = useState({})
   const [manualQuery,    setManualQuery]    = useState('')
+  const [placeIdInput,   setPlaceIdInput]   = useState('')
+  const [placeIdLoading, setPlaceIdLoading] = useState(false)
   const [toastMsg,       setToastMsg]       = useState('')
 
   // ── Auto-discovery state ────────────────────────────────────────────────────
@@ -1877,6 +1880,22 @@ function VenueDashboard() {
       showToast(`✓ Imported ${result.imported} venue${result.imported !== 1 ? 's' : ''}!`)
     } else {
       showToast(`✓ ${result.imported} imported · ⚠️ ${result.failed} failed — see console`)
+    }
+  }
+
+  // ── Direct Place ID import ───────────────────────────────────────────────────
+  async function handleImportByPlaceId() {
+    const id = placeIdInput.trim()
+    if (!id || placeIdLoading) return
+    setPlaceIdLoading(true)
+    const result = await importVenueByPlaceId(id)
+    await dispatch(fetchVenues())
+    setPlaceIdLoading(false)
+    if (result.imported > 0) {
+      setPlaceIdInput('')
+      showToast('✓ Venue imported by Place ID!')
+    } else {
+      showToast('⚠️ Could not import — check the Place ID and try again')
     }
   }
 
@@ -2538,12 +2557,12 @@ function VenueDashboard() {
 
       {/* ── Manual search ── */}
       <section className={styles.searchSection}>
-        <div className={styles.sectionLabel}>Add a specific venue</div>
+        <div className={styles.sectionLabel}>Search by name</div>
         <div className={styles.manualRow}>
           <input
             className={styles.manualInput}
             type="text"
-            placeholder="e.g. Baila, Studio Latino, Club Habana…"
+            placeholder="e.g. Bachatanya, Kizzland, Studio Latino…"
             value={manualQuery}
             onChange={(e) => setManualQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleManualSearch(manualQuery)}
@@ -2556,6 +2575,33 @@ function VenueDashboard() {
             disabled={manualRunning || !manualQuery.trim()}
           >
             {manualRunning ? '⏳' : 'Search'}
+          </button>
+        </div>
+      </section>
+
+      {/* ── Direct Place ID import ── */}
+      <section className={styles.searchSection}>
+        <div className={styles.sectionLabel}>Import by Google Place ID</div>
+        <div className={styles.sectionHint}>
+          Find the Place ID at <strong>maps.google.com</strong> → share → copy link, or use the Place ID Finder tool.
+        </div>
+        <div className={styles.manualRow}>
+          <input
+            className={styles.manualInput}
+            type="text"
+            placeholder="ChIJ… (Google Place ID)"
+            value={placeIdInput}
+            onChange={(e) => setPlaceIdInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleImportByPlaceId()}
+            disabled={placeIdLoading}
+            dir="ltr"
+          />
+          <button
+            className={styles.manualSearchBtn}
+            onClick={handleImportByPlaceId}
+            disabled={placeIdLoading || !placeIdInput.trim()}
+          >
+            {placeIdLoading ? '⏳' : 'Import'}
           </button>
         </div>
       </section>
