@@ -9,7 +9,7 @@ export default function SearchBar({ value, onChange, placeholder }) {
     <div className={styles.wrapper}>
       <span className={styles.icon}>🔍</span>
       <input
-        type="search"
+        type="text"
         className={styles.input}
         value={value}
         onChange={(e) => onChange(e.target.value)}

@@ -21,6 +21,7 @@ import { selectNextEventByVenueMap, selectSpecialEventsByVenueMap } from '../sto
 import { parseLocalDate, venueCity } from '../i18n/dateUtils'
 import { trackVenueClick } from '../services/analyticsService'
 import StyleFilterRow from '../components/events/StyleFilterRow'
+import DirectionsSheet from '../components/ui/DirectionsSheet'
 import styles from './MapPage.module.css'
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
@@ -191,6 +192,7 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
   const lang  = i18n.language
   const diff  = getDiff(nextEvent?.date)
   const time  = nextEvent?.time ?? ''
+  const [showDirections, setShowDirections] = useState(false)
 
   let eventLabel = null
   if (nextEvent?.date) {
@@ -205,10 +207,6 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
       })
     }
   }
-
-  const mapsUrl = venue.coordinates
-    ? `https://www.google.com/maps/search/?api=1&query=${venue.coordinates.lat},${venue.coordinates.lng}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((venue.name ?? '') + ' ' + (venue.city ?? ''))}`
 
   return (
     <div className={styles.popup}>
@@ -278,14 +276,12 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
       )}
 
       <div className={styles.popupActions}>
-        <a
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
           className={styles.popupDirBtn}
+          onClick={() => setShowDirections(true)}
         >
           {t('map.directions')}
-        </a>
+        </button>
         <Link
           to={`/venues/${venue.placeId}`}
           className={styles.popupViewBtn}
@@ -294,6 +290,14 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
           {t('map.viewVenue')}
         </Link>
       </div>
+
+      {showDirections && (
+        <DirectionsSheet
+          coords={venue.coordinates}
+          name={venue.name}
+          onClose={() => setShowDirections(false)}
+        />
+      )}
     </div>
   )
 }
