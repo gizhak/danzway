@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { selectIsSaved, toggleSave } from '../../store/appSlice'
 import { selectVenuesByName } from '../../store/venuesSlice'
 import { relativeDate, shortMonthDay } from '../../i18n/dateUtils'
+import { updateEventSaveCount } from '../../services/saveService'
 import Badge from '../ui/Badge'
 import DirectionsSheet from '../ui/DirectionsSheet'
 import styles from './EventCard.module.css'
@@ -37,6 +38,7 @@ export default function EventCard({ event }) {
     image,
     placePhoto,
     description,
+    isRecurring = false,
   } = event
 
   const saved        = useSelector(selectIsSaved(id))
@@ -134,7 +136,11 @@ export default function EventCard({ event }) {
       <div className={styles.actions}>
         <motion.button
           className={`${styles.actionBtn} ${saved ? styles.actionBtnSaved : ''}`}
-          onClick={() => dispatch(toggleSave(id))}
+          onClick={() => {
+            const willSave = !saved
+            dispatch(toggleSave(id))
+            updateEventSaveCount(id, isRecurring, willSave ? 1 : -1, title ?? venue ?? '')
+          }}
           whileTap={{ scale: 0.88 }}
           animate={saved ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}

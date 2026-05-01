@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { selectIsVenueSaved, toggleSaveVenue, selectNextEventByVenueName } from '../../store/appSlice'
 import { shortMonthDay, venueCity, parseLocalDate } from '../../i18n/dateUtils'
+import { updateVenueSaveCount } from '../../services/saveService'
 import Badge from '../ui/Badge'
 import DirectionsSheet from '../ui/DirectionsSheet'
 import styles from './VenueCard.module.css'
@@ -169,7 +170,11 @@ export default function VenueCard({ venue }) {
       <div className={styles.actions}>
         <motion.button
           className={`${styles.actionBtn} ${saved ? styles.actionBtnSaved : ''}`}
-          onClick={() => dispatch(toggleSaveVenue(placeId))}
+          onClick={() => {
+            const willSave = !saved
+            dispatch(toggleSaveVenue(placeId))
+            updateVenueSaveCount(placeId, willSave ? 1 : -1, name ?? '')
+          }}
           whileTap={{ scale: 0.88 }}
           animate={saved ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}

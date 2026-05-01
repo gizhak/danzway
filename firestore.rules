@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'RNCYFNwZh6UQkoZ6aGDf5GxQE583';
+    }
+
+    // Allow any user to increment/decrement only the saveCount field.
+    // All other field changes require admin auth.
+    function isSaveCountOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['saveCount']);
+    }
+
+    // ── Venues ───────────────────────────────────────────────────────────────
+    match /venues/{docId} {
+      allow read:          if true;
+      allow write, delete: if isAdmin();
+      allow update:        if isSaveCountOnly();
+    }
+
+    // ── Events ───────────────────────────────────────────────────────────────
+    match /events/{docId} {
+      allow read:          if true;
+      allow write, delete: if isAdmin();
+      allow update:        if isSaveCountOnly();
+    }
+
+    // ── Pending events (admin review queue) ──────────────────────────────────
+    match /pending_events/{docId} {
+      allow read:          if true;
+      allow write, delete: if isAdmin();
+    }
+
+    // ── Special events (Facebook-sourced) ────────────────────────────────────
+    match /special_events/{docId} {
+      allow read:          if true;
+      allow write, delete: if isAdmin();
+    }
+
+    // ── Catch-all: deny everything else ──────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

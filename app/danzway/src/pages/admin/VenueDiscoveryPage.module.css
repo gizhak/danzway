@@ -2600,3 +2600,95 @@
   cursor: pointer;
   flex-shrink: 0;
 }
+
+/* ─── Popularity Stats ────────────────────────────────────────────────────── */
+.statsSection {
+  margin-bottom: 2rem;
+}
+
+.statsSectionTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-brand-heading);
+  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .statsGrid { grid-template-columns: 1fr; }
+}
+
+.statsCard {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.statsCardTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 0.75rem;
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-wrap: wrap;
+}
+
+.statsRow:last-child { border-bottom: none; }
+
+.statsRank {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
+  min-width: 22px;
+}
+
+.statsName {
+  flex: 1;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statsDate {
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+}
+
+.statsBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 9999px;
+  padding: 0.15rem 0.55rem;
+  white-space: nowrap;
+}
+
+.statsEmpty {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  padding: 1rem 0;
+}
+

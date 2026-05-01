@@ -28,6 +28,14 @@ export const trackFacebookScan = () =>
 export const trackFeedbackClick = () =>
   track('feedback_click');
 
+// ── Saves ─────────────────────────────────────────────────────────────────────
+
+export const trackPartySaved = (partyName, partyId) =>
+  track('party_saved', { party_name: partyName, party_id: partyId });
+
+export const trackVenueSaved = (venueName, venueId) =>
+  track('venue_saved', { venue_name: venueName, venue_id: venueId });
+
 // ── Navigation / tabs ─────────────────────────────────────────────────────────
 
 export const trackPageView = (path, title = '') =>

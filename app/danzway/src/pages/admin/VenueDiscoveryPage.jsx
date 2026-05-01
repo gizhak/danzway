@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
-import { doc, setDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore'
+import { doc, setDoc, updateDoc, serverTimestamp, collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore'
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
 import { db, auth } from '../../services/firebase'
 import {
@@ -1423,6 +1423,72 @@ export default function VenueDiscoveryPage() {
   return <VenueDashboard />
 }
 
+// ── Popularity Stats ──────────────────────────────────────────────────────────
+function PopularityStats() {
+  const [topVenues, setTopVenues] = useState([])
+  const [topEvents, setTopEvents] = useState([])
+
+  useEffect(() => {
+    const q = query(collection(db, 'venues'), orderBy('saveCount', 'desc'), limit(5))
+    return onSnapshot(q, (snap) => {
+      setTopVenues(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    })
+  }, [])
+
+  useEffect(() => {
+    const q = query(collection(db, 'events'), orderBy('saveCount', 'desc'), limit(5))
+    return onSnapshot(q, (snap) => {
+      setTopEvents(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    })
+  }, [])
+
+  return (
+    <section className={styles.statsSection}>
+      <h2 className={styles.statsSectionTitle}>📊 Popularity Stats</h2>
+      <div className={styles.statsGrid}>
+
+        <div className={styles.statsCard}>
+          <div className={styles.statsCardTitle}>🏆 Top 5 Venues</div>
+          {topVenues.length === 0 ? (
+            <div className={styles.statsEmpty}>No saves yet</div>
+          ) : (
+            topVenues.map((v, i) => (
+              <div key={v.id} className={styles.statsRow}>
+                <span className={styles.statsRank}>#{i + 1}</span>
+                <span className={styles.statsName}>{v.name ?? v.id}</span>
+                <span className={styles.statsBadge}>
+                  ♥ Saved {v.saveCount ?? 0} times
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className={styles.statsCard}>
+          <div className={styles.statsCardTitle}>🎉 Top 5 Events</div>
+          {topEvents.length === 0 ? (
+            <div className={styles.statsEmpty}>No saves yet</div>
+          ) : (
+            topEvents.map((e, i) => (
+              <div key={e.id} className={styles.statsRow}>
+                <span className={styles.statsRank}>#{i + 1}</span>
+                <span className={styles.statsName}>
+                  {e.title ?? e.venue ?? e.id}
+                  {e.date && <span className={styles.statsDate}> · {e.date}</span>}
+                </span>
+                <span className={styles.statsBadge}>
+                  ♥ Saved {e.saveCount ?? 0} times
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+
+      </div>
+    </section>
+  )
+}
+
 // ── Dashboard — only rendered when admin is authenticated ─────────────────────
 function VenueDashboard() {
   const dispatch       = useDispatch()
@@ -2337,6 +2403,9 @@ function VenueDashboard() {
           Discover · import · control every dance venue in Israel
         </p>
       </div>
+
+      {/* ── Popularity Stats ── */}
+      <PopularityStats />
 
       {/* ── Imported venues (collection) — shown FIRST so filter tabs are immediately visible ── */}
       {importedVenues.length > 0 && (
