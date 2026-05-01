@@ -381,6 +381,10 @@ export default function VenueDetailPage() {
           </button>
         )}
 
+        <p className={styles.betaDisclaimer}>
+          DanzWay Beta | המידע נסרק אוטומטית ממקורות ציבוריים. מומלץ לוודא פרטים מול המועדון לפני ההגעה.
+        </p>
+
       </motion.div>
 
       {/* ── Lightbox ── */}

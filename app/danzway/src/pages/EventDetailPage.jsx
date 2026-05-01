@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, Navigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
@@ -66,6 +66,12 @@ export default function EventDetailPage() {
 
   if (eventsStatus === 'idle' || eventsStatus === 'loading') {
     return <p className={styles.notFound}>{t('eventDetail.loading')}</p>
+  }
+
+  // Recurring virtual events are never in Firestore — redirect to the venue page
+  const recurringMatch = id?.match(/^(.+)-rec-\d+-\d{4}-\d{2}-\d{2}$/)
+  if (recurringMatch) {
+    return <Navigate to={`/venues/${recurringMatch[1]}`} replace />
   }
 
   if (!event) {

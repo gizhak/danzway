@@ -65,8 +65,10 @@ export default function EventCard({ event }) {
   const [showDirections, setShowDirections] = useState(false)
 
   async function handleShare() {
-    const url  = `${window.location.origin}/events/${id}`
-    const text = `${t('share.joinMe', { name: title ?? venue })} ${url}`
+    const url  = isRecurring && event.placeId
+      ? `${window.location.origin}/venues/${event.placeId}`
+      : `${window.location.origin}/events/${id}`
+    const text = t('share.joinMe', { name: title ?? venue })
     if (navigator.share) {
       try { await navigator.share({ title: title ?? venue, text, url }) } catch { /* cancelled */ }
     } else {
