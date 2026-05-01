@@ -1,23 +1,28 @@
 import { db } from './firebase'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 
-const MAPS_KEY   = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+const MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 const PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY
 
 // ─── Category mapping ──────────────────────────────────────────────────────
 
 export const GOOGLE_TYPE_MAP = {
-  night_club:               { en: 'Nightclub',        he: 'מועדון לילה'    },
-  dance_school:             { en: 'Dance Studio',     he: 'אולפן ריקודים'  },
-  bar:                      { en: 'Bar',              he: 'בר'             },
-  restaurant:               { en: 'Restaurant & Bar', he: 'מסעדה ובר'      },
-  gym:                      { en: 'Studio',           he: 'סטודיו'         },
-  sports_activity_location: { en: 'Dance Studio',     he: 'אולפן ריקודים'  },
-  entertainment_venue:      { en: 'Event Venue',      he: 'אולם אירועים'   },
-  event_venue:              { en: 'Event Venue',      he: 'אולם אירועים'   },
-  performing_arts_theater:  { en: 'Theater',          he: 'תיאטרון'        },
-  cultural_center:          { en: 'Cultural Center',  he: 'מרכז תרבות'     },
-  community_center:         { en: 'Community Center', he: 'מרכז קהילתי'    },
+  night_club: { en: 'Nightclub', he: 'מועדון לילה' },
+  dance_school: { en: 'Dance Studio', he: 'אולפן ריקודים' },
+  bar: { en: 'Bar', he: 'בר' },
+  restaurant: { en: 'Restaurant & Bar', he: 'מסעדה ובר' },
+  gym: { en: 'Studio', he: 'סטודיו' },
+  sports_activity_location: { en: 'Dance Studio', he: 'אולפן ריקודים' },
+  entertainment_venue: { en: 'Event Venue', he: 'אולם אירועים' },
+  event_venue: { en: 'Event Venue', he: 'אולם אירועים' },
+  performing_arts_theater: { en: 'Theater', he: 'תיאטרון' },
+  cultural_center: { en: 'Cultural Center', he: 'מרכז תרבות' },
+  community_center: { en: 'Community Center', he: 'מרכז קהילתי' },
+  social_club: { en: 'Social Club', he: 'מועדון חברתי' },
+  art_gallery: { en: 'Venue', he: 'גלריה/אולם' },
+  university: { en: 'Campus', he: 'קמפוס' },
+  stadium: { en: 'Sports Hall', he: 'אולם ספורט' },
+  establishment: { en: 'Venue', he: 'מקום' },
 }
 
 const FALLBACK_CATEGORY = { en: 'Venue', he: 'מקום' }
@@ -116,62 +121,108 @@ export async function refreshVenueMetadata(event) {
   return { placeId, placePhoto }
 }
 
-// ─── Plan 010: Venue Discovery ─────────────────────────────────────────────
+// ─── Plan 010 + Plan 021: Venue Discovery ─────────────────────────────────
+
+// Known Israeli Latin dance venues that generic searches often miss.
+// These are searched by exact name when city-only queries are used.
+export const KNOWN_DANCE_VENUES = [
+  'Bachatanya', 'Kizzland', 'La Tienda', 'Studio Latino', 'Salsa Club',
+  'Club Havana', 'Dance Zone', 'Salsavida', 'La Bomba', 'Ritmo Latino',
+  'Baila Con Fuego', 'V Dance Studio', 'Tropical Dance', 'Bachata Nation',
+]
+
+// Dance keywords appended to city-only queries to cast a wider net.
+const DANCE_EXPANSION_KEYWORDS = ['salsa bachata', 'kizomba zouk', 'latin dance club', 'מסיבת ריקודים']
 
 /**
- * Searches for dance venues using Places API (New) Text Search.
- * Returns lightweight result objects suitable for the discovery grid.
- *
- * @param {string} query         - e.g. "salsa club Tel Aviv"
- * @param {Set}    seenPlaceIds  - placeIds already shown; results in this Set are filtered out
+ * Single raw Places API fetch — returns shaped venue objects.
  */
-export async function searchDanceVenues(query, seenPlaceIds = new Set()) {
+async function fetchPlacesQuery(textQuery, seenPlaceIds) {
+  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': PLACES_KEY,
+      'X-Goog-FieldMask': [
+        'places.id',
+        'places.displayName',
+        'places.types',
+        'places.formattedAddress',
+        'places.rating',
+        'places.userRatingCount',
+        'places.photos',
+      ].join(','),
+    },
+    body: JSON.stringify({ textQuery, languageCode: 'en' }),
+  })
+  if (!res.ok) return []
+  const data = await res.json()
+  return (data.places ?? [])
+    .filter((p) => p.id && !seenPlaceIds.has(p.id))
+    .map((p) => ({
+      placeId:     p.id,
+      name:        p.displayName?.text ?? 'Unknown Venue',
+      address:     p.formattedAddress ?? '',
+      types:       p.types ?? [],
+      categories:  mapGoogleTypes(p.types),
+      rating:      p.rating ?? null,
+      reviewCount: p.userRatingCount ?? 0,
+      thumbnail:   p.photos?.[0]?.name ? buildPhotoUrl(p.photos[0].name, 400) : null,
+    }))
+}
+
+/**
+ * Searches for dance venues. When query looks like a city name (≤3 words, no
+ * venue-specific nouns), automatically expands with dance keywords and known
+ * venue names to catch studios not classified as nightclubs.
+ *
+ * @param {string} query         - e.g. "Tel Aviv" or "salsa club Tel Aviv"
+ * @param {Set}    seenPlaceIds  - placeIds already shown; filtered out of results
+ * @param {boolean} expand       - force expansion even for specific queries
+ */
+export async function searchDanceVenues(query, seenPlaceIds = new Set(), expand = false) {
   if (!PLACES_KEY) return []
   try {
-    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': PLACES_KEY,
-        'X-Goog-FieldMask': [
-          'places.id',
-          'places.displayName',
-          'places.types',
-          'places.formattedAddress',
-          'places.rating',
-          'places.userRatingCount',
-          'places.photos',
-        ].join(','),
-      },
-      body: JSON.stringify({ textQuery: query, languageCode: 'en' }),
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      console.error('[Places] searchDanceVenues HTTP error:', res.status, err)
-      return []
-    }
-    const data = await res.json()
-    const places = data.places ?? []
+    const q = query.trim()
+    const wordCount = q.split(/\s+/).length
+    const isCityOnly = expand || wordCount <= 3
 
-    return places
-      .filter((p) => p.id && !seenPlaceIds.has(p.id))
-      .map((p) => ({
-        placeId:     p.id,
-        name:        p.displayName?.text ?? 'Unknown Venue',
-        address:     p.formattedAddress ?? '',
-        types:       p.types ?? [],
-        categories:  mapGoogleTypes(p.types),
-        rating:      p.rating ?? null,
-        reviewCount: p.userRatingCount ?? 0,
-        thumbnail:   p.photos?.[0]?.name
-          ? buildPhotoUrl(p.photos[0].name, 400)
-          : null,
-      }))
+    if (!isCityOnly) {
+      // Specific query — single fetch
+      return await fetchPlacesQuery(q, seenPlaceIds)
+    }
+
+    // City-only: run base query + keyword expansions in parallel
+    const expandedQueries = [
+      q,
+      ...DANCE_EXPANSION_KEYWORDS.map((kw) => `${kw} ${q}`),
+    ]
+
+    const localSeen = new Set(seenPlaceIds)
+    const results   = []
+
+    for (const eq of expandedQueries) {
+      const found = await fetchPlacesQuery(eq, localSeen)
+      found.forEach((v) => localSeen.add(v.placeId))
+      results.push(...found)
+    }
+
+    // Also search known venue names in this city
+    const knownQueries = KNOWN_DANCE_VENUES.map((name) => `${name} ${q} Israel`)
+    await Promise.all(
+      knownQueries.map(async (kq) => {
+        const found = await fetchPlacesQuery(kq, localSeen)
+        found.forEach((v) => { localSeen.add(v.placeId); results.push(v) })
+      })
+    )
+
+    return results
   } catch (err) {
     console.error('[Places] searchDanceVenues fetch error:', err)
     return []
   }
 }
+
 
 /**
  * Fetches full venue details for import: photo gallery (up to 5), reviews (up to 5),
@@ -208,17 +259,17 @@ export async function getFullVenueDetails(placeId) {
     }
     const p = await res.json()
 
-    const categories  = mapGoogleTypes(p.types ?? [])
+    const categories = mapGoogleTypes(p.types ?? [])
 
     const photos = (p.photos ?? [])
       .slice(0, 5)
       .map((ph) => buildPhotoUrl(ph.name, 800))
 
     const reviews = (p.reviews ?? []).slice(0, 5).map((r) => ({
-      author:       r.authorAttribution?.displayName ?? 'Anonymous',
-      authorPhoto:  r.authorAttribution?.photoUri    ?? null,
-      rating:       r.rating ?? null,
-      text:         r.text?.text ?? '',
+      author: r.authorAttribution?.displayName ?? 'Anonymous',
+      authorPhoto: r.authorAttribution?.photoUri ?? null,
+      rating: r.rating ?? null,
+      text: r.text?.text ?? '',
       relativeTime: r.relativePublishTimeDescription ?? '',
     }))
 
@@ -231,7 +282,7 @@ export async function getFullVenueDetails(placeId) {
       return parts[0] ?? ''
     }
 
-    const city   = extractCity(p.formattedAddress)
+    const city = extractCity(p.formattedAddress)
 
     // Fetch Hebrew address for cityHe
     let cityHe = city
@@ -251,34 +302,34 @@ export async function getFullVenueDetails(placeId) {
     // Auto-detect social media from websiteUri
     const websiteUri = p.websiteUri ?? null
     let instagram = null
-    let facebook  = null
+    let facebook = null
     if (websiteUri) {
       if (websiteUri.includes('instagram.com')) instagram = websiteUri
       else if (websiteUri.includes('facebook.com')) facebook = websiteUri
     }
 
     return {
-      placeId:          p.id,
-      name:             p.displayName?.text ?? 'Unknown Venue',
-      address:          p.formattedAddress ?? '',
+      placeId: p.id,
+      name: p.displayName?.text ?? 'Unknown Venue',
+      address: p.formattedAddress ?? '',
       city,
       cityHe,
-      active:           true,    // visible by default — admin can hide via toggle
-      logo:             null,
-      styles:           [],
-      categories:       categories.map((c) => c.en),
-      categoriesHe:     categories.map((c) => c.he),
-      googleTypes:      p.types ?? [],
-      rating:           p.rating           ?? null,
-      reviewCount:      p.userRatingCount  ?? 0,
+      active: true,    // visible by default — admin can hide via toggle
+      logo: null,
+      styles: [],
+      categories: categories.map((c) => c.en),
+      categoriesHe: categories.map((c) => c.he),
+      googleTypes: p.types ?? [],
+      rating: p.rating ?? null,
+      reviewCount: p.userRatingCount ?? 0,
       photos,
       reviews,
-      phone:            p.nationalPhoneNumber ?? null,
-      website:          websiteUri,
+      phone: p.nationalPhoneNumber ?? null,
+      website: websiteUri,
       instagram,
       facebook,
       instagramPostUrl: null,
-      coordinates:      p.location
+      coordinates: p.location
         ? { lat: p.location.latitude, lng: p.location.longitude }
         : null,
     }
@@ -320,7 +371,7 @@ export async function fetchInstagramOEmbed(postUrl) {
  */
 export async function importVenuesToFirestore(placeIds) {
   let imported = 0
-  let failed   = 0
+  let failed = 0
   const failedIds = []
 
   for (const placeId of placeIds) {
@@ -346,11 +397,11 @@ export async function importVenuesToFirestore(placeIds) {
           lastRefreshed: serverTimestamp(),
           // Admin-managed defaults — written ONLY on first import
           ...(isNew ? {
-            active:           true,    // visible by default
-            logo:             null,
-            styles:           [],
+            active: true,    // visible by default
+            logo: null,
+            styles: [],
             instagramPostUrl: null,
-            importedAt:       serverTimestamp(),
+            importedAt: serverTimestamp(),
           } : {}),
         },
         { merge: true }   // preserves any admin-managed fields not in this write
@@ -365,4 +416,12 @@ export async function importVenuesToFirestore(placeIds) {
   }
 
   return { imported, failed, failedIds }
+}
+
+/**
+ * Import a single venue directly by its Google Place ID, bypassing discovery.
+ */
+export async function importVenueByPlaceId(placeId) {
+  if (!placeId?.trim()) return { imported: 0, failed: 1, failedIds: [placeId] }
+  return importVenuesToFirestore([placeId.trim()])
 }
