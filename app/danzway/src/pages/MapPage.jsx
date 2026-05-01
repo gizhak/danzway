@@ -426,12 +426,15 @@ export default function MapPage() {
           />
         </Map>
 
-        {/* ── Floating style filter bar ── */}
+        {/* ── Floating style filter bar + disclaimer ── */}
         <div className={styles.filterBar}>
           <StyleFilterRow
             activeFilters={styleFilters}
             onSelect={(id) => dispatch(toggleStyleFilter(id))}
           />
+          <div className={styles.disclaimer}>
+            DanzWay Beta | המידע נסרק אוטומטית ממקורות ציבוריים. מומלץ לוודא פרטים מול המועדון לפני ההגעה.
+          </div>
         </div>
 
         {/* ── Bottom sheet: selected venue card ── */}
@@ -456,13 +459,6 @@ export default function MapPage() {
             <line x1="12.5" y1="9" x2="17" y2="9"/>
           </svg>
         </button>
-
-        {/* ── Beta disclaimer ── */}
-        {!selectedVenue && (
-          <div className={styles.disclaimer}>
-            DanzWay Beta | המידע נסרק אוטומטית ממקורות ציבוריים. מומלץ לוודא פרטים מול המועדון לפני ההגעה.
-          </div>
-        )}
 
       </div>
     </APIProvider>

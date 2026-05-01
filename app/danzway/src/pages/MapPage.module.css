@@ -497,20 +497,12 @@
   }
 }
 
-/* ── Beta disclaimer bar ── */
+/* ── Beta disclaimer bar (inside filterBar, below style circles) ── */
 .disclaimer {
-  position: absolute;
-  bottom: calc(60px + env(safe-area-inset-bottom, 0px));
-  left: 0;
-  right: 0;
-  z-index: 10;
-  padding: 0.45rem 1rem;
-  background: rgba(8, 8, 9, 0.82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-top: 1px solid rgba(245, 158, 11, 0.15);
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.45);
+  padding: 0.3rem 1rem 0.4rem;
+  border-top: 1px solid rgba(245, 158, 11, 0.10);
+  font-size: 0.63rem;
+  color: rgba(255, 255, 255, 0.38);
   text-align: center;
   direction: rtl;
   line-height: 1.4;

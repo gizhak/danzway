@@ -21,6 +21,20 @@
   width: max-content;
 }
 
+@media (min-width: 768px) {
+  .wrapper {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    overflow-x: visible;
+  }
+
+  .row {
+    width: auto;
+    padding: 0 1.5rem;
+  }
+}
+
 /* ── Bubble button ── */
 .bubble {
   display: flex;
