@@ -1,0 +1,121 @@
+import { useState, useMemo, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import { selectSavedIds, selectSavedVenueIds } from '../store/appSlice'
+import {
+  selectActiveVenues,
+  selectVenuesStatus,
+  fetchVenues,
+} from '../store/venuesSlice'
+import { selectEventsForActiveVenues } from '../store/selectors'
+import { parseLocalDate } from '../i18n/dateUtils'
+import EventCard from '../components/events/EventCard'
+import VenueCard from '../components/venues/VenueCard'
+import styles from './FavoritesPage.module.css'
+
+const FILTERS = ['all', 'parties', 'clubs']
+
+export default function FavoritesPage() {
+  const [filter, setFilter] = useState('all')
+  const dispatch             = useDispatch()
+  const { t }                = useTranslation()
+
+  const savedIds      = useSelector(selectSavedIds)
+  const savedVenueIds = useSelector(selectSavedVenueIds)
+  // Use the same merged list PartiesPage uses (real + recurring virtual events)
+  const allEvents     = useSelector(selectEventsForActiveVenues)
+  const allVenues     = useSelector(selectActiveVenues)
+  const venuesStatus  = useSelector(selectVenuesStatus)
+
+  useEffect(() => {
+    if (venuesStatus === 'idle') dispatch(fetchVenues())
+  }, [venuesStatus, dispatch])
+
+  const savedEvents = useMemo(() => {
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    return allEvents.filter((e) => {
+      // selectEventsForActiveVenues already filters to today+, but keep guard
+      const isSaved = !!savedIds[e.id]
+      const isUpcoming = e.date ? parseLocalDate(e.date) >= today : true
+      return isSaved && isUpcoming
+    })
+  }, [allEvents, savedIds])
+
+  // Debug
+  useEffect(() => {
+    console.log('[Favorites] allEvents:', allEvents.length, '| savedIds:', Object.keys(savedIds), '| savedEvents:', savedEvents.length)
+  }, [allEvents, savedIds, savedEvents])
+
+  const savedVenues = useMemo(
+    () => allVenues.filter((v) => savedVenueIds[v.placeId]),
+    [allVenues, savedVenueIds]
+  )
+
+  const showEvents = filter === 'all' || filter === 'parties'
+  const showVenues = filter === 'all' || filter === 'clubs'
+
+  const totalCount =
+    (showEvents ? savedEvents.length : 0) +
+    (showVenues ? savedVenues.length : 0)
+
+  const isEmpty = savedEvents.length === 0 && savedVenues.length === 0
+
+  return (
+    <div className={styles.page}>
+
+      <div className={styles.hero}>
+        <h1 className={styles.heroTitle}>{t('favorites.title')}</h1>
+        <p className={styles.heroSubtitle}>{t('favorites.subtitle')}</p>
+      </div>
+
+      <div className={styles.filterRow}>
+        {FILTERS.map((f) => (
+          <button
+            key={f}
+            className={`${styles.filterChip} ${filter === f ? styles.filterChipActive : ''}`}
+            onClick={() => setFilter(f)}
+          >
+            {t(`favorites.filter_${f}`)}
+          </button>
+        ))}
+      </div>
+
+      {isEmpty ? (
+        <div className={styles.empty}>
+          <div className={styles.emptyIcon}>♡</div>
+          <div className={styles.emptyTitle}>{t('favorites.emptyTitle')}</div>
+          <div className={styles.emptyText}>{t('favorites.emptyText')}</div>
+        </div>
+      ) : (
+        <>
+          {showVenues && savedVenues.length > 0 && (
+            <section>
+              {filter === 'all' && (
+                <h2 className={styles.sectionHeader}>{t('favorites.clubs')}</h2>
+              )}
+              {savedVenues.map((v) => <VenueCard key={v.placeId} venue={v} />)}
+            </section>
+          )}
+
+          {showEvents && savedEvents.length > 0 && (
+            <section>
+              {filter === 'all' && (
+                <h2 className={styles.sectionHeader}>{t('favorites.parties')}</h2>
+              )}
+              {savedEvents.map((e) => <EventCard key={e.id} event={e} />)}
+            </section>
+          )}
+
+          {totalCount === 0 && (
+            <div className={styles.empty}>
+              <div className={styles.emptyIcon}>♡</div>
+              <div className={styles.emptyTitle}>{t('favorites.emptyTitle')}</div>
+              <div className={styles.emptyText}>{t('favorites.emptyText')}</div>
+            </div>
+          )}
+        </>
+      )}
+
+    </div>
+  )
+}

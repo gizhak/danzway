@@ -1,10 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { selectIsSaved, toggleSave, selectNextEventByVenueName } from '../../store/appSlice'
+import { selectIsVenueSaved, toggleSaveVenue, selectNextEventByVenueName } from '../../store/appSlice'
 import { shortMonthDay, venueCity, parseLocalDate } from '../../i18n/dateUtils'
 import Badge from '../ui/Badge'
+import DirectionsSheet from '../ui/DirectionsSheet'
 import styles from './VenueCard.module.css'
 
 const GENERIC_IMAGE =
@@ -40,7 +42,7 @@ export default function VenueCard({ venue }) {
     coordinates,
   } = venue
 
-  const saved              = useSelector(selectIsSaved(placeId))
+  const saved              = useSelector(selectIsVenueSaved(placeId))
   const nextEventsByVenue  = useSelector(selectNextEventByVenueName)
   const normName           = (name ?? '').toLowerCase().replace(/\s+/g, ' ').trim()
   const nextEvent          = nextEventsByVenue[name] ?? nextEventsByVenue[normName] ?? nextEventsByVenue[placeId] ?? null
@@ -50,6 +52,18 @@ export default function VenueCard({ venue }) {
   const mapsUrl = coordinates
     ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + (city ?? ''))}`
+
+  const [showDirections, setShowDirections] = useState(false)
+
+  async function handleShare() {
+    const url  = `${window.location.origin}/venues/${placeId}`
+    const text = `${t('share.joinMe', { name })} ${url}`
+    if (navigator.share) {
+      try { await navigator.share({ title: name, text, url }) } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url).catch(() => {})
+    }
+  }
 
   const categoryLine = categories.slice(0, 2).join(' · ')
   const hashtags = danceStyles
@@ -155,28 +169,34 @@ export default function VenueCard({ venue }) {
       <div className={styles.actions}>
         <motion.button
           className={`${styles.actionBtn} ${saved ? styles.actionBtnSaved : ''}`}
-          onClick={() => dispatch(toggleSave(placeId))}
+          onClick={() => dispatch(toggleSaveVenue(placeId))}
           whileTap={{ scale: 0.88 }}
           animate={saved ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
         >
           {saved ? '♥' : '♡'} {t('venue.save')}
         </motion.button>
-        <button className={styles.actionBtn}>➤ {t('venue.share')}</button>
+        <button className={styles.actionBtn} onClick={handleShare}>➤ {t('venue.share')}</button>
       </div>
 
       {/* ── Directions CTA ── */}
-      <a
-        href={mapsUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
         className={styles.directionsBtn}
+        onClick={() => setShowDirections(true)}
       >
         <span>📍</span>
-        {t('venue.directions')}
+        {t('event.getDirections')}
         {phone && <span className={styles.directionsSep}>·</span>}
         {phone && <span className={styles.directionsPhone}>{phone}</span>}
-      </a>
+      </button>
+
+      {showDirections && (
+        <DirectionsSheet
+          coords={coordinates}
+          name={name}
+          onClose={() => setShowDirections(false)}
+        />
+      )}
 
     </article>
   )

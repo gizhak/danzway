@@ -12,6 +12,7 @@ export function subscribeToEvents(onChange) {
       const data = doc.data()
       return {
         ...data,
+        id:         doc.id,
         createdAt:  data.createdAt?.toMillis?.()  ?? null,
         approvedAt: data.approvedAt?.toMillis?.() ?? null,
       }

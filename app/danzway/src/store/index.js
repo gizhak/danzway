@@ -44,11 +44,12 @@ function loadState() {
     if (parsed && typeof parsed.savedIds === 'object' && !Array.isArray(parsed.savedIds)) {
       return {
         app: {
-          savedIds:     parsed.savedIds ?? {},
-          styleFilters: [],   // never restore filter state — always reset to "All Styles"
-          events:       [],
-          status:       'idle',
-          error:        null,
+          savedIds:      parsed.savedIds      ?? {},
+          savedVenueIds: parsed.savedVenueIds ?? {},
+          styleFilters:  [],
+          events:        [],
+          status:        'idle',
+          error:         null,
         },
       }
     }
@@ -72,8 +73,8 @@ function saveState(state) {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
-        savedIds: state.app.savedIds,
-        // styleFilters intentionally not persisted — resets to "All Styles" on reload
+        savedIds:      state.app.savedIds,
+        savedVenueIds: state.app.savedVenueIds,
       })
     )
   } catch {

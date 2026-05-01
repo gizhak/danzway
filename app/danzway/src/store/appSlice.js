@@ -9,6 +9,7 @@ export const fetchEvents = createAsyncThunk('app/fetchEvents', async () => {
     const data = doc.data()
     return {
       ...data,
+      id:         doc.id,
       createdAt:  data.createdAt?.toMillis?.()  ?? null,
       approvedAt: data.approvedAt?.toMillis?.() ?? null,
     }
@@ -19,11 +20,11 @@ export const fetchEvents = createAsyncThunk('app/fetchEvents', async () => {
 const appSlice = createSlice({
   name: 'app',
   initialState: {
-    // Record<eventId, true> — fully serializable, O(1) lookup.
-    savedIds: {},
-    styleFilters: [],  // string[] — empty = show all; single-select (tap again to deselect)
+    savedIds:      {},   // Record<eventId, true>  — events saved by user
+    savedVenueIds: {},   // Record<placeId, true>  — venues saved by user
+    styleFilters: [],
     events: [],
-    status: 'idle',   // 'idle' | 'loading' | 'succeeded' | 'failed'
+    status: 'idle',
     error: null,
   },
   reducers: {
@@ -37,6 +38,14 @@ const appSlice = createSlice({
         delete state.savedIds[id]
       } else {
         state.savedIds[id] = true
+      }
+    },
+    toggleSaveVenue(state, action) {
+      const id = action.payload
+      if (state.savedVenueIds[id]) {
+        delete state.savedVenueIds[id]
+      } else {
+        state.savedVenueIds[id] = true
       }
     },
     toggleStyleFilter(state, action) {
@@ -71,12 +80,14 @@ const appSlice = createSlice({
   },
 })
 
-export const { setEvents, toggleSave, toggleStyleFilter } = appSlice.actions
+export const { setEvents, toggleSave, toggleSaveVenue, toggleStyleFilter } = appSlice.actions
 export default appSlice.reducer
 
 // ─── Selectors ────────────────────────────────────────────
-export const selectSavedIds      = (state) => state.app.savedIds
-export const selectSavedCount    = (state) => Object.keys(state.app.savedIds).length
+export const selectSavedIds       = (state) => state.app.savedIds
+export const selectSavedVenueIds  = (state) => state.app.savedVenueIds
+export const selectSavedCount     = (state) =>
+  Object.keys(state.app.savedIds).length + Object.keys(state.app.savedVenueIds).length
 
 // Normalise venue name for loose matching (lowercase, collapse spaces)
 function normKey(str) {
@@ -121,7 +132,8 @@ export const selectStyleFilters  = createSelector(
   (filters) => (Array.isArray(filters) ? filters : [])
 )
 // Curried selector — call as useSelector(selectIsSaved(event.id))
-export const selectIsSaved       = (id) => (state) => !!state.app.savedIds[id]
+export const selectIsSaved        = (id) => (state) => !!state.app.savedIds[id]
+export const selectIsVenueSaved   = (id) => (state) => !!state.app.savedVenueIds[id]
 export const selectAllEvents     = (state) => state.app.events
 export const selectEventsStatus  = (state) => state.app.status
 export const selectEventsError   = (state) => state.app.error

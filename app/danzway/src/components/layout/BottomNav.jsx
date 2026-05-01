@@ -11,6 +11,7 @@ const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
 const PUBLIC_NAV = [
   { to: '/', key: 'clubs', icon: '⊞', end: true },
   { to: '/parties', key: 'parties', icon: '🎉', end: false },
+  { to: '/saved', key: 'saved', icon: '♥', end: false },
   { to: '/map', key: 'map', icon: '📍', end: false },
 ]
 

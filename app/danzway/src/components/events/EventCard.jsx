@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
@@ -6,6 +7,7 @@ import { selectIsSaved, toggleSave } from '../../store/appSlice'
 import { selectVenuesByName } from '../../store/venuesSlice'
 import { relativeDate, shortMonthDay } from '../../i18n/dateUtils'
 import Badge from '../ui/Badge'
+import DirectionsSheet from '../ui/DirectionsSheet'
 import styles from './EventCard.module.css'
 
 function getAvatarInitials(name) {
@@ -34,38 +36,41 @@ export default function EventCard({ event }) {
     _venuePhoto,
     image,
     placePhoto,
-    price,
-    currency,
     description,
-    whatsapp,
   } = event
 
   const saved        = useSelector(selectIsSaved(id))
   const venuesByName = useSelector(selectVenuesByName)
-
   const venueData    = venuesByName[venue]
+
   const resolvedLogo  = _venueLogo  ?? venueData?.logo            ?? null
   const resolvedPhoto = _venuePhoto ?? venueData?.customImageUrl ?? venueData?.photos?.[0] ?? placePhoto ?? null
   const heroImage     = resolvedLogo || resolvedPhoto || image || null
+  const coords        = venueData?.coordinates ?? null
 
-  const relDate          = relativeDate(date, t, lang)
-  const { month, day }   = shortMonthDay(date, lang)
+  const relDate        = relativeDate(date, t, lang)
+  const { month, day } = shortMonthDay(date, lang)
 
   const hashtags = danceStyles
     .map((s) => `#${s.toLowerCase().replace(/\s+/g, '')}`)
     .join(' ')
 
-  const waMessage = encodeURIComponent(
-    t('event.waMessage', { title, venue, location, date, time })
-  )
-  const waUrl = whatsapp
-    ? `https://wa.me/${whatsapp}?text=${waMessage}`
-    : `https://wa.me/?text=${waMessage}`
+  const [showDirections, setShowDirections] = useState(false)
+
+  async function handleShare() {
+    const url  = `${window.location.origin}/events/${id}`
+    const text = `${t('share.joinMe', { name: title ?? venue })} ${url}`
+    if (navigator.share) {
+      try { await navigator.share({ title: title ?? venue, text, url }) } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url).catch(() => {})
+    }
+  }
 
   return (
     <article className={styles.card}>
 
-      {/* ── Header row: avatar + venue + DATE/TIME ── */}
+      {/* ── Header row ── */}
       <div className={styles.header}>
         <div className={styles.avatar}>{getAvatarInitials(venue)}</div>
         <div className={styles.headerInfo}>
@@ -80,7 +85,7 @@ export default function EventCard({ event }) {
         <button className={styles.menuBtn} aria-label={t('event.moreOptions')}>···</button>
       </div>
 
-      {/* ── Image (tapping navigates to detail) ── */}
+      {/* ── Image ── */}
       <Link to={`/events/${id}`} className={styles.imageLink} aria-label={t('event.viewDetails', { title })}>
         <div className={styles.imageWrapper}>
           {heroImage ? (
@@ -103,8 +108,6 @@ export default function EventCard({ event }) {
           ) : (
             <div className={styles.imagePlaceholder}>♪</div>
           )}
-
-          {/* Date badge — pinned top-end (right in LTR, left in RTL) */}
           <div className={styles.dateBadge}>
             <div className={styles.dateBadgeMonth}>{month}</div>
             <div className={styles.dateBadgeDay}>{day}</div>
@@ -119,7 +122,7 @@ export default function EventCard({ event }) {
         </div>
       )}
 
-      {/* ── Description + hashtags ── */}
+      {/* ── Description ── */}
       {description && (
         <p className={styles.description}>
           {description}{' '}
@@ -136,21 +139,29 @@ export default function EventCard({ event }) {
           animate={saved ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
         >
-          {saved ? '♥' : '♡'} {t('event.interested')}
+          {saved ? '♥' : '♡'} {t('event.save')}
         </motion.button>
-        <button className={styles.actionBtn}>➤ {t('event.share')}</button>
+        <button className={styles.actionBtn} onClick={handleShare}>
+          ➤ {t('event.share')}
+        </button>
       </div>
 
-      {/* ── WhatsApp RSVP ── */}
-      <a
-        href={waUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      {/* ── Get Directions CTA ── */}
+      <button
         className={styles.rsvpBtn}
+        onClick={() => setShowDirections(true)}
       >
-        <span>📱</span>
-        {t('event.whatsappRsvp')}
-      </a>
+        <span>📍</span>
+        {t('event.getDirections')}
+      </button>
+
+      {showDirections && (
+        <DirectionsSheet
+          coords={coords}
+          name={venue}
+          onClose={() => setShowDirections(false)}
+        />
+      )}
 
     </article>
   )
