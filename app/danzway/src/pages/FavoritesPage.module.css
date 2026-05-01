@@ -1,0 +1,91 @@
+.page {
+  padding: 1.25rem 0.75rem 6rem;
+}
+
+/* ─── Hero ───────────────────────────────────────────────── */
+.hero {
+  margin-bottom: 1.25rem;
+}
+
+.heroTitle {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--color-brand-heading);
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.heroSubtitle {
+  font-size: 0.9rem;
+  color: var(--color-brand-text);
+  margin: 0;
+  opacity: 0.65;
+}
+
+/* ─── Filter chips ───────────────────────────────────────── */
+.filterRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.filterChipActive {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+}
+
+/* ─── Section header ─────────────────────────────────────── */
+.sectionHeader {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 1.25rem 0 0.6rem 0.25rem;
+}
+
+/* ─── Empty state ────────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  opacity: 0.25;
+}
+
+.emptyTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.emptyText {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.35);
+  max-width: 260px;
+  line-height: 1.5;
+}

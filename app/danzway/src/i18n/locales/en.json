@@ -2,6 +2,7 @@
   "nav": {
     "clubs":   "CLUBS",
     "parties": "PARTIES",
+    "saved":   "SAVED",
     "map":     "MAP",
     "post":    "POST",
     "profile": "PROFILE",
@@ -45,10 +46,32 @@
       }
     }
   },
+  "directions": {
+    "title":      "GET DIRECTIONS",
+    "waze":       "Waze",
+    "googleMaps": "Google Maps",
+    "cancel":     "Cancel"
+  },
+  "share": {
+    "joinMe": "Join me at {{name}}!"
+  },
+  "favorites": {
+    "title":        "Saved",
+    "subtitle":     "Your saved clubs and parties",
+    "filter_all":     "All",
+    "filter_parties": "Parties",
+    "filter_clubs":   "Clubs",
+    "parties":      "Parties",
+    "clubs":        "Clubs",
+    "emptyTitle":   "Nothing saved yet",
+    "emptyText":    "Tap ♡ on any venue or event to save it here."
+  },
   "event": {
-    "interested":   "INTERESTED",
-    "share":        "SHARE",
-    "whatsappRsvp": "WHATSAPP RSVP",
+    "interested":     "INTERESTED",
+    "save":           "SAVE",
+    "share":          "SHARE",
+    "getDirections":  "GET DIRECTIONS",
+    "whatsappRsvp":   "WHATSAPP RSVP",
     "moreOptions":  "More options",
     "viewDetails":  "View details for {{title}}",
     "empty":        "No events found.",

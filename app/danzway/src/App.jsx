@@ -7,6 +7,7 @@ import MapPage from './pages/MapPage'
 import VenueDiscoveryPage from './pages/admin/VenueDiscoveryPage'
 import VenueDetailPage from './pages/VenueDetailPage'
 import PartiesPage from './pages/PartiesPage'
+import FavoritesPage from './pages/FavoritesPage'
 import { useEventsSync } from './hooks/useEventsSync'
 import { trackPageView } from './services/analyticsService'
 
@@ -19,6 +20,7 @@ const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
 const PAGE_TITLES = {
   '/':             'Home',
   '/parties':      'Parties',
+  '/saved':        'Saved',
   '/map':          'Map',
   '/admin/venues': 'Admin',
 }
@@ -44,6 +46,7 @@ export default function App() {
           <Route path="/venues/:placeId" element={<VenueDetailPage />} />
           <Route path="/events/:id"      element={<EventDetailPage />} />
           <Route path="/map"             element={<MapPage />} />
+          <Route path="/saved"           element={<FavoritesPage />} />
 
           {/* Post and Profile: routes redirect to home until features are ready */}
           <Route path="/post"    element={<Navigate to="/" replace />} />

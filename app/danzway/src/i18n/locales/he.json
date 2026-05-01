@@ -1,11 +1,12 @@
 {
   "nav": {
-    "clubs": "מועדונים",
+    "clubs":   "מועדונים",
     "parties": "מסיבות",
-    "map": "מפה",
-    "post": "פרסם",
+    "saved":   "שמורים",
+    "map":     "מפה",
+    "post":    "פרסם",
     "profile": "פרופיל",
-    "venues": "מקומות"
+    "venues":  "מקומות"
   },
   "home": {
     "hero": {
@@ -45,10 +46,32 @@
       }
     }
   },
+  "directions": {
+    "title":      "הוראות הגעה",
+    "waze":       "Waze",
+    "googleMaps": "Google Maps",
+    "cancel":     "ביטול"
+  },
+  "share": {
+    "joinMe": "הצטרפו אליי ב{{name}}!"
+  },
+  "favorites": {
+    "title":          "שמורים",
+    "subtitle":       "המועדונים והמסיבות שלך",
+    "filter_all":     "הכל",
+    "filter_parties": "מסיבות",
+    "filter_clubs":   "מועדונים",
+    "parties":        "מסיבות",
+    "clubs":          "מועדונים",
+    "emptyTitle":     "עדיין לא שמרת כלום",
+    "emptyText":      "לחץ ♡ על מקום או אירוע כדי לשמור אותו כאן."
+  },
   "event": {
-    "interested": "מתעניין",
-    "share": "שתף",
-    "whatsappRsvp": "אישור הגעה ב-WhatsApp",
+    "interested":    "מתעניין",
+    "save":          "שמור",
+    "share":         "שתף",
+    "getDirections": "הוראות הגעה",
+    "whatsappRsvp":  "אישור הגעה ב-WhatsApp",
     "moreOptions": "אפשרויות נוספות",
     "viewDetails": "פרטים על {{title}}",
     "empty": "לא נמצאו אירועים.",
