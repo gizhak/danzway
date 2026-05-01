@@ -129,4 +129,38 @@
 }
 .feedbackEmail:hover { text-decoration: underline; }
 
+/* ── Desktop nav links (hidden on mobile) ── */
+.desktopNav {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktopNav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .desktopLink {
+    padding: 0.35rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: rgba(156, 163, 175, 0.65);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .desktopLink:hover {
+    color: #f3f4f6;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .desktopLinkActive {
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.12);
+  }
+}
+
 /* Hamburger styles preserved here — re-enable in Navbar.jsx when side-menu is needed */

@@ -1,8 +1,21 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { auth } from '../../services/firebase'
 import { trackFeedbackClick } from '../../services/analyticsService'
 import styles from './Navbar.module.css'
+
+const PUBLIC_NAV = [
+  { to: '/',        key: 'clubs',   end: true  },
+  { to: '/parties', key: 'parties', end: false },
+  { to: '/saved',   key: 'saved',   end: false },
+  { to: '/map',     key: 'map',     end: false },
+]
+
+const ADMIN_NAV = [
+  ...PUBLIC_NAV,
+  { to: '/admin/venues', key: 'venues', end: false },
+]
 
 function useLangToggle() {
   const { i18n } = useTranslation()
@@ -19,7 +32,11 @@ function useLangToggle() {
 
 export default function Navbar() {
   const { toggle, label } = useLangToggle()
+  const { t } = useTranslation()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+
+  const isAdmin = auth.currentUser?.email === 'guy.izhak.tech@gmail.com'
+  const NAV_ITEMS = isAdmin ? ADMIN_NAV : PUBLIC_NAV
 
   function handleFeedbackToggle() {
     setFeedbackOpen((v) => !v)
@@ -32,6 +49,22 @@ export default function Navbar() {
         DanzWay
         <span className={styles.betaBadge}>Beta</span>
       </NavLink>
+
+      {/* Desktop nav links — hidden on mobile */}
+      <nav className={styles.desktopNav}>
+        {NAV_ITEMS.map(({ to, key, end }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={end}
+            className={({ isActive }) =>
+              isActive ? `${styles.desktopLink} ${styles.desktopLinkActive}` : styles.desktopLink
+            }
+          >
+            {t(`nav.${key}`)}
+          </NavLink>
+        ))}
+      </nav>
 
       <div className={styles.feedbackWrap}>
         <button
