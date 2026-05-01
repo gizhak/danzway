@@ -61,23 +61,26 @@ export default function FavoritesPage() {
   const isEmpty = savedEvents.length === 0 && savedVenues.length === 0
 
   return (
-    <div className={styles.page}>
-
+    <>
+      {/* ── Scrollable hero ── */}
       <div className={styles.hero}>
         <h1 className={styles.heroTitle}>{t('favorites.title')}</h1>
         <p className={styles.heroSubtitle}>{t('favorites.subtitle')}</p>
       </div>
 
-      <div className={styles.filterRow}>
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            className={`${styles.filterChip} ${filter === f ? styles.filterChipActive : ''}`}
-            onClick={() => setFilter(f)}
-          >
-            {t(`favorites.filter_${f}`)}
-          </button>
-        ))}
+      {/* ── Sticky filter chips ── */}
+      <div className={styles.stickyBar}>
+        <div className={styles.filterRow}>
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              className={`${styles.filterChip} ${filter === f ? styles.filterChipActive : ''}`}
+              onClick={() => setFilter(f)}
+            >
+              {t(`favorites.filter_${f}`)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {isEmpty ? (
@@ -87,7 +90,7 @@ export default function FavoritesPage() {
           <div className={styles.emptyText}>{t('favorites.emptyText')}</div>
         </div>
       ) : (
-        <>
+        <div className={styles.content}>
           {showVenues && savedVenues.length > 0 && (
             <section>
               {filter === 'all' && (
@@ -113,9 +116,9 @@ export default function FavoritesPage() {
               <div className={styles.emptyText}>{t('favorites.emptyText')}</div>
             </div>
           )}
-        </>
+        </div>
       )}
 
-    </div>
+    </>
   )
 }
