@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -52,12 +52,33 @@ export default function VenueDetailPage() {
   const venuesStatus      = useSelector(selectVenuesStatus)
   const nextEventsByVenue = useSelector(selectNextEventByVenueName)
   const venue             = venues.find((v) => v.placeId === placeId)
-  const [toastMsg,    setToastMsg]    = useState('')
-  const [refreshing,  setRefreshing]  = useState(false)
+  const [toastMsg,      setToastMsg]      = useState('')
+  const [refreshing,    setRefreshing]    = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(null)
+  const swipeStartX = useRef(0)
+
+  // Gallery must be computed before hooks so keyboard effect can reference it
+  const venuePhotos = venue?.photos ?? []
+  const gallery     = venuePhotos.length > 1 ? venuePhotos.slice(1, 6) : []
+
+  // Scroll to top on every venue open
+  useEffect(() => { window.scrollTo(0, 0) }, [])
 
   useEffect(() => {
     if (venuesStatus === 'idle') dispatch(fetchVenues())
   }, [venuesStatus, dispatch])
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (lightboxIndex === null || gallery.length === 0) return
+    const handleKey = (e) => {
+      if (e.key === 'Escape')     setLightboxIndex(null)
+      if (e.key === 'ArrowLeft')  setLightboxIndex((i) => (i - 1 + gallery.length) % gallery.length)
+      if (e.key === 'ArrowRight') setLightboxIndex((i) => (i + 1) % gallery.length)
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [lightboxIndex, gallery.length])
 
   function showToast(msg) {
     setToastMsg(msg)
@@ -124,7 +145,6 @@ export default function VenueDetailPage() {
     cityHe,
     address,
     logo,
-    photos = [],
     styles: danceStyles = [],
     categories = [],
     rating,
@@ -138,8 +158,8 @@ export default function VenueDetailPage() {
   } = venue
 
   // Hero: manual override → first Google photo → generic fallback
-  const heroImage  = venue.customImageUrl ?? photos[0] ?? GENERIC_IMAGE
-  const gallery    = photos.length > 1 ? photos.slice(1, 6) : []
+  // gallery is already computed above (before early returns)
+  const heroImage = venue.customImageUrl ?? venuePhotos[0] ?? GENERIC_IMAGE
 
   const mapsUrl = coordinates
     ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
@@ -175,12 +195,13 @@ export default function VenueDetailPage() {
   return (
     <div className={styles.page}>
 
-      {/* ── Header: Back + Share ── */}
+      {/* ── Sticky header: Back + Name + Share ── */}
       <div className={styles.header}>
         <Link to="/" className={styles.back}>
           <span className={styles.backArrow}>{t('venue.detail.backArrow')}</span>
           <span>{t('venue.detail.back')}</span>
         </Link>
+        <span className={styles.stickyName}>{name}</span>
         <button className={styles.shareFab} onClick={handleShare} aria-label="Share venue">
           <ShareIcon />
         </button>
@@ -266,7 +287,14 @@ export default function VenueDetailPage() {
         {gallery.length > 0 && (
           <div className={styles.gallery}>
             {gallery.map((url, i) => (
-              <img key={i} src={url} alt={`${name} ${i + 2}`} className={styles.galleryPhoto} loading="lazy" />
+              <img
+                key={i}
+                src={url}
+                alt={`${name} ${i + 2}`}
+                className={styles.galleryPhoto}
+                loading="lazy"
+                onClick={() => setLightboxIndex(i)}
+              />
             ))}
           </div>
         )}
@@ -353,6 +381,77 @@ export default function VenueDetailPage() {
         )}
 
       </motion.div>
+
+      {/* ── Lightbox ── */}
+      <AnimatePresence>
+        {lightboxIndex !== null && gallery[lightboxIndex] && (
+          <motion.div
+            className={styles.lightbox}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={() => setLightboxIndex(null)}
+          >
+            {/* Close */}
+            <button
+              className={styles.lightboxClose}
+              onClick={() => setLightboxIndex(null)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+
+            {/* Prev */}
+            {gallery.length > 1 && (
+              <button
+                className={`${styles.lightboxNav} ${styles.lightboxNavPrev}`}
+                onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i - 1 + gallery.length) % gallery.length) }}
+                aria-label="Previous image"
+              >
+                ‹
+              </button>
+            )}
+
+            {/* Image — swipe to navigate */}
+            <motion.img
+              key={lightboxIndex}
+              src={gallery[lightboxIndex]}
+              className={styles.lightboxImg}
+              alt=""
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.18 }}
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => { swipeStartX.current = e.clientX; e.currentTarget.setPointerCapture(e.pointerId) }}
+              onPointerUp={(e) => {
+                const dx = e.clientX - swipeStartX.current
+                if (dx < -48) setLightboxIndex((i) => (i + 1) % gallery.length)
+                else if (dx > 48) setLightboxIndex((i) => (i - 1 + gallery.length) % gallery.length)
+              }}
+            />
+
+            {/* Next */}
+            {gallery.length > 1 && (
+              <button
+                className={`${styles.lightboxNav} ${styles.lightboxNavNext}`}
+                onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % gallery.length) }}
+                aria-label="Next image"
+              >
+                ›
+              </button>
+            )}
+
+            {/* Counter */}
+            {gallery.length > 1 && (
+              <div className={styles.lightboxCounter}>
+                {lightboxIndex + 1} / {gallery.length}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Toast ── */}
       <AnimatePresence>
