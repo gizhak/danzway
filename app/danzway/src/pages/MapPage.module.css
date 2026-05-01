@@ -1,23 +1,25 @@
 /* ── Page wrapper ────────────────────────────────────────────────────────────
-   Breaks out of Layout's padding to create a full-bleed, viewport-height map.
-   Negative margins cancel main's top/horizontal padding.
-   Negative margin-bottom cancels main's reserved bottom padding (BottomNav space)
-   so the page doesn't scroll. Height is anchored to viewport minus the sticky Navbar.
+   Fixed positioning removes the map completely from page-scroll flow.
+   top: 60px sits below the sticky Navbar. bottom: 0 reaches the viewport edge
+   (the BottomNav floats above it at z-index 100).
+   overflow: hidden + the body-lock in MapPage.jsx together prevent
+   one-finger drag from scrolling the parent document on iOS/Android.
 ────────────────────────────────────────────────────────────────────────────── */
 .page {
-  position: relative;
-  margin-top:    -1.5rem;
-  margin-left:   -1.25rem;
-  margin-right:  -1.25rem;
-  margin-bottom: calc(-62px - 1.1rem - 1.5rem);
-  height: calc(100svh - 60px);
+  position: fixed;
+  top: 60px;
+  /* Navbar height */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
   overflow: hidden;
   background: #0a0a10;
 }
 
 /* ── Map fills the page container ────────────────────────────────────────── */
 .map {
-  width:  100%;
+  width: 100%;
   height: 100%;
 }
 
@@ -27,27 +29,19 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
-  padding-top: 0.5rem;
-  background: linear-gradient(
-    to bottom,
-    rgba(8, 8, 9, 0.95) 0%,
-    rgba(8, 8, 9, 0.75) 70%,
-    rgba(8, 8, 9, 0.0)  100%
-  );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Above all map tiles (z-index ~2–10) and markers, below BottomNav (z-index 100) */
+  z-index: 20;
+  padding-top: 0.6rem;
+  padding-bottom: 0.4rem;
+  background: rgba(8, 8, 12, 0.78);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  /* Block touch events from reaching the map beneath so tapping filter
+     chips never accidentally pans the map. */
+  touch-action: auto;
 }
 
-.venueCount {
-  font-size: 0.67rem;
-  font-weight: 700;
-  color: rgba(245, 158, 11, 0.65);
-  letter-spacing: 0.1em;
-  text-align: center;
-  text-transform: uppercase;
-  padding-bottom: 0.5rem;
-}
 
 /* ── Custom marker pin ───────────────────────────────────────────────────── */
 .pin {
@@ -120,8 +114,15 @@
 }
 
 @keyframes goldPulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.30), 0 0 12px 3px rgba(245, 158, 11, 0.40), 0 2px 10px rgba(0,0,0,0.55); }
-  50%       { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.18), 0 0 20px 6px rgba(245, 158, 11, 0.55), 0 2px 10px rgba(0,0,0,0.55); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.30), 0 0 12px 3px rgba(245, 158, 11, 0.40), 0 2px 10px rgba(0, 0, 0, 0.55);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.18), 0 0 20px 6px rgba(245, 158, 11, 0.55), 0 2px 10px rgba(0, 0, 0, 0.55);
+  }
 }
 
 .pinLogo {
@@ -178,10 +179,12 @@
 /* ── Bottom sheet (slides up when a venue is selected) ───────────────────── */
 .sheet {
   position: absolute;
-  bottom: calc(62px + 1.1rem + 0.65rem); /* sit just above the floating BottomNav */
+  /* Sit above the BottomNav (60px) + safe area + breathing room */
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 0.65rem);
   left: 1rem;
   right: 1rem;
-  z-index: 60; /* above BottomNav (z-index: 50) */
+  /* Within .page stacking context — must be below BottomNav which is in root context */
+  z-index: 15;
   animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -228,7 +231,8 @@
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.65rem;
-  padding-right: 1.5rem; /* avoid overlap with close button */
+  padding-right: 1.5rem;
+  /* avoid overlap with close button */
 }
 
 .popupLogo {
@@ -406,6 +410,40 @@
   opacity: 0.88;
 }
 
+/* ── My Location FAB ────────────────────────────────────────────────────── */
+.locationBtn {
+  position: absolute;
+  /* Sit just above the BottomNav — aligns with Google Maps attribution row */
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 50px);
+  right: 10px;
+  z-index: 15;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #f59e0b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.14);
+  transition: background 0.15s, transform 0.12s;
+}
+
+.locationBtn:hover {
+  background: rgba(255, 255, 255, 0.88);
+  transform: scale(1.06);
+}
+
+.locationBtn:active {
+  transform: scale(0.94);
+}
+
 /* ── Error state (no API key) ────────────────────────────────────────────── */
 .errorState {
   text-align: center;
@@ -436,19 +474,33 @@
 
 /* ── Shared keyframe ─────────────────────────────────────────────────────── */
 @keyframes pulse {
-  0%   { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.85); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.85);
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(18px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* ── Beta disclaimer bar ── */
 .disclaimer {
   position: absolute;
-  bottom: 0;
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px));
   left: 0;
   right: 0;
   z-index: 10;
@@ -458,7 +510,7 @@
   -webkit-backdrop-filter: blur(8px);
   border-top: 1px solid rgba(245, 158, 11, 0.15);
   font-size: 0.68rem;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255, 255, 255, 0.45);
   text-align: center;
   direction: rtl;
   line-height: 1.4;

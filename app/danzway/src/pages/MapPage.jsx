@@ -166,6 +166,13 @@ function ClusteredMarkers({ venues, nextEventsByVenue, specialEventsByVenue, sel
   })
 }
 
+// ─── Map controller — exposes the map instance outside the Map tree ──────────
+function MapController({ mapRef }) {
+  const map = useMap()
+  useEffect(() => { mapRef.current = map }, [map, mapRef])
+  return null
+}
+
 // ─── User location blue dot ───────────────────────────────────────────────────
 function UserLocationMarker({ position }) {
   return (
@@ -304,11 +311,22 @@ export default function MapPage() {
   const [selectedVenue, setSelectedVenue] = useState(null)
   const [userLocation,  setUserLoc]       = useState(null)
   const [mapCenter,     setMapCenter]     = useState(DEFAULT_CENTER)
+  const mapRef = useRef(null)
 
   // Derive nextEvent live from the selector — never stale when Firestore updates
   const selectedNextEvent = selectedVenue
     ? getNextEvent(selectedVenue, nextEventsByVenue)
     : null
+
+  // Lock body scroll while the map is mounted so one-finger drag pans the map,
+  // not the page. iOS needs position:fixed on body to honour overflow:hidden.
+  useEffect(() => {
+    const prev = document.body.style.cssText
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.width    = '100%'
+    return () => { document.body.style.cssText = prev }
+  }, [])
 
   useEffect(() => {
     if (venuesStatus === 'idle') dispatch(fetchVenues())
@@ -349,6 +367,19 @@ export default function MapPage() {
   }, [])
 
   const handleClose = useCallback(() => setSelectedVenue(null), [])
+
+  const handleLocate = useCallback(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const loc = { lat: coords.latitude, lng: coords.longitude }
+        setUserLoc(loc)
+        mapRef.current?.panTo(loc)
+      },
+      () => {}
+    )
+  }, [])
+
   const { t } = useTranslation()
 
   if (!API_KEY) {
@@ -360,11 +391,6 @@ export default function MapPage() {
       </div>
     )
   }
-
-  const isLoading  = venuesStatus === 'loading' || venuesStatus === 'idle'
-  const countLabel = isLoading
-    ? t('map.loading')
-    : t('map.count', { count: filteredVenues.length })
 
   return (
     <APIProvider apiKey={API_KEY}>
@@ -384,6 +410,7 @@ export default function MapPage() {
           className={styles.map}
           onClick={handleClose}
         >
+          <MapController mapRef={mapRef} />
           {userLocation && <UserLocationMarker position={userLocation} />}
 
           <ClusteredMarkers
@@ -401,7 +428,6 @@ export default function MapPage() {
             activeFilters={styleFilters}
             onSelect={(id) => dispatch(toggleStyleFilter(id))}
           />
-          <div className={styles.venueCount}>{countLabel}</div>
         </div>
 
         {/* ── Bottom sheet: selected venue card ── */}
@@ -415,6 +441,17 @@ export default function MapPage() {
             />
           </div>
         )}
+
+        {/* ── My Location FAB ── */}
+        <button className={styles.locationBtn} onClick={handleLocate} aria-label="My location">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+            <circle cx="9" cy="9" r="3.5"/>
+            <line x1="9" y1="1"  x2="9" y2="5.5"/>
+            <line x1="9" y1="12.5" x2="9" y2="17"/>
+            <line x1="1"  y1="9" x2="5.5" y2="9"/>
+            <line x1="12.5" y1="9" x2="17" y2="9"/>
+          </svg>
+        </button>
 
         {/* ── Beta disclaimer ── */}
         {!selectedVenue && (

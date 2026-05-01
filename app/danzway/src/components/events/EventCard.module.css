@@ -88,11 +88,13 @@
   border-radius: 6px;
   line-height: 1;
   transition: background 0.15s ease;
+  display: none;
+  /* Hidden by default, shown on hover via JS */
 }
 
-.menuBtn:hover {
+/* .menuBtn:hover {
   background: rgba(255, 255, 255, 0.06);
-}
+} */
 
 /* ─── Venue name as link ──────────────────────────────── */
 .venueNameLink {
@@ -134,11 +136,9 @@
 .imageOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(8, 8, 9, 0) 50%,
-    rgba(8, 8, 9, 0.70) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(8, 8, 9, 0) 50%,
+      rgba(8, 8, 9, 0.70) 100%);
 }
 
 .imagePlaceholder {
@@ -246,9 +246,9 @@
 .recurringChip {
   font-size: 0.68rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.45);
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   padding: 1px 6px;
   white-space: nowrap;
@@ -257,9 +257,9 @@
 .overrideChip {
   font-size: 0.68rem;
   font-weight: 600;
-  color: rgba(245,158,11,0.75);
-  background: rgba(245,158,11,0.10);
-  border: 1px solid rgba(245,158,11,0.25);
+  color: rgba(245, 158, 11, 0.75);
+  background: rgba(245, 158, 11, 0.10);
+  border: 1px solid rgba(245, 158, 11, 0.25);
   border-radius: 999px;
   padding: 1px 6px;
   white-space: nowrap;
@@ -288,21 +288,21 @@
 }
 
 .adminEditBtn {
-  background: rgba(245,158,11,0.12);
-  color: rgba(245,158,11,0.85);
+  background: rgba(245, 158, 11, 0.12);
+  color: rgba(245, 158, 11, 0.85);
 }
 
 .adminEditBtn:hover {
-  background: rgba(245,158,11,0.22);
+  background: rgba(245, 158, 11, 0.22);
 }
 
 .adminCancelBtn {
-  background: rgba(239,68,68,0.10);
-  color: rgba(239,68,68,0.75);
+  background: rgba(239, 68, 68, 0.10);
+  color: rgba(239, 68, 68, 0.75);
 }
 
 .adminCancelBtn:hover {
-  background: rgba(239,68,68,0.20);
+  background: rgba(239, 68, 68, 0.20);
 }
 
 /* ─── WhatsApp RSVP button ────────────────────────────── */
