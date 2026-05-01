@@ -75,21 +75,21 @@
 }
 
 .feedbackBtn {
-  height: 32px;
-  width: 32px;
-  border-radius: 9999px;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  height: 28px;
+  padding: 0 0.55rem;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.10);
+  border: 1px solid rgba(245, 158, 11, 0.38);
   color: #fbbf24;
-  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 .feedbackBtn:hover {
-  background: rgba(245, 158, 11, 0.22);
+  background: rgba(245, 158, 11, 0.20);
+  border-color: rgba(245, 158, 11, 0.6);
 }
 
 .feedbackBackdrop {
@@ -103,12 +103,14 @@
   top: calc(100% + 8px);
   inset-inline-start: 0;
   z-index: 99;
-  min-width: 240px;
+  min-width: 230px;
   padding: 0.85rem 1rem;
-  background: #1a1a24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(18, 18, 26, 0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.28);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55);
 }
 
 .feedbackText {

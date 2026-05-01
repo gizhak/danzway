@@ -40,10 +40,12 @@ export default function BottomNav() {
             isActive ? `${styles.navItem} ${styles.active}` : styles.navItem
           }
         >
-          <span className={styles.iconWrap}>
-            <span className={styles.navIcon}>{icon}</span>
+          <span className={styles.pill}>
+            <span className={styles.iconWrap}>
+              <span className={styles.navIcon}>{icon}</span>
+            </span>
+            <span className={styles.label}>{t(`nav.${key}`)}</span>
           </span>
-          <span>{t(`nav.${key}`)}</span>
         </NavLink>
       ))}
     </nav>

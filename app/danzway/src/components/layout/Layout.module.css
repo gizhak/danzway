@@ -11,8 +11,8 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 1.5rem 1.25rem;
-  /* Reserve space for floating BottomNav (62px + 1.1rem gap + breathing room) */
-  padding-bottom: calc(62px + 1.1rem + 1.5rem);
+  /* Reserve space for fixed BottomNav (60px) + device safe area + breathing room */
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 1.5rem);
   box-sizing: border-box;
 }
 
