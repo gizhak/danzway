@@ -57,6 +57,11 @@ export default function EventCard({ event }) {
     .map((s) => `#${s.toLowerCase().replace(/\s+/g, '')}`)
     .join(' ')
 
+  // Recurring virtual events have no Firestore document — send to venue page instead
+  const cardTo = isRecurring
+    ? (event.placeId ? `/venues/${event.placeId}` : '/')
+    : `/events/${id}`
+
   const [showDirections, setShowDirections] = useState(false)
 
   async function handleShare() {
@@ -76,9 +81,12 @@ export default function EventCard({ event }) {
       <div className={styles.header}>
         <div className={styles.avatar}>{getAvatarInitials(venue)}</div>
         <div className={styles.headerInfo}>
-          <Link to={`/venues/${event.placeId ?? ''}`} className={styles.venueNameLink}>
-            <div className={styles.venueName}>{venue} · {location}</div>
-          </Link>
+          {event.placeId
+            ? <Link to={`/venues/${event.placeId}`} className={styles.venueNameLink}>
+                <div className={styles.venueName}>{venue} · {location}</div>
+              </Link>
+            : <div className={styles.venueName}>{venue} · {location}</div>
+          }
           <div className={styles.venueDate}>
             <span className={styles.relDate}>{relDate}</span>
             {time && <span className={styles.timeChip}>🕐 {time}</span>}
@@ -88,7 +96,7 @@ export default function EventCard({ event }) {
       </div>
 
       {/* ── Image ── */}
-      <Link to={`/events/${id}`} className={styles.imageLink} aria-label={t('event.viewDetails', { title })}>
+      <Link to={cardTo} className={styles.imageLink} aria-label={t('event.viewDetails', { title })}>
         <div className={styles.imageWrapper}>
           {heroImage ? (
             <>
