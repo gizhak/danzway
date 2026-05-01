@@ -81,17 +81,17 @@ export default function PartiesPage() {
         <p className={styles.heroSubtitle}>{t('parties.hero.subtitle')}</p>
       </section>
 
-      {/* ── Style filter bubbles ── */}
-      <div className={styles.filterRow}>
-        <StyleFilterRow
-          activeFilters={styleFilters}
-          onSelect={(id) => { dispatch(toggleStyleFilter(id)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-        />
-      </div>
-
-      {/* ── Search ── */}
-      <div className={styles.searchRow}>
-        <SearchBar value={query} onChange={setQuery} />
+      {/* ── Sticky filter + search bar ── */}
+      <div className={styles.stickyBar}>
+        <div className={styles.filterRow}>
+          <StyleFilterRow
+            activeFilters={styleFilters}
+            onSelect={(id) => dispatch(toggleStyleFilter(id))}
+          />
+        </div>
+        <div className={styles.searchRow}>
+          <SearchBar value={query} onChange={setQuery} />
+        </div>
       </div>
 
       {/* ── Count row ── */}
