@@ -47,7 +47,7 @@
     }
   },
   "directions": {
-    "title":      "GET DIRECTIONS",
+    "title":      "TAKE ME THERE",
     "waze":       "Waze",
     "googleMaps": "Google Maps",
     "cancel":     "Cancel"
@@ -70,7 +70,7 @@
     "interested":     "INTERESTED",
     "save":           "SAVE",
     "share":          "SHARE",
-    "getDirections":  "GET DIRECTIONS",
+    "getDirections":  "TAKE ME THERE",
     "whatsappRsvp":   "WHATSAPP RSVP",
     "moreOptions":  "More options",
     "viewDetails":  "View details for {{title}}",
@@ -80,7 +80,7 @@
   "venue": {
     "save":       "SAVE",
     "share":      "SHARE",
-    "directions": "GET DIRECTIONS",
+    "directions": "TAKE ME THERE",
     "detail": {
       "loading":        "Loading…",
       "notFound":       "Venue not found.",
@@ -88,10 +88,10 @@
       "backArrow":      "←",
       "openInMaps":     "Open in Google Maps →",
       "viewOnMaps":     "View on Google Maps →",
-      "instagram":      "📸 Instagram",
-      "facebook":       "👍 Facebook",
-      "specialPost":    "🎉 Special Post",
-      "website":        "🌐 Visit Website",
+      "instagram":      "Instagram",
+      "facebook":       "Facebook",
+      "specialPost":    "Special Post",
+      "website":        "Visit Website",
       "refresh":        "↻ Refresh Venue from Google",
       "refreshing":     "⏳ Refreshing…",
       "reviews":        "reviews",
@@ -141,7 +141,7 @@
     "loading":        "Loading venues…",
     "count_one":      "{{count}} verified venue",
     "count_other":    "{{count}} verified venues",
-    "directions":     "📍 Directions",
+    "directions":     "Take Me There",
     "viewVenue":      "View Venue →",
     "tonight":        "Tonight · {{time}}",
     "tomorrow":       "Tomorrow · {{time}}",

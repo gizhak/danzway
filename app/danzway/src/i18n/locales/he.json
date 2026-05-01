@@ -10,8 +10,8 @@
   },
   "home": {
     "hero": {
-      "title": "הליינים הפעילים",
-      "highlight": "היום",
+      "title": "הספוטים החמים",
+      "highlight": "לריקוד",
       "subtitle": "סלסה · באצ'טה · קיזומבה · זוק ועוד ברחבי ישראל"
     },
     "count_one": "נמצא מועדון אחד",
@@ -47,7 +47,7 @@
     }
   },
   "directions": {
-    "title":      "הוראות הגעה",
+    "title":      "קח אותי לשם",
     "waze":       "Waze",
     "googleMaps": "Google Maps",
     "cancel":     "ביטול"
@@ -70,7 +70,7 @@
     "interested":    "מתעניין",
     "save":          "שמור",
     "share":         "שתף",
-    "getDirections": "הוראות הגעה",
+    "getDirections": "קח אותי לשם",
     "whatsappRsvp":  "אישור הגעה ב-WhatsApp",
     "moreOptions": "אפשרויות נוספות",
     "viewDetails": "פרטים על {{title}}",
@@ -80,7 +80,7 @@
   "venue": {
     "save": "שמור",
     "share": "שתף",
-    "directions": "קבל הוראות הגעה",
+    "directions": "קח אותי לשם",
     "detail": {
       "loading": "טוען…",
       "notFound": "המקום לא נמצא.",
@@ -88,10 +88,10 @@
       "backArrow": "→",
       "openInMaps": "→ פתח ב-Google Maps",
       "viewOnMaps": "→ צפה ב-Google Maps",
-      "instagram": "📸 אינסטגרם",
-      "facebook": "👍 פייסבוק",
-      "specialPost": "🎉 פוסט מיוחד",
-      "website": "🌐 אתר הבית",
+      "instagram": "אינסטגרם",
+      "facebook": "פייסבוק",
+      "specialPost": "פוסט מיוחד",
+      "website": "אתר הבית",
       "refresh": "↺ רענן מ-Google",
       "refreshing": "⏳ מרענן…",
       "reviews": "ביקורות",
@@ -141,7 +141,7 @@
     "loading": "טוען מקומות…",
     "count_one": "מקום מאומת אחד",
     "count_other": "{{count}} מקומות מאומתים",
-    "directions": "📍 הוראות הגעה",
+    "directions": "קח אותי לשם",
     "viewVenue": "← פרטי המקום",
     "tonight": "הערב · {{time}}",
     "tomorrow": "מחר · {{time}}",
