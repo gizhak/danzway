@@ -11,6 +11,8 @@ import Badge from '../ui/Badge'
 import DirectionsSheet from '../ui/DirectionsSheet'
 import styles from './EventCard.module.css'
 
+const GENERIC_IMAGE = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
+
 function getAvatarInitials(name) {
   return (name ?? '?')
     .split(' ')
@@ -47,7 +49,7 @@ export default function EventCard({ event }) {
 
   const resolvedLogo  = _venueLogo  ?? venueData?.logo            ?? null
   const resolvedPhoto = _venuePhoto ?? venueData?.customImageUrl ?? venueData?.photos?.[0] ?? placePhoto ?? null
-  const heroImage     = resolvedLogo || resolvedPhoto || image || null
+  const heroImage     = resolvedLogo || resolvedPhoto || image || GENERIC_IMAGE
   const coords        = venueData?.coordinates ?? null
 
   const relDate        = relativeDate(date, t, lang)
@@ -100,26 +102,13 @@ export default function EventCard({ event }) {
       {/* ── Image ── */}
       <Link to={cardTo} className={styles.imageLink} aria-label={t('event.viewDetails', { title })}>
         <div className={styles.imageWrapper}>
-          {heroImage ? (
-            <>
-              <img
-                src={heroImage}
-                alt={title}
-                className={styles.image}
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none'
-                  e.currentTarget.nextSibling?.style && (e.currentTarget.nextSibling.style.display = 'none')
-                  const ph = document.createElement('div')
-                  ph.className = styles.imagePlaceholder
-                  ph.textContent = '♪'
-                  e.currentTarget.parentNode.appendChild(ph)
-                }}
-              />
-              <div className={styles.imageOverlay} />
-            </>
-          ) : (
-            <div className={styles.imagePlaceholder}>♪</div>
-          )}
+          <img
+            src={heroImage}
+            alt={title}
+            className={styles.image}
+            onError={(e) => { e.currentTarget.src = GENERIC_IMAGE; e.currentTarget.onerror = null }}
+          />
+          <div className={styles.imageOverlay} />
           <div className={styles.dateBadge}>
             <div className={styles.dateBadgeMonth}>{month}</div>
             <div className={styles.dateBadgeDay}>{day}</div>

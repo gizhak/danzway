@@ -1,14 +1,18 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../services/firebase'
+import { getCachedVenues, setCachedVenues } from '../services/venueCache'
 
 // ─── Async Thunk ───────────────────────────────────────────────────────────
 
 export const fetchVenues = createAsyncThunk('venues/fetchVenues', async () => {
+  // Return cached data if still fresh (< 24 h) — avoids a Firestore read
+  const cached = getCachedVenues()
+  if (cached) return cached
+
   const snapshot = await getDocs(collection(db, 'venues'))
-  return snapshot.docs.map((doc) => {
+  const venues = snapshot.docs.map((doc) => {
     const data = doc.data()
-    // Convert Firestore Timestamps to plain numbers so Redux doesn't complain
     return {
       ...data,
       importedAt:        data.importedAt?.toMillis?.()        ?? null,
@@ -16,6 +20,9 @@ export const fetchVenues = createAsyncThunk('venues/fetchVenues', async () => {
       lastScanTimestamp: data.lastScanTimestamp?.toMillis?.() ?? null,
     }
   })
+
+  setCachedVenues(venues)
+  return venues
 })
 
 // ─── Slice ─────────────────────────────────────────────────────────────────
@@ -60,6 +67,7 @@ const venuesSlice = createSlice({
   },
 })
 
+export { clearVenueCache } from '../services/venueCache'
 export const { setVenues, updateVenueField } = venuesSlice.actions
 
 export default venuesSlice.reducer
