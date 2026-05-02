@@ -3,16 +3,11 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../services/firebase'
 import { selectAllVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
 import { selectNextEventByVenueName } from '../store/appSlice'
-import { getFullVenueDetails } from '../services/googlePlaces'
 import { shortMonthDay, venueCity } from '../i18n/dateUtils'
 import Badge from '../components/ui/Badge'
 import styles from './VenueDetailPage.module.css'
-
-const IS_ADMIN = import.meta.env.VITE_IS_ADMIN === 'true'
 
 const GENERIC_IMAGE =
   'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
@@ -54,7 +49,6 @@ export default function VenueDetailPage() {
   const nextEventsByVenue = useSelector(selectNextEventByVenueName)
   const venue             = venues.find((v) => v.placeId === placeId)
   const [toastMsg,      setToastMsg]      = useState('')
-  const [refreshing,    setRefreshing]    = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(null)
   const swipeStartX = useRef(0)
 
@@ -84,29 +78,6 @@ export default function VenueDetailPage() {
   function showToast(msg) {
     setToastMsg(msg)
     setTimeout(() => setToastMsg(''), 2500)
-  }
-
-  async function handleRefresh() {
-    setRefreshing(true)
-    try {
-      const details = await getFullVenueDetails(placeId)
-      if (!details) { showToast(t('venue.detail.notFoundGoogle')); return }
-
-      // Preserve admin-managed fields — only refresh Google data
-      const { active, logo, styles: venueStyles, instagramPostUrl, ...googleData } = details
-      await setDoc(
-        doc(db, 'venues', placeId),
-        { ...googleData, lastRefreshed: serverTimestamp() },
-        { merge: true }
-      )
-      dispatch(fetchVenues())
-      showToast(t('venue.detail.refreshed'))
-    } catch (err) {
-      console.error('[VenueDetailPage] refresh error:', err)
-      showToast(t('venue.detail.refreshError'))
-    } finally {
-      setRefreshing(false)
-    }
   }
 
   async function handleShare() {
@@ -215,7 +186,12 @@ export default function VenueDetailPage() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <img src={heroImage} alt={name} className={styles.heroImg} />
+        <img
+          src={heroImage}
+          alt={name}
+          className={styles.heroImg}
+          onError={(e) => { e.currentTarget.src = GENERIC_IMAGE; e.currentTarget.onerror = null }}
+        />
         <div className={styles.heroOverlay} />
 
         {/* Date badge — top-right */}
@@ -295,6 +271,7 @@ export default function VenueDetailPage() {
                 className={styles.galleryPhoto}
                 loading="lazy"
                 onClick={() => setLightboxIndex(i)}
+                onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
             ))}
           </div>
@@ -368,17 +345,6 @@ export default function VenueDetailPage() {
           <a href={website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
             {t('venue.detail.website')}
           </a>
-        )}
-
-        {/* Admin: Refresh from Google Places */}
-        {IS_ADMIN && (
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className={styles.adminRefreshBtn}
-          >
-            {refreshing ? t('venue.detail.refreshing') : t('venue.detail.refresh')}
-          </button>
         )}
 
         <p className={styles.betaDisclaimer}>

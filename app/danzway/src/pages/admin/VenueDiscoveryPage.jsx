@@ -10,6 +10,7 @@ import {
   selectVenuesStatus,
   selectImportedPlaceIds,
   updateVenueField,
+  clearVenueCache,
 } from '../../store/venuesSlice'
 import { fetchEvents, selectAllEvents, setEvents } from '../../store/appSlice'
 import { selectEventsForActiveVenues } from '../../store/selectors'
@@ -644,6 +645,9 @@ function ImportedVenueRow({
   onApprovePending,
   onRejectPending,
   approvingIds = new Set(),
+  // refresh from Google
+  isRefreshingGoogle = false,
+  onRefreshFromGoogle,
   // other
   onToggleActive,
   onToggleStyle,
@@ -928,6 +932,14 @@ function ImportedVenueRow({
             onClick={isAddingParty ? onCancelAddParty : onStartAddParty}
           >
             {isAddingParty ? '✕' : '+ Add Party'}
+          </button>
+          <button
+            className={styles.refreshGoogleBtn}
+            onClick={onRefreshFromGoogle}
+            disabled={isRefreshingGoogle}
+            title="Re-fetch venue metadata (photos, rating, address) from Google Places"
+          >
+            {isRefreshingGoogle ? '⏳ Syncing…' : '↻ Sync Google'}
           </button>
         </div>
       </div>
@@ -1548,6 +1560,9 @@ function VenueDashboard() {
   const [editingScheduleId,  setEditingScheduleId]  = useState(null)
   const [savingSchedule,     setSavingSchedule]     = useState(false)
 
+  // ── Sync from Google state ───────────────────────────────────────────────────
+  const [refreshingVenueId,  setRefreshingVenueId]  = useState(null)
+
   // ── Event discovery state ────────────────────────────────────────────────────
   const [pendingEvents,    setPendingEvents]    = useState([])
   const [scanStatus,       setScanStatus]       = useState('idle')
@@ -1934,11 +1949,36 @@ function VenueDashboard() {
     }))
   }
 
+  // ── Sync venue metadata from Google Places ──────────────────────────────────
+  async function handleRefreshVenueFromGoogle(placeId) {
+    if (refreshingVenueId) return
+    setRefreshingVenueId(placeId)
+    try {
+      const details = await getFullVenueDetails(placeId)
+      if (!details) { showToast('⚠️ Venue not found on Google'); return }
+      const { active, logo, styles: venueStyles, instagramPostUrl, ...googleData } = details
+      await setDoc(
+        doc(db, 'venues', placeId),
+        { ...googleData, lastRefreshed: serverTimestamp() },
+        { merge: true }
+      )
+      clearVenueCache()
+      await dispatch(fetchVenues())
+      showToast('✓ Venue synced from Google!')
+    } catch (err) {
+      console.error('[Admin] refresh from Google error:', err)
+      showToast('⚠️ Could not sync venue')
+    } finally {
+      setRefreshingVenueId(null)
+    }
+  }
+
   // ── Import ──────────────────────────────────────────────────────────────────
   async function handleImport() {
     if (selectedIds.size === 0 || importStatus === 'loading') return
     setImportStatus('loading')
     const result = await importVenuesToFirestore(Array.from(selectedIds))
+    clearVenueCache()
     await dispatch(fetchVenues())
     setSelectedIds(new Set())
     setImportStatus('idle')
@@ -1955,6 +1995,7 @@ function VenueDashboard() {
     if (!id || placeIdLoading) return
     setPlaceIdLoading(true)
     const result = await importVenueByPlaceId(id)
+    clearVenueCache()
     await dispatch(fetchVenues())
     setPlaceIdLoading(false)
     if (result.imported > 0) {
@@ -2541,6 +2582,9 @@ function VenueDashboard() {
                 onApprovePending={handleApproveOne}
                 onRejectPending={handleRejectOne}
                 approvingIds={approvingIds}
+                // refresh from Google
+                isRefreshingGoogle={refreshingVenueId === venue.placeId}
+                onRefreshFromGoogle={() => handleRefreshVenueFromGoogle(venue.placeId)}
                 // other
                 onToggleActive={handleToggleActive}
                 onToggleStyle={handleToggleStyle}
