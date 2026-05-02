@@ -1718,6 +1718,23 @@
   margin-bottom: 0;
 }
 
+.syncAllBtn {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(99, 179, 237, 0.5);
+  background: rgba(99, 179, 237, 0.1);
+  color: rgba(99, 179, 237, 0.95);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+.syncAllBtn:hover:not(:disabled) { background: rgba(99, 179, 237, 0.22); }
+.syncAllBtn:disabled { opacity: 0.5; cursor: default; }
+
 .bulkEditToggleBtn {
   flex-shrink: 0;
   height: 30px;

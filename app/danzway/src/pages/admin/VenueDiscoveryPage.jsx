@@ -20,6 +20,7 @@ import {
   importVenuesToFirestore,
   importVenueByPlaceId,
 } from '../../services/googlePlaces'
+import { uploadVenuePhotos } from '../../services/venuePhotoStorage'
 import {
   saveEventToFirestore,
   saveEventOverride,
@@ -1949,6 +1950,35 @@ function VenueDashboard() {
     }))
   }
 
+  // ── Sync ALL venues from Google Places ──────────────────────────────────────
+  const [syncingAll, setSyncingAll] = useState(false)
+
+  async function handleSyncAllFromGoogle() {
+    if (syncingAll || refreshingVenueId) return
+    setSyncingAll(true)
+    let success = 0, failed = 0
+    for (const venue of importedVenues) {
+      try {
+        const details = await getFullVenueDetails(venue.placeId)
+        if (!details) { failed++; continue }
+        const { active, logo, styles: venueStyles, instagramPostUrl, ...googleData } = details
+        const storedPhotos = await uploadVenuePhotos(venue.placeId, googleData.photos ?? [])
+        await setDoc(
+          doc(db, 'venues', venue.placeId),
+          { ...googleData, photos: storedPhotos, lastRefreshed: serverTimestamp() },
+          { merge: true }
+        )
+        success++
+      } catch {
+        failed++
+      }
+    }
+    clearVenueCache()
+    await dispatch(fetchVenues())
+    setSyncingAll(false)
+    showToast(`✓ Synced ${success} venues${failed > 0 ? ` · ⚠️ ${failed} failed` : ''}`)
+  }
+
   // ── Sync venue metadata from Google Places ──────────────────────────────────
   async function handleRefreshVenueFromGoogle(placeId) {
     if (refreshingVenueId) return
@@ -1957,9 +1987,10 @@ function VenueDashboard() {
       const details = await getFullVenueDetails(placeId)
       if (!details) { showToast('⚠️ Venue not found on Google'); return }
       const { active, logo, styles: venueStyles, instagramPostUrl, ...googleData } = details
+      const storedPhotos = await uploadVenuePhotos(placeId, googleData.photos ?? [])
       await setDoc(
         doc(db, 'venues', placeId),
-        { ...googleData, lastRefreshed: serverTimestamp() },
+        { ...googleData, photos: storedPhotos, lastRefreshed: serverTimestamp() },
         { merge: true }
       )
       clearVenueCache()
@@ -2456,6 +2487,13 @@ function VenueDashboard() {
               In your collection ({importedVenues.length})
             </span>
             <button
+              className={styles.syncAllBtn}
+              onClick={handleSyncAllFromGoogle}
+              disabled={syncingAll || !!refreshingVenueId}
+            >
+              {syncingAll ? '⏳ Syncing all…' : '↻ Sync All Google'}
+            </button>
+            <button
               className={[styles.bulkEditToggleBtn, showBulkEdit ? styles.bulkEditToggleBtnActive : ''].join(' ')}
               onClick={() => { setShowBulkEdit((v) => !v); setBulkPhotoUrl('') }}
             >
@@ -2647,22 +2685,29 @@ function VenueDashboard() {
         </div>
       )}
 
-      {autoDone && results.length > 0 && !autoRunning && (
+      {autoDone && !autoRunning && (
         <div className={[styles.autoDiscoveryDone, cacheTimestamp ? styles.autoDiscoveryDoneCached : ''].join(' ')}>
-          {cacheTimestamp ? (
-            <>
-              <span>
-                📋 {results.length} venues · cached{' '}
-                {new Date(cacheTimestamp).toLocaleString('en-IL', {
-                  day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
-                })}
-              </span>
-              <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan Google</button>
-            </>
+          {results.length > 0 ? (
+            cacheTimestamp ? (
+              <>
+                <span>
+                  📋 {results.length} venues · cached{' '}
+                  {new Date(cacheTimestamp).toLocaleString('en-IL', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+                  })}
+                </span>
+                <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan Google</button>
+              </>
+            ) : (
+              <>
+                <span>✓ Found {results.length} venue{results.length !== 1 ? 's' : ''} across Israel</span>
+                <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan</button>
+              </>
+            )
           ) : (
             <>
-              <span>✓ Found {results.length} venue{results.length !== 1 ? 's' : ''} across Israel</span>
-              <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan</button>
+              <span>No venues found — quota may be exceeded</span>
+              <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan Google</button>
             </>
           )}
         </div>
