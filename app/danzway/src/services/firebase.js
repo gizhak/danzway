@@ -14,8 +14,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db   = getFirestore(app);
-export const auth = getAuth(app);
+export const db      = getFirestore(app);
+export const auth    = getAuth(app);
 
 // Analytics is optional — silently unavailable in non-browser envs (SSR, tests)
 export let analytics = null;
