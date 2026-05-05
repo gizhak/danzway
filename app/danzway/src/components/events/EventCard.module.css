@@ -67,6 +67,12 @@
   color: var(--color-brand-amber-light);
 }
 
+.weekdayChip {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .timeChip {
   font-size: 0.78rem;
   font-weight: 600;

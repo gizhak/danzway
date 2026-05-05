@@ -54,7 +54,7 @@ export default function EventCard({ event }) {
   const coords        = venueData?.coordinates ?? null
 
   const relDate        = relativeDate(date, t, lang)
-  const { month, day } = shortMonthDay(date, lang)
+  const { month, day, weekday } = shortMonthDay(date, lang)
 
   const hashtags = danceStyles
     .map((s) => `#${s.toLowerCase().replace(/\s+/g, '')}`)
@@ -94,6 +94,7 @@ export default function EventCard({ event }) {
           }
           <div className={styles.venueDate}>
             <span className={styles.relDate}>{relDate}</span>
+            <span className={styles.weekdayChip}>{weekday}</span>
             {time && <span className={styles.timeChip}>🕐 {time}</span>}
           </div>
         </div>

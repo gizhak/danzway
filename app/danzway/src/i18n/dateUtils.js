@@ -27,13 +27,14 @@ export function relativeDate(dateStr, t, lang) {
   return ev.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
 }
 
-/** Short month label (e.g. "JAN" / "ינו") + numeric day. */
+/** Short month label + numeric day + short weekday (e.g. "יום ב'" / "Mon"). */
 export function shortMonthDay(dateStr, lang) {
   const d      = parseLocalDate(dateStr)
   const locale = LOCALE[lang] ?? 'en-US'
   return {
-    month: d.toLocaleDateString(locale, { month: 'short' }).toUpperCase(),
-    day:   d.getDate(),
+    month:   d.toLocaleDateString(locale, { month: 'short' }).toUpperCase(),
+    day:     d.getDate(),
+    weekday: d.toLocaleDateString(locale, { weekday: 'short' }),
   }
 }
 
