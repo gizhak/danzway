@@ -95,6 +95,20 @@ export default function FavoritesPage() {
           <div className={styles.emptyIcon}>♡</div>
           <div className={styles.emptyTitle}>{t('favorites.emptyTitle')}</div>
           <div className={styles.emptyText}>{t('favorites.emptyText')}</div>
+          <div className={styles.tips}>
+            <div className={styles.tip}>
+              <span className={styles.tipIcon}>♡</span>
+              <span className={styles.tipText}>{t('favorites.tip1', 'לחץ לב על מסיבה או מועדון כדי לשמור')}</span>
+            </div>
+            <div className={styles.tip}>
+              <span className={`${styles.tipIcon} ${styles.tipIconFilled}`}>♥</span>
+              <span className={styles.tipText}>{t('favorites.tip2', 'הלב יתמלא כשיש לך שמורים')}</span>
+            </div>
+            <div className={styles.tip}>
+              <span className={`${styles.tipIcon} ${styles.tipIconPulse}`}>♥</span>
+              <span className={styles.tipText}>{t('favorites.tip3', 'הלב ידפוק ביום שיש לך מסיבה')}</span>
+            </div>
+          </div>
         </div>
       ) : (
         <div className={styles.content}>
