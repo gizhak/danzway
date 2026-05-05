@@ -137,3 +137,4 @@ export const selectIsVenueSaved   = (id) => (state) => !!state.app.savedVenueIds
 export const selectAllEvents     = (state) => state.app.events
 export const selectEventsStatus  = (state) => state.app.status
 export const selectEventsError   = (state) => state.app.error
+

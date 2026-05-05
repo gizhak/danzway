@@ -48,7 +48,10 @@ export default function VenueCard({ venue }) {
   const normName           = (name ?? '').toLowerCase().replace(/\s+/g, ' ').trim()
   const nextEvent          = nextEventsByVenue[name] ?? nextEventsByVenue[normName] ?? nextEventsByVenue[placeId] ?? null
 
-  const heroImage = venue.customImageUrl ?? photos[0] ?? GENERIC_IMAGE
+  const isGoogleApiUrl = (u) => u && u.includes('places.googleapis.com')
+  const safePhoto = photos.find(u => !isGoogleApiUrl(u))
+  const safeLogo  = isGoogleApiUrl(logo) ? null : logo
+  const heroImage = venue.customImageUrl ?? safePhoto ?? GENERIC_IMAGE
 
   const mapsUrl = coordinates
     ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
@@ -93,9 +96,9 @@ export default function VenueCard({ venue }) {
 
       {/* ── Header row ── */}
       <div className={styles.header}>
-        {logo ? (
+        {safeLogo ? (
           <img
-            src={logo}
+            src={safeLogo}
             alt={name}
             className={styles.avatarImg}
             onError={(e) => {

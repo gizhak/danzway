@@ -47,8 +47,9 @@ export default function EventCard({ event }) {
   const venuesByName = useSelector(selectVenuesByName)
   const venueData    = venuesByName[venue]
 
-  const resolvedLogo  = _venueLogo  ?? venueData?.logo            ?? null
-  const resolvedPhoto = _venuePhoto ?? venueData?.customImageUrl ?? venueData?.photos?.[0] ?? placePhoto ?? null
+  const isGApi = (u) => u?.includes('places.googleapis.com')
+  const resolvedLogo  = isGApi(_venueLogo)  ? null : (_venueLogo  ?? (isGApi(venueData?.logo)  ? null : venueData?.logo)  ?? null)
+  const resolvedPhoto = isGApi(_venuePhoto) ? null : (_venuePhoto ?? venueData?.customImageUrl ?? (venueData?.photos ?? []).find(u => !isGApi(u)) ?? (isGApi(placePhoto) ? null : placePhoto) ?? null)
   const heroImage     = resolvedLogo || resolvedPhoto || image || GENERIC_IMAGE
   const coords        = venueData?.coordinates ?? null
 

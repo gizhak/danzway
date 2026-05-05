@@ -20,7 +20,7 @@ import {
   importVenuesToFirestore,
   importVenueByPlaceId,
 } from '../../services/googlePlaces'
-import { uploadVenuePhotos } from '../../services/venuePhotoStorage'
+import { uploadVenuePhotos, isGoogleApiPhotoUrl } from '../../services/venuePhotoStorage'
 import {
   saveEventToFirestore,
   saveEventOverride,
@@ -216,73 +216,92 @@ function VenueResultCard({
 }) {
   const { name, address, categories, rating, reviewCount, thumbnail } = venue
   const isActive = importedVenueData?.active === true
+  const [cardCollapsed, setCardCollapsed] = useState(true)
 
   return (
     <article className={[styles.card, isSelected ? styles.cardSelected : ''].join(' ')}>
-      <div className={styles.cardThumb}>
-        {thumbnail ? (
-          <img src={thumbnail} alt={name} className={styles.cardThumbImg} />
-        ) : (
-          <div className={styles.cardThumbPlaceholder}>🎵</div>
-        )}
 
-        {isImported ? (
-          <button
-            className={[styles.vToggleCard, isActive ? styles.vToggleCardOn : ''].join(' ')}
-            onClick={(e) => { e.stopPropagation(); onToggleActive(venue.placeId, !isActive) }}
-            title={isActive ? 'Live — tap to hide' : 'Hidden — tap to go live'}
-          >
-            {isActive ? '● Live' : '○ Off'}
-          </button>
-        ) : (
-          <button
-            className={[styles.checkbox, isSelected ? styles.checkboxChecked : ''].join(' ')}
-            onClick={onToggleSelect}
-            aria-label={isSelected ? 'Deselect' : 'Select'}
-          >
-            {isSelected && (
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M1.5 5L4 7.5L8.5 2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-          </button>
-        )}
-      </div>
-
-      <div className={styles.cardBody}>
-        <div className={styles.cardName}>{name}</div>
-        <div className={styles.cardAddress}>{address}</div>
-        {categories?.length > 0 && (
-          <div className={styles.cardCategories}>
-            {categories.slice(0, 2).map((c) => (
-              <span key={c.en} className={styles.categoryBadge}>{c.en}</span>
-            ))}
-          </div>
-        )}
-        <div className={styles.cardFooter}>
-          <StarRating rating={rating} count={reviewCount} />
-          <button
-            className={[styles.detailsBtn, isExpanded ? styles.detailsBtnOpen : ''].join(' ')}
-            onClick={onExpand}
-          >
-            {isExpanded ? 'Hide ▲' : 'Details ▼'}
-          </button>
+      {/* ── Header row (always visible) ── */}
+      <div className={styles.cardHeaderRow} onClick={() => setCardCollapsed(v => !v)}>
+        <div className={styles.cardThumbSmall}>
+          {thumbnail ? (
+            <img src={thumbnail} alt={name} className={styles.cardThumbSmallImg} />
+          ) : (
+            <div className={styles.cardThumbPlaceholder}>🎵</div>
+          )}
         </div>
+        <div className={styles.cardHeaderInfo}>
+          <div className={styles.cardName}>{name}</div>
+          <div className={styles.cardAddress}>{address}</div>
+        </div>
+        {isImported ? (
+          <span className={styles.lampBadgeIn} title="Already in your app">
+            <span className={styles.lampGlow} />💡
+          </span>
+        ) : (
+          <>
+            <span className={styles.lampBadgeNew} title="New discovery">
+              <span className={styles.lampGlowNew} />💡
+            </span>
+            <button
+              className={[styles.checkbox, isSelected ? styles.checkboxChecked : ''].join(' ')}
+              onClick={(e) => { e.stopPropagation(); onToggleSelect() }}
+              aria-label={isSelected ? 'Deselect' : 'Select'}
+            >
+              {isSelected && (
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M1.5 5L4 7.5L8.5 2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </button>
+          </>
+        )}
+        <span className={[styles.cardExpandChevron, cardCollapsed ? '' : styles.cardExpandChevronOpen].join(' ')} />
       </div>
 
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-            style={{ overflow: 'hidden' }}
-          >
-            <ExpandedDetails entry={detailsEntry} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ── Collapsible card body ── */}
+      <div className={[styles.cardCollapsibleBody, cardCollapsed ? styles.cardBodyCollapsed : ''].join(' ')}>
+        {/* Big thumbnail only in expanded view */}
+        <div className={styles.cardThumb}>
+          {thumbnail ? (
+            <img src={thumbnail} alt={name} className={styles.cardThumbImg} />
+          ) : (
+            <div className={styles.cardThumbPlaceholder}>🎵</div>
+          )}
+        </div>
+        <div className={styles.cardBody}>
+          {categories?.length > 0 && (
+            <div className={styles.cardCategories}>
+              {categories.slice(0, 2).map((c) => (
+                <span key={c.en} className={styles.categoryBadge}>{c.en}</span>
+              ))}
+            </div>
+          )}
+          <div className={styles.cardFooter}>
+            <StarRating rating={rating} count={reviewCount} />
+            <button
+              className={[styles.detailsBtn, isExpanded ? styles.detailsBtnOpen : ''].join(' ')}
+              onClick={(e) => { e.stopPropagation(); onExpand() }}
+            >
+              {isExpanded ? 'Hide ▲' : 'Details ▼'}
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+              style={{ overflow: 'hidden' }}
+            >
+              <ExpandedDetails entry={detailsEntry} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </article>
   )
 }
@@ -662,6 +681,7 @@ function ImportedVenueRow({
 
   const fileInputRef = useRef(null)
   const thumb = customImageUrl ?? logo ?? photos?.[0] ?? null
+  const [expanded, setExpanded] = useState(false)
   const [inputUrl,  setInputUrl]  = useState('')
   const [igHandle,   setIgHandle]   = useState(venue.instagram         ?? '')
   const [fbHandle,   setFbHandle]   = useState(venue.facebook          ?? '')
@@ -756,7 +776,17 @@ function ImportedVenueRow({
           <span className={styles.vToggleDot} />
           {active ? 'Live' : 'Hidden'}
         </button>
+        <button
+          className={styles.cardExpandBtn}
+          onClick={() => setExpanded(v => !v)}
+          aria-label={expanded ? 'Collapse' : 'Expand'}
+        >
+          <span className={[styles.cardExpandChevron, expanded ? styles.cardExpandChevronOpen : ''].join(' ')} />
+        </button>
       </div>
+
+      {/* ── Collapsible body ── */}
+      <div className={[styles.importedRowBody, expanded ? styles.importedRowBodyOpen : ''].join(' ')}>
 
       {/* ── Style chips ── */}
       <div className={styles.styleChipsRow}>
@@ -1047,6 +1077,8 @@ function ImportedVenueRow({
           </motion.div>
         )}
       </AnimatePresence>
+
+      </div>{/* end importedRowBody */}
     </div>
   )
 }
@@ -1592,7 +1624,7 @@ function VenueDashboard() {
     if (venuesStatus === 'idle') dispatch(fetchVenues())
   }, [dispatch, venuesStatus])
 
-  // ── Auto-discovery on mount — load cache first, API only if cache is stale ──
+  // ── Load cache on mount — NEVER auto-call Google API ──
   useEffect(() => {
     if (discoveryRef.current) return
     discoveryRef.current = true
@@ -1602,11 +1634,11 @@ function VenueDashboard() {
       setResults(cached.results)
       setSeenIds(new Set(cached.results.map(v => v.placeId)))
       setCacheTimestamp(cached.timestamp)
-      setAutoDone(true)
-      return  // ← skip API call entirely
     }
-
-    runAutoDiscovery()
+    // Always show Re-scan button, even when cache is empty.
+    // runAutoDiscovery() intentionally NOT called on mount — quota protection.
+    // Admin must click "Re-scan Google" manually to trigger API calls.
+    setAutoDone(true)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Live listener for pending_events — updates UI instantly on any write ──
@@ -2451,6 +2483,9 @@ function VenueDashboard() {
   const isImporting   = importStatus === 'loading'
   const liveCount     = importedVenues.filter(v => v.active === true).length
   const hiddenCount   = importedVenues.filter(v => v.active !== true).length
+  const badPhotoCount = importedVenues.filter(v =>
+    (v.photos ?? []).some(isGoogleApiPhotoUrl) || isGoogleApiPhotoUrl(v.logo)
+  ).length
 
   // Build a per-venue event map from the merged selector
   const eventsByVenue = useMemo(() => {
@@ -2465,63 +2500,177 @@ function VenueDashboard() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  const [activeTab, setActiveTab] = useState('venues')
+  const [tabSearch, setTabSearch] = useState('')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const TABS = [
+    { id: 'venues',   icon: '🏠', label: 'Venues',   badge: importedVenues.length || null },
+    { id: 'events',   icon: '🎉', label: 'Events',    badge: pendingEvents.length || null },
+    { id: 'discover', icon: '🔍', label: 'Discover',  badge: results.length || null },
+    { id: 'stats',    icon: '📊', label: 'Stats',     badge: null },
+  ]
+
+  function switchTab(id) {
+    setActiveTab(id)
+    setTabSearch('')
+    setSidebarOpen(false)
+  }
+
   return (
     <div className={styles.page}>
 
-      {/* ── Page header ── */}
-      <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Venue Control Center</h1>
-        <p className={styles.pageSubtitle}>
-          Discover · import · control every dance venue in Israel
-        </p>
-      </div>
+      {/* ── Mobile backdrop ── */}
+      {sidebarOpen && <div className={styles.sidebarBackdrop} onClick={() => setSidebarOpen(false)} />}
 
-      {/* ── Popularity Stats ── */}
-      <PopularityStats />
+      {/* ── Sidebar ── */}
+      <nav className={[styles.sidebar, sidebarOpen ? styles.sidebarOpenMobile : ''].join(' ')}>
+        <div className={styles.sidebarBrand}>
+          <div className={styles.sidebarBrandLogo}>💃</div>
+          <div className={styles.sidebarBrandText}>
+            <span className={styles.sidebarBrandName}>DanzWay</span>
+            <span className={styles.sidebarBrandSub}>Admin</span>
+          </div>
+        </div>
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            className={[styles.sidebarTab, activeTab === tab.id ? styles.sidebarTabActive : ''].join(' ')}
+            onClick={() => switchTab(tab.id)}
+          >
+            <span className={styles.sidebarTabIcon}>{tab.icon}</span>
+            <span className={styles.sidebarTabLabel}>{tab.label}</span>
+            {tab.badge != null ? <span className={styles.sidebarTabBadge}>{tab.badge}</span> : null}
+          </button>
+        ))}
+      </nav>
 
-      {/* ── Imported venues (collection) — shown FIRST so filter tabs are immediately visible ── */}
-      {importedVenues.length > 0 && (
+      {/* ── Main content ── */}
+      <div className={styles.mainContent}>
+
+      {/* ── Sticky header area (mobile: all controls stick together) ── */}
+      <div className={styles.stickyHeaderArea}>
+
+        {/* Mobile top bar */}
+        <div className={styles.mobileTopBar}>
+          <button className={styles.hamburgerBtn} onClick={() => setSidebarOpen(v => !v)} aria-label="Menu">
+            <span /><span /><span />
+          </button>
+          <span className={styles.mobileTabTitle}>
+            {TABS.find(t => t.id === activeTab)?.icon} {TABS.find(t => t.id === activeTab)?.label}
+          </span>
+        </div>
+
+        {/* Tab search bar */}
+        {activeTab !== 'stats' && (
+          <div className={styles.tabSearchBar}>
+            <span className={styles.tabSearchIcon}>🔍</span>
+            <input
+              className={styles.tabSearchInput}
+              type="text"
+              placeholder={
+                activeTab === 'venues'   ? 'Search venues…' :
+                activeTab === 'events'   ? 'Search events…' :
+                'Filter results…'
+              }
+              value={tabSearch}
+              onChange={(e) => setTabSearch(e.target.value)}
+              dir="auto"
+            />
+            {tabSearch && (
+              <button className={styles.tabSearchClear} onClick={() => setTabSearch('')}>✕</button>
+            )}
+          </div>
+        )}
+
+        {/* Venues: collection header + filter tabs */}
+        {activeTab === 'venues' && importedVenues.length > 0 && (
+          <>
+            <div className={styles.importedSectionHeader}>
+              <span className={styles.sectionLabel}>
+                In your collection ({importedVenues.length})
+              </span>
+              <button
+                className={styles.syncAllBtn}
+                onClick={handleSyncAllFromGoogle}
+                disabled={syncingAll || !!refreshingVenueId}
+              >
+                {syncingAll ? '⏳ Syncing all…' : '↻ Sync All Google'}
+              </button>
+              <button
+                className={[styles.bulkEditToggleBtn, showBulkEdit ? styles.bulkEditToggleBtnActive : ''].join(' ')}
+                onClick={() => { setShowBulkEdit((v) => !v); setBulkPhotoUrl('') }}
+              >
+                {showBulkEdit ? '✕ Cancel' : '🖼 Set Logo for All'}
+              </button>
+            </div>
+            <div className={styles.venueFilterTabs}>
+              <button
+                className={[styles.venueFilterTab, venueFilter === 'all' ? styles.venueFilterTabActive : ''].join(' ')}
+                onClick={() => setVenueFilter('all')}
+              >
+                All <span className={styles.venueFilterCount}>{importedVenues.length}</span>
+              </button>
+              <button
+                className={[styles.venueFilterTab, venueFilter === 'live' ? styles.venueFilterTabLive : ''].join(' ')}
+                onClick={() => setVenueFilter('live')}
+              >
+                ● Live <span className={styles.venueFilterCount}>{liveCount}</span>
+              </button>
+              <button
+                className={[styles.venueFilterTab, venueFilter === 'hidden' ? styles.venueFilterTabHidden : ''].join(' ')}
+                onClick={() => setVenueFilter('hidden')}
+              >
+                ○ Hidden <span className={styles.venueFilterCount}>{hiddenCount}</span>
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ⚠️ Google API photo warning */}
+        {activeTab === 'venues' && badPhotoCount > 0 && (
+          <div className={styles.apiPhotoWarning}>
+            <span>⚠️ {badPhotoCount} venue{badPhotoCount !== 1 ? 's' : ''} have Google API photo URLs — every user view burns quota. Run ↻ Sync All Google when quota resets (~10 AM).</span>
+          </div>
+        )}
+
+        {/* Discover: cache status banner */}
+        {activeTab === 'discover' && autoDone && !autoRunning && (
+          <div className={[styles.autoDiscoveryDone, cacheTimestamp ? styles.autoDiscoveryDoneCached : ''].join(' ')}>
+            {results.length > 0 ? (
+              cacheTimestamp ? (
+                <>
+                  <span>
+                    📋 {results.length} venues · cached{' '}
+                    {new Date(cacheTimestamp).toLocaleString('en-IL', {
+                      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+                    })}
+                  </span>
+                  <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan Google</button>
+                </>
+              ) : (
+                <>
+                  <span>✓ Found {results.length} venue{results.length !== 1 ? 's' : ''} across Israel</span>
+                  <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan</button>
+                </>
+              )
+            ) : (
+              <>
+                <span>No cached results — scan to discover venues</span>
+                <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan Google</button>
+              </>
+            )}
+          </div>
+        )}
+
+      </div>{/* end stickyHeaderArea */}
+
+      {/* ── Stats tab ── */}
+      {activeTab === 'stats' && <PopularityStats />}
+
+      {/* ── Imported venues (collection) ── */}
+      {activeTab === 'venues' && importedVenues.length > 0 && (
         <section className={styles.importedSection}>
-          <div className={styles.importedSectionHeader}>
-            <span className={styles.sectionLabel}>
-              In your collection ({importedVenues.length})
-            </span>
-            <button
-              className={styles.syncAllBtn}
-              onClick={handleSyncAllFromGoogle}
-              disabled={syncingAll || !!refreshingVenueId}
-            >
-              {syncingAll ? '⏳ Syncing all…' : '↻ Sync All Google'}
-            </button>
-            <button
-              className={[styles.bulkEditToggleBtn, showBulkEdit ? styles.bulkEditToggleBtnActive : ''].join(' ')}
-              onClick={() => { setShowBulkEdit((v) => !v); setBulkPhotoUrl('') }}
-            >
-              {showBulkEdit ? '✕ Cancel' : '🖼 Set Logo for All'}
-            </button>
-          </div>
-
-          {/* ── Venue filter tabs ── */}
-          <div className={styles.venueFilterTabs}>
-            <button
-              className={[styles.venueFilterTab, venueFilter === 'all' ? styles.venueFilterTabActive : ''].join(' ')}
-              onClick={() => setVenueFilter('all')}
-            >
-              All <span className={styles.venueFilterCount}>{importedVenues.length}</span>
-            </button>
-            <button
-              className={[styles.venueFilterTab, venueFilter === 'live' ? styles.venueFilterTabLive : ''].join(' ')}
-              onClick={() => setVenueFilter('live')}
-            >
-              ● Live <span className={styles.venueFilterCount}>{liveCount}</span>
-            </button>
-            <button
-              className={[styles.venueFilterTab, venueFilter === 'hidden' ? styles.venueFilterTabHidden : ''].join(' ')}
-              onClick={() => setVenueFilter('hidden')}
-            >
-              ○ Hidden <span className={styles.venueFilterCount}>{hiddenCount}</span>
-            </button>
-          </div>
 
           <AnimatePresence>
             {showBulkEdit && (
@@ -2572,6 +2721,11 @@ function VenueDashboard() {
                 venueFilter === 'live'   ? v.active === true :
                 /* hidden */               v.active !== true
               )
+              .filter(v => {
+                if (!tabSearch.trim()) return true
+                const q = tabSearch.toLowerCase()
+                return (v.name ?? '').toLowerCase().includes(q) || (v.city ?? '').toLowerCase().includes(q)
+              })
               .map((venue) => (
               <ImportedVenueRow
                 key={venue.placeId}
@@ -2633,11 +2787,13 @@ function VenueDashboard() {
         </section>
       )}
 
-      {/* ── Facebook Group Scanner ── */}
+      {/* ── Events tab ── */}
+      {activeTab === 'events' && (
+      <>
       <FacebookScanPanel
         fbScanning={fbScanning}
         fbScanStatus={fbScanStatus}
-        fbPendingEvents={pendingEvents.filter(e => e.source === 'facebook')}
+        fbPendingEvents={pendingEvents.filter(e => e.source === 'facebook' && (!tabSearch.trim() || (e.title ?? '').toLowerCase().includes(tabSearch.toLowerCase()) || (e.venueName ?? '').toLowerCase().includes(tabSearch.toLowerCase())))}
         approvingIds={approvingIds}
         onScan={handleScanFacebook}
         onApproveOne={handleApproveOne}
@@ -2646,7 +2802,7 @@ function VenueDashboard() {
 
       {/* ── Discovered Events (crawler results) ── */}
       <DiscoveredEventsPanel
-        pendingEvents={pendingEvents.filter(e => e.source !== 'facebook')}
+        pendingEvents={pendingEvents.filter(e => e.source !== 'facebook' && (!tabSearch.trim() || (e.title ?? '').toLowerCase().includes(tabSearch.toLowerCase()) || (e.venueName ?? '').toLowerCase().includes(tabSearch.toLowerCase())))}
         scanStatus={scanStatus}
         scanProgress={scanProgress}
         scanResults={scanResults}
@@ -2665,7 +2821,12 @@ function VenueDashboard() {
         onApproveAll={handleApproveAll}
         onRescan={handleRescan}
       />
+      </>
+      )}
 
+      {/* ── Discover tab ── */}
+      {activeTab === 'discover' && (
+      <>
       {/* ── Auto-discovery progress bar ── */}
       {autoRunning && (
         <div className={styles.autoDiscoveryBar}>
@@ -2682,34 +2843,6 @@ function VenueDashboard() {
               style={{ width: `${autoTotal > 0 ? (autoProgress / autoTotal) * 100 : 0}%` }}
             />
           </div>
-        </div>
-      )}
-
-      {autoDone && !autoRunning && (
-        <div className={[styles.autoDiscoveryDone, cacheTimestamp ? styles.autoDiscoveryDoneCached : ''].join(' ')}>
-          {results.length > 0 ? (
-            cacheTimestamp ? (
-              <>
-                <span>
-                  📋 {results.length} venues · cached{' '}
-                  {new Date(cacheTimestamp).toLocaleString('en-IL', {
-                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
-                  })}
-                </span>
-                <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan Google</button>
-              </>
-            ) : (
-              <>
-                <span>✓ Found {results.length} venue{results.length !== 1 ? 's' : ''} across Israel</span>
-                <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan</button>
-              </>
-            )
-          ) : (
-            <>
-              <span>No venues found — quota may be exceeded</span>
-              <button className={styles.rerunBtn} onClick={handleForceRescan}>↺ Re-scan Google</button>
-            </>
-          )}
         </div>
       )}
 
@@ -2798,7 +2931,7 @@ function VenueDashboard() {
       {results.length > 0 && (
         <section className={styles.resultsSection}>
           <div className={styles.resultsGrid}>
-            {results.map((venue) => (
+            {results.filter(v => !tabSearch.trim() || (v.name ?? '').toLowerCase().includes(tabSearch.toLowerCase()) || (v.city ?? '').toLowerCase().includes(tabSearch.toLowerCase())).map((venue) => (
               <VenueResultCard
                 key={venue.placeId}
                 venue={venue}
@@ -2830,6 +2963,9 @@ function VenueDashboard() {
         </div>
       )}
 
+      </>
+      )}
+
       {/* ── Admin: Edit / Override modal ── */}
       {editingEvent && (
         <EditEventModal
@@ -2856,6 +2992,8 @@ function VenueDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      </div>{/* end mainContent */}
 
     </div>
   )

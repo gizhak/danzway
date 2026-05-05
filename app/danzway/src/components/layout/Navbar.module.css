@@ -161,6 +161,22 @@
     color: #fbbf24;
     background: rgba(245, 158, 11, 0.12);
   }
+
+  .desktopLinkSavedPulse {
+    color: #fbbf24;
+    animation: savedGlow 1.4s ease-in-out infinite;
+  }
+
+  @keyframes savedGlow {
+    0%, 100% {
+      color: #fbbf24;
+      text-shadow: 0 0 6px rgba(251, 191, 36, 0.4);
+    }
+    42% {
+      color: #fff;
+      text-shadow: 0 0 12px rgba(251, 191, 36, 0.9), 0 0 20px rgba(251, 191, 36, 0.4);
+    }
+  }
 }
 
 /* Hamburger styles preserved here — re-enable in Navbar.jsx when side-menu is needed */

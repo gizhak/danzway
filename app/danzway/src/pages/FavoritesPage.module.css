@@ -79,6 +79,29 @@
   margin: 1.25rem 0 0.6rem 0.25rem;
 }
 
+.sectionHeaderToday {
+  color: #fbbf24;
+  font-size: 0.78rem;
+}
+
+.todayCardWrap {
+  margin-bottom: 1rem;
+}
+
+.todayCardWrap > article {
+  border-color: rgba(251, 191, 36, 0.6);
+  animation: todayBorderPulse 2s ease-in-out infinite;
+}
+
+@keyframes todayBorderPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25), 0 0 14px rgba(251, 191, 36, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.55), 0 0 28px rgba(251, 191, 36, 0.25);
+  }
+}
+
 /* ─── Empty state ────────────────────────────────────────── */
 .empty {
   display: flex;

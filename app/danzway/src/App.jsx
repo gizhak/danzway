@@ -51,12 +51,12 @@ export default function App() {
           {/* Post and Profile: routes redirect to home until features are ready */}
           <Route path="/post"    element={<Navigate to="/" replace />} />
           <Route path="/profile" element={<Navigate to="/" replace />} />
-
-          {/* Admin only — guarded both by env flag and by route presence */}
-          {IS_ADMIN && (
-            <Route path="/admin/venues" element={<VenueDiscoveryPage />} />
-          )}
         </Route>
+
+        {/* Admin — standalone, no Layout wrapper (full-screen dashboard) */}
+        {IS_ADMIN && (
+          <Route path="/admin/venues" element={<VenueDiscoveryPage />} />
+        )}
       </Routes>
     </BrowserRouter>
   )

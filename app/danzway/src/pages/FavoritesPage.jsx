@@ -31,15 +31,22 @@ export default function FavoritesPage() {
     if (venuesStatus === 'idle') dispatch(fetchVenues())
   }, [venuesStatus, dispatch])
 
-  const savedEvents = useMemo(() => {
+  const { todayEvents, futureEvents } = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0)
-    return allEvents.filter((e) => {
-      // selectEventsForActiveVenues already filters to today+, but keep guard
-      const isSaved = !!savedIds[e.id]
-      const isUpcoming = e.date ? parseLocalDate(e.date) >= today : true
-      return isSaved && isUpcoming
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+    const todayEvents  = []
+    const futureEvents = []
+    allEvents.forEach((e) => {
+      if (!savedIds[e.id] || !e.date) return
+      const d = parseLocalDate(e.date)
+      if (d < today) return
+      if (d < tomorrow) todayEvents.push(e)
+      else futureEvents.push(e)
     })
+    return { todayEvents, futureEvents }
   }, [allEvents, savedIds])
+
+  const savedEvents = useMemo(() => [...todayEvents, ...futureEvents], [todayEvents, futureEvents])
 
   // Debug
   useEffect(() => {
@@ -91,6 +98,22 @@ export default function FavoritesPage() {
         </div>
       ) : (
         <div className={styles.content}>
+
+          {/* ── Today's events — always first ── */}
+          {showEvents && todayEvents.length > 0 && (
+            <section>
+              <h2 className={`${styles.sectionHeader} ${styles.sectionHeaderToday}`}>
+                🔥 {t('favorites.today', 'היום')}
+              </h2>
+              {todayEvents.map((e) => (
+                <div key={e.id} className={styles.todayCardWrap}>
+                  <EventCard event={e} />
+                </div>
+              ))}
+            </section>
+          )}
+
+          {/* ── Saved venues ── */}
           {showVenues && savedVenues.length > 0 && (
             <section>
               {filter === 'all' && (
@@ -100,12 +123,13 @@ export default function FavoritesPage() {
             </section>
           )}
 
-          {showEvents && savedEvents.length > 0 && (
+          {/* ── Future events ── */}
+          {showEvents && futureEvents.length > 0 && (
             <section>
-              {filter === 'all' && (
+              {(filter === 'all' || todayEvents.length > 0) && (
                 <h2 className={styles.sectionHeader}>{t('favorites.parties')}</h2>
               )}
-              {savedEvents.map((e) => <EventCard key={e.id} event={e} />)}
+              {futureEvents.map((e) => <EventCard key={e.id} event={e} />)}
             </section>
           )}
 

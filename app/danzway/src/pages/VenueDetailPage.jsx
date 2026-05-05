@@ -53,7 +53,7 @@ export default function VenueDetailPage() {
   const swipeStartX = useRef(0)
 
   // Gallery must be computed before hooks so keyboard effect can reference it
-  const venuePhotos = venue?.photos ?? []
+  const venuePhotos = (venue?.photos ?? []).filter(u => !u?.includes('places.googleapis.com'))
   const gallery     = venuePhotos.length > 1 ? venuePhotos.slice(1, 6) : []
 
   // Scroll to top on every venue open
@@ -131,6 +131,7 @@ export default function VenueDetailPage() {
 
   // Hero: manual override → first Google photo → generic fallback
   // gallery is already computed above (before early returns)
+  const safeLogo  = venue.logo?.includes('places.googleapis.com') ? null : venue.logo
   const heroImage = venue.customImageUrl ?? venuePhotos[0] ?? GENERIC_IMAGE
 
   const mapsUrl = coordinates
@@ -221,7 +222,7 @@ export default function VenueDetailPage() {
       >
         {/* Logo + name */}
         <div className={styles.titleRow}>
-          {logo && <img src={logo} alt={name} className={styles.logoAvatar} />}
+          {safeLogo && <img src={safeLogo} alt={name} className={styles.logoAvatar} />}
           <h1 className={styles.title}>{name}</h1>
         </div>
 

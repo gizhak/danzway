@@ -141,6 +141,44 @@ export const selectEventsForActiveVenues = createSelector(
 )
 
 /**
+ * True when the user has a saved event happening TODAY specifically.
+ * Used to pulse the heart icon.
+ */
+export const selectHasTodaySavedEvent = createSelector(
+  (state) => state.app.savedIds,
+  selectEventsForActiveVenues,
+  (savedIds, events) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(today.getDate() + 1)
+    return events.some((ev) => {
+      if (!savedIds[ev.id] || !ev.date) return false
+      const d = new Date(ev.date)
+      return d >= today && d < tomorrow
+    })
+  }
+)
+
+/**
+ * True when the user has anything saved — upcoming event (today+) OR any venue.
+ * Used to show a filled (non-pulsing) heart.
+ */
+export const selectHasAnySaved = createSelector(
+  (state) => state.app.savedIds,
+  (state) => state.app.savedVenueIds,
+  selectEventsForActiveVenues,
+  (savedIds, savedVenueIds, events) => {
+    if (Object.keys(savedVenueIds).length > 0) return true
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return events.some(
+      (ev) => savedIds[ev.id] && ev.date && new Date(ev.date) >= today
+    )
+  }
+)
+
+/**
  * Returns { [placeId]: event } for active isSpecial events (e.g. Facebook birthdays, workshops).
  * Used by MapPage to render gold-glow markers for venues with a special upcoming event.
  */

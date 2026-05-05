@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
+import { selectHasTodaySavedEvent } from '../../store/selectors'
 import { auth } from '../../services/firebase'
 import { trackFeedbackClick } from '../../services/analyticsService'
 import styles from './Navbar.module.css'
@@ -33,10 +35,15 @@ function useLangToggle() {
 export default function Navbar() {
   const { toggle, label } = useLangToggle()
   const { t } = useTranslation()
+  const location = useLocation()
+  const hasTodayEvent = useSelector(selectHasTodaySavedEvent)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   const isAdmin = auth.currentUser?.email === 'guy.izhak.tech@gmail.com'
   const NAV_ITEMS = isAdmin ? ADMIN_NAV : PUBLIC_NAV
+
+  const onSavedPage = location.pathname === '/saved'
+  const pulseSaved  = hasTodayEvent && !onSavedPage
 
   function handleFeedbackToggle() {
     setFeedbackOpen((v) => !v)
@@ -52,18 +59,25 @@ export default function Navbar() {
 
       {/* Desktop nav links — hidden on mobile */}
       <nav className={styles.desktopNav}>
-        {NAV_ITEMS.map(({ to, key, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              isActive ? `${styles.desktopLink} ${styles.desktopLinkActive}` : styles.desktopLink
-            }
-          >
-            {t(`nav.${key}`)}
-          </NavLink>
-        ))}
+        {NAV_ITEMS.map(({ to, key, end }) => {
+          const isSaved = key === 'saved'
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                [
+                  styles.desktopLink,
+                  isActive ? styles.desktopLinkActive : '',
+                  isSaved && pulseSaved ? styles.desktopLinkSavedPulse : '',
+                ].filter(Boolean).join(' ')
+              }
+            >
+              {t(`nav.${key}`)}
+            </NavLink>
+          )
+        })}
       </nav>
 
       <div className={styles.feedbackWrap}>
