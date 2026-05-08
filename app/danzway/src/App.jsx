@@ -9,6 +9,7 @@ import VenueDetailPage from './pages/VenueDetailPage'
 import PartiesPage from './pages/PartiesPage'
 import FavoritesPage from './pages/FavoritesPage'
 import { useEventsSync } from './hooks/useEventsSync'
+import { useAnonymousAuth } from './hooks/useAnonymousAuth'
 import { trackPageView } from './services/analyticsService'
 
 // Post and Profile are disabled until launch — imports kept for future re-activation.
@@ -36,6 +37,7 @@ function PageTracker() {
 
 export default function App() {
   useEventsSync()
+  useAnonymousAuth()
   return (
     <BrowserRouter>
       <PageTracker />

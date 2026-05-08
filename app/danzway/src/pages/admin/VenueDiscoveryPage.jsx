@@ -40,6 +40,7 @@ import {
   approveAllPending,
 } from '../../services/pendingEventsService'
 import { getNextWeekdayDate } from '../../i18n/dateUtils'
+import { countPastAttendance, cleanupPastAttendance, subscribeToAttendance } from '../../services/attendanceService'
 import { trackVenueScan, trackFacebookScan } from '../../services/analyticsService'
 import styles from './VenueDiscoveryPage.module.css'
 
@@ -1468,6 +1469,169 @@ export default function VenueDiscoveryPage() {
   return <VenueDashboard />
 }
 
+// ── Today Attendance Chart ────────────────────────────────────────────────────
+function TodayAttendanceChart() {
+  const allEvents = useSelector(selectEventsForActiveVenues)
+  const [counts,   setCounts]   = useState({})
+  const [saving,   setSaving]   = useState(false)
+  const chartRef = useRef(null)
+
+  const today = new Date().toISOString().split('T')[0]
+
+  const todayEvents = useMemo(
+    () => allEvents.filter(e => e.date === today && !e.isCancelled),
+    [allEvents, today]
+  )
+
+  const todayIds = useMemo(
+    () => todayEvents.map(e => e.id).join(','),
+    [todayEvents]
+  )
+
+  useEffect(() => {
+    if (!todayIds) return
+    const ids   = todayIds.split(',').filter(Boolean)
+    const unsubs = ids.map(id =>
+      subscribeToAttendance(id, (data) => {
+        setCounts(prev => ({ ...prev, [id]: data.count ?? 0 }))
+      })
+    )
+    return () => unsubs.forEach(u => u())
+  }, [todayIds])
+
+  const sorted = useMemo(() =>
+    [...todayEvents]
+      .map(e => ({ ...e, count: counts[e.id] ?? 0 }))
+      .sort((a, b) => b.count - a.count),
+    [todayEvents, counts]
+  )
+
+  const maxCount = Math.max(...sorted.map(e => e.count), 1)
+
+  async function handleShare() {
+    if (!chartRef.current) return
+    setSaving(true)
+    try {
+      const { default: html2canvas } = await import('html2canvas')
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: '#0A192F',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      })
+
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'))
+      const file = new File([blob], `danzway-${today}.png`, { type: 'image/png' })
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'DanzWay — היום בשטח' })
+      } else {
+        const link = document.createElement('a')
+        link.download = `danzway-${today}.png`
+        link.href = URL.createObjectURL(blob)
+        link.click()
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className={`${styles.statsCard} ${styles.chartCard}`}>
+      <div className={styles.statsCardTitle}>📊 היום בשטח — מי הולך לאן?</div>
+
+      <div ref={chartRef} className={styles.chartWrap}>
+        <div className={styles.chartHeader}>
+          <span className={styles.chartTitle}>📊 היום בשטח — מי הולך לאן?</span>
+          <span className={styles.chartDate}>
+            {new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </span>
+        </div>
+
+        {sorted.length === 0 ? (
+          <div className={styles.statsEmpty}>אין מסיבות היום</div>
+        ) : (
+          sorted.map(ev => (
+            <div key={ev.id} className={styles.chartRow}>
+              <span className={styles.chartLabel}>{ev.title ?? ev.venue}</span>
+              <div className={styles.chartBarTrack}>
+                <div
+                  className={styles.chartBar}
+                  style={{ width: ev.count > 0 ? `${Math.max((ev.count / maxCount) * 100, 4)}%` : '0%' }}
+                />
+              </div>
+              <span className={styles.chartCount}>{ev.count}</span>
+            </div>
+          ))
+        )}
+
+        <div className={styles.chartBrand}>danzway-app.web.app</div>
+      </div>
+
+      <button
+        className={styles.rescanBtn}
+        onClick={handleShare}
+        disabled={sorted.length === 0 || saving}
+        style={{ marginTop: '0.75rem' }}
+      >
+        {saving ? 'מכין...' : '📤 שמור / שתף'}
+      </button>
+    </div>
+  )
+}
+
+// ── Attendance Cleanup ────────────────────────────────────────────────────────
+function AttendanceCleanup() {
+  const [staleCount, setStaleCount] = useState(null) // null = loading
+  const [cleaning,   setCleaning]   = useState(false)
+  const [cleaned,    setCleaned]    = useState(null)  // number cleaned last run
+
+  useEffect(() => {
+    countPastAttendance().then(setStaleCount).catch(() => setStaleCount(0))
+  }, [])
+
+  async function handleCleanup() {
+    setCleaning(true)
+    try {
+      const n = await cleanupPastAttendance()
+      setCleaned(n)
+      setStaleCount(0)
+    } catch (e) {
+      alert('שגיאה בניקוי: ' + e.message)
+    } finally {
+      setCleaning(false)
+    }
+  }
+
+  const loading = staleCount === null
+  const hasStale = staleCount > 0
+
+  return (
+    <div className={styles.statsCard}>
+      <div className={styles.statsCardTitle}>🗑️ Attendance Cleanup</div>
+      <div className={styles.statsRow} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
+        <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
+          {loading
+            ? 'בודק רשומות ישנות...'
+            : hasStale
+              ? `נמצאו ${staleCount} רשומות של מסיבות שכבר עברו`
+              : cleaned !== null
+                ? `✓ נוקו ${cleaned} רשומות — הכל נקי`
+                : '✓ אין רשומות ישנות — הכל נקי'
+          }
+        </span>
+        <button
+          className={styles.rescanBtn}
+          onClick={handleCleanup}
+          disabled={!hasStale || cleaning || loading}
+        >
+          {cleaning ? 'מנקה...' : `🗑️ נקה רשומות ישנות${hasStale ? ` (${staleCount})` : ''}`}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Popularity Stats ──────────────────────────────────────────────────────────
 function PopularityStats() {
   const [topVenues, setTopVenues] = useState([])
@@ -1528,6 +1692,10 @@ function PopularityStats() {
             ))
           )}
         </div>
+
+        <AttendanceCleanup />
+
+        <TodayAttendanceChart />
 
       </div>
     </section>

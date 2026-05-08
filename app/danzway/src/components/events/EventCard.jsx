@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { selectIsSaved, toggleSave } from '../../store/appSlice'
+import { selectIsSaved, selectUid, toggleSave } from '../../store/appSlice'
+import { useAttendance } from '../../hooks/useAttendance'
 import { selectVenuesByName } from '../../store/venuesSlice'
 import { relativeDate, shortMonthDay } from '../../i18n/dateUtils'
 import { updateEventSaveCount } from '../../services/saveService'
@@ -12,6 +13,34 @@ import DirectionsSheet from '../ui/DirectionsSheet'
 import styles from './EventCard.module.css'
 
 const GENERIC_IMAGE = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
+
+function PeopleIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  )
+}
 
 function getAvatarInitials(name) {
   return (name ?? '?')
@@ -44,7 +73,9 @@ export default function EventCard({ event }) {
   } = event
 
   const saved        = useSelector(selectIsSaved(id))
+  const uid          = useSelector(selectUid)
   const venuesByName = useSelector(selectVenuesByName)
+  const { count, isGoing, toggle } = useAttendance(id, uid)
   const venueData    = venuesByName[venue]
 
   const isGApi = (u) => u?.includes('places.googleapis.com')
@@ -117,6 +148,28 @@ export default function EventCard({ event }) {
           </div>
         </div>
       </Link>
+
+      {/* ── Attendance ── */}
+      <div className={styles.attendRow}>
+        <span className={styles.attendCount}>
+          <PeopleIcon />
+          <span>{count}</span>
+        </span>
+        <motion.button
+          className={`${styles.attendBtn} ${isGoing ? styles.attendBtnActive : ''}`}
+          onClick={toggle}
+          disabled={!uid}
+          whileTap={{ scale: 0.9 }}
+          animate={isGoing ? { scale: [1, 1.12, 0.95, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {!isGoing && <PlusIcon />}
+          <span>{isGoing
+            ? (lang === 'he' ? 'סימנתי שאני בא/ה ✓' : "I'm going ✓")
+            : (lang === 'he' ? 'האם את/ה בא/ה?' : 'Are you going?')
+          }</span>
+        </motion.button>
+      </div>
 
       {/* ── Style badges ── */}
       {danceStyles.length > 0 && (
