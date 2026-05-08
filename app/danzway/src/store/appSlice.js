@@ -20,6 +20,7 @@ export const fetchEvents = createAsyncThunk('app/fetchEvents', async () => {
 const appSlice = createSlice({
   name: 'app',
   initialState: {
+    uid:           null, // anonymous Firebase uid
     savedIds:      {},   // Record<eventId, true>  — events saved by user
     savedVenueIds: {},   // Record<placeId, true>  — venues saved by user
     styleFilters: [],
@@ -28,6 +29,9 @@ const appSlice = createSlice({
     error: null,
   },
   reducers: {
+    setUid(state, action) {
+      state.uid = action.payload
+    },
     setEvents(state, action) {
       state.events = action.payload
       state.status = 'succeeded'
@@ -80,7 +84,7 @@ const appSlice = createSlice({
   },
 })
 
-export const { setEvents, toggleSave, toggleSaveVenue, toggleStyleFilter } = appSlice.actions
+export const { setUid, setEvents, toggleSave, toggleSaveVenue, toggleStyleFilter } = appSlice.actions
 export default appSlice.reducer
 
 // ─── Selectors ────────────────────────────────────────────
@@ -134,6 +138,7 @@ export const selectStyleFilters  = createSelector(
 // Curried selector — call as useSelector(selectIsSaved(event.id))
 export const selectIsSaved        = (id) => (state) => !!state.app.savedIds[id]
 export const selectIsVenueSaved   = (id) => (state) => !!state.app.savedVenueIds[id]
+export const selectUid           = (state) => state.app.uid
 export const selectAllEvents     = (state) => state.app.events
 export const selectEventsStatus  = (state) => state.app.status
 export const selectEventsError   = (state) => state.app.error
