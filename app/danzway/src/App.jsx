@@ -5,8 +5,10 @@ import HomePage from './pages/HomePage'
 import EventDetailPage from './pages/EventDetailPage'
 import MapPage from './pages/MapPage'
 import VenueDiscoveryPage from './pages/admin/VenueDiscoveryPage'
+import FlyersReviewPage from './pages/admin/FlyersReviewPage'
 import VenueDetailPage from './pages/VenueDetailPage'
 import PartiesPage from './pages/PartiesPage'
+import SpecialEventsPage from './pages/SpecialEventsPage'
 import FavoritesPage from './pages/FavoritesPage'
 import { useEventsSync } from './hooks/useEventsSync'
 import { useAnonymousAuth } from './hooks/useAnonymousAuth'
@@ -22,6 +24,7 @@ const PAGE_TITLES = {
   '/':             'Home',
   '/parties':      'Parties',
   '/saved':        'Saved',
+  '/festivals':    'Festivals',
   '/map':          'Map',
   '/admin/venues': 'Admin',
 }
@@ -45,6 +48,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/"                element={<HomePage />} />
           <Route path="/parties"         element={<PartiesPage />} />
+          <Route path="/festivals"       element={<SpecialEventsPage />} />
           <Route path="/venues/:placeId" element={<VenueDetailPage />} />
           <Route path="/events/:id"      element={<EventDetailPage />} />
           <Route path="/map"             element={<MapPage />} />
@@ -57,7 +61,10 @@ export default function App() {
 
         {/* Admin — standalone, no Layout wrapper (full-screen dashboard) */}
         {IS_ADMIN && (
-          <Route path="/admin/venues" element={<VenueDiscoveryPage />} />
+          <Route path="/admin/venues"  element={<VenueDiscoveryPage />} />
+        )}
+        {IS_ADMIN && (
+          <Route path="/admin/flyers" element={<FlyersReviewPage />} />
         )}
       </Routes>
     </BrowserRouter>

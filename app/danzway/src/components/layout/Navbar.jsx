@@ -8,10 +8,11 @@ import { trackFeedbackClick } from '../../services/analyticsService'
 import styles from './Navbar.module.css'
 
 const PUBLIC_NAV = [
-  { to: '/',        key: 'clubs',   end: true  },
-  { to: '/parties', key: 'parties', end: false },
-  { to: '/saved',   key: 'saved',   end: false },
-  { to: '/map',     key: 'map',     end: false },
+  { to: '/',          key: 'clubs',     end: true  },
+  { to: '/parties',   key: 'parties',   end: false },
+  { to: '/festivals', key: 'festivals', end: false },
+  { to: '/saved',     key: 'saved',     end: false },
+  { to: '/map',       key: 'map',       end: false },
 ]
 
 const ADMIN_NAV = [

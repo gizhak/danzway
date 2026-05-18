@@ -1,0 +1,284 @@
+/* ─── Backdrop ───────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.18s ease;
+}
+
+@media (min-width: 480px) {
+  .backdrop { align-items: center; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── Modal card ─────────────────────────────────────────── */
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  background: rgba(18, 18, 26, 0.98);
+  border: 1px solid rgba(245, 158, 11, 0.30);
+  border-bottom: none;
+  border-radius: 22px 22px 0 0;
+  padding: 1.75rem 1.5rem 2rem;
+  box-shadow:
+    0 -8px 40px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(245, 158, 11, 0.10) inset;
+  animation: slideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 480px) {
+  .modal {
+    border: 1px solid rgba(245, 158, 11, 0.30);
+    border-radius: 22px;
+    animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes popIn {
+  from { transform: scale(0.94); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+/* ─── Close button ───────────────────────────────────────── */
+.closeBtn {
+  position: absolute;
+  top: 1rem;
+  inset-inline-end: 1rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #9ca3af;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.closeBtn:hover { background: rgba(255, 255, 255, 0.16); color: #f3f4f6; }
+
+/* ─── Header ─────────────────────────────────────────────── */
+.header {
+  margin-bottom: 1.25rem;
+  padding-inline-end: 2rem;
+}
+
+.headerIcon {
+  font-size: 1.6rem;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f3f4f6;
+  margin: 0 0 0.3rem;
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ─── Form ───────────────────────────────────────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.04em;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  color: #f3f4f6;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.textarea:focus {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.10);
+}
+
+.textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
+
+.textarea:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.hint {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.errorMsg {
+  font-size: 0.78rem;
+  color: #f87171;
+  margin: 0;
+}
+
+/* ─── Image upload ───────────────────────────────────────── */
+.hiddenFileInput {
+  display: none;
+}
+
+.imagePickerBtn {
+  width: 100%;
+  height: 68px;
+  border-radius: 12px;
+  border: 1px dashed rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.04);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.83rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.imagePickerBtn:hover:not(:disabled) {
+  border-color: rgba(245, 158, 11, 0.65);
+  background: rgba(245, 158, 11, 0.09);
+  color: #fbbf24;
+}
+
+.imagePickerBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.imagePreviewWrap {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(245, 158, 11, 0.30);
+}
+
+.imagePreview {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.imageClearBtn {
+  position: absolute;
+  top: 6px;
+  inset-inline-end: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  color: #f3f4f6;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.imageClearBtn:hover { background: rgba(220, 38, 38, 0.60); }
+
+/* ─── Submit button ──────────────────────────────────────── */
+.submitBtn {
+  height: 48px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  color: #0a0a0a;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.40);
+  transition: box-shadow 0.2s, transform 0.15s, opacity 0.15s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  box-shadow: 0 6px 28px rgba(245, 158, 11, 0.55);
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Success state ──────────────────────────────────────── */
+.success {
+  text-align: center;
+  padding: 1rem 0 0.5rem;
+}
+
+.successIcon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+.successTitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fbbf24;
+  margin: 0 0 0.5rem;
+}
+
+.successText {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 1.5rem;
+  line-height: 1.55;
+}
+
+.doneBtn {
+  height: 44px;
+  padding: 0 2rem;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.40);
+  color: #fbbf24;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.doneBtn:hover { background: rgba(245, 158, 11, 0.22); }

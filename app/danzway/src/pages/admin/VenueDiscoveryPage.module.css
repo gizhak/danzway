@@ -127,6 +127,31 @@
   color: #f5c842;
 }
 
+/* ─── Flyers review nav link (acts like a sidebarTab but routes to /admin/flyers) ── */
+.sidebarFlyersLink {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 9px;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  background: rgba(245, 158, 11, 0.06);
+  color: #fbbf24;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  direction: ltr;
+  margin-top: 0.5rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.sidebarFlyersLink:hover {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.40);
+}
+
 .sidebarDivider {
   height: 1px;
   background: rgba(255,255,255,0.06);

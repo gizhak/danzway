@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { doc, setDoc, updateDoc, serverTimestamp, collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore'
@@ -2711,6 +2712,11 @@ function VenueDashboard() {
             {tab.badge != null ? <span className={styles.sidebarTabBadge}>{tab.badge}</span> : null}
           </button>
         ))}
+        {/* ── Flyers review link — badge count lives in FlyersReviewPage itself ── */}
+        <Link to="/admin/flyers" className={styles.sidebarFlyersLink}>
+          <span className={styles.sidebarTabIcon}>⭐</span>
+          <span className={styles.sidebarTabLabel}>Flyers</span>
+        </Link>
       </nav>
 
       {/* ── Main content ── */}

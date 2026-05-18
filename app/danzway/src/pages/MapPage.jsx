@@ -17,7 +17,7 @@ import {
   selectEventsStatus,
 } from '../store/appSlice'
 import { selectActiveVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
-import { selectNextEventByVenueMap, selectSpecialEventsByVenueMap } from '../store/selectors'
+import { selectNextEventByVenueMap, selectSpecialEventsByVenueMap, selectStandaloneFestivals } from '../store/selectors'
 import { parseLocalDate, venueCity } from '../i18n/dateUtils'
 import { trackVenueClick } from '../services/analyticsService'
 import StyleFilterRow from '../components/events/StyleFilterRow'
@@ -167,6 +167,87 @@ function ClusteredMarkers({ venues, nextEventsByVenue, specialEventsByVenue, sel
   })
 }
 
+// ─── Standalone festival star marker (Scenario B) ────────────────────────────
+function StandaloneFestivalMarker({ event, isSelected, onClick }) {
+  const [markerRef] = useAdvancedMarkerRef()
+  return (
+    <AdvancedMarker
+      ref={markerRef}
+      position={{ lat: event.coordinates.latitude, lng: event.coordinates.longitude }}
+      onClick={onClick}
+      zIndex={isSelected ? 120 : 90}
+    >
+      <div className={`${styles.festivalPin} ${isSelected ? styles.festivalPinSelected : ''}`}>
+        ★
+      </div>
+    </AdvancedMarker>
+  )
+}
+
+// ─── Festival bottom-sheet popup (Scenario B) ─────────────────────────────────
+function FestivalPopup({ event, onClose }) {
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language
+
+  const displayDate = event.startDate ?? event.date
+  const endDateVal  = event.endDate
+  const locale = lang === 'he' ? 'he-IL' : 'en-US'
+  const fmt    = (d) => parseLocalDate(d).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+
+  const dateLabel = (displayDate && endDateVal && endDateVal !== displayDate)
+    ? `${fmt(displayDate)} – ${fmt(endDateVal)}`
+    : displayDate
+      ? fmt(displayDate)
+      : null
+
+  return (
+    <div className={styles.popup}>
+      <button className={styles.popupClose} onClick={onClose} aria-label="Close">✕</button>
+
+      <div className={styles.festivalPopupHeader}>
+        <div className={styles.festivalStarIcon}>★</div>
+        <div className={styles.popupMeta}>
+          <div className={styles.festivalPopupTitle}>{event.title}</div>
+          {dateLabel && (
+            <div className={styles.festivalPopupDate}>📅 {dateLabel}</div>
+          )}
+          {event.location && (
+            <div className={styles.popupCity}>📍 {event.location}</div>
+          )}
+        </div>
+      </div>
+
+      {event.styles?.length > 0 && (
+        <div className={styles.popupStyles}>
+          {event.styles.map((s) => (
+            <span key={s} className={styles.popupBadge}>{t(`styles.${s}`, s)}</span>
+          ))}
+        </div>
+      )}
+
+      <div className={styles.popupActions}>
+        {event.ticketLink && (
+          <a
+            href={event.ticketLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.festivalTicketBtn}
+          >
+            🎟 {t('map.buyTickets')}
+          </a>
+        )}
+        <Link
+          to={`/events/${event.id}`}
+          className={styles.popupViewBtn}
+          onClick={onClose}
+        >
+          {t('map.viewEvent')}
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 // ─── Map controller — exposes the map instance outside the Map tree ──────────
 function MapController({ mapRef }) {
   const map = useMap()
@@ -246,19 +327,22 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
 
       {specialEvent && (
         <div className={styles.popupSpecial}>
-          <div className={styles.popupFbLabel}>★ Event from Facebook</div>
+          <div className={styles.popupFbLabel}>★ {t('map.specialEvent')}</div>
           <div className={styles.popupSpecialTitle}>{specialEvent.title?.slice(0, 80)}</div>
-          {specialEvent.date && (
+          {(specialEvent.startDate ?? specialEvent.date) && (
             <div className={styles.popupSpecialTime}>
               {(() => {
-                const diff2 = getDiff(specialEvent.date)
+                const displayDate = specialEvent.startDate ?? specialEvent.date
+                const endDateVal  = specialEvent.endDate
                 const locale = lang === 'he' ? 'he-IL' : 'en-US'
+                const diff2  = getDiff(displayDate)
+                const fmt    = (d) => parseLocalDate(d).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+                if (endDateVal && endDateVal !== displayDate) {
+                  return `${fmt(displayDate)} – ${fmt(endDateVal)}`
+                }
                 if (diff2 === 0) return t('map.tonight', { time: specialEvent.time ?? '' })
                 if (diff2 === 1) return t('map.tomorrow', { time: specialEvent.time ?? '' })
-                return t('map.eventDate', {
-                  date: parseLocalDate(specialEvent.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
-                  time: specialEvent.time ?? '',
-                })
+                return t('map.eventDate', { date: fmt(displayDate), time: specialEvent.time ?? '' })
               })()}
             </div>
           )}
@@ -311,8 +395,10 @@ export default function MapPage() {
   const eventsStatus         = useSelector(selectEventsStatus)
   const nextEventsByVenue    = useSelector(selectNextEventByVenueMap)
   const specialEventsByVenue = useSelector(selectSpecialEventsByVenueMap)
+  const standaloneFestivals  = useSelector(selectStandaloneFestivals)
 
-  const [selectedVenue, setSelectedVenue] = useState(null)
+  const [selectedVenue,    setSelectedVenue]    = useState(null)
+  const [selectedFestival, setSelectedFestival] = useState(null)
   const [userLocation,  setUserLoc]       = useState(null)
   const [mapCenter,     setMapCenter]     = useState(DEFAULT_CENTER)
   const mapRef = useRef(null)
@@ -367,10 +453,19 @@ export default function MapPage() {
 
   const handleMarkerClick = useCallback((venue) => {
     setSelectedVenue(venue)
+    setSelectedFestival(null)
     trackVenueClick(venue.name, venue.placeId)
   }, [])
 
-  const handleClose = useCallback(() => setSelectedVenue(null), [])
+  const handleFestivalClick = useCallback((event) => {
+    setSelectedFestival(event)
+    setSelectedVenue(null)
+  }, [])
+
+  const handleClose = useCallback(() => {
+    setSelectedVenue(null)
+    setSelectedFestival(null)
+  }, [])
 
   const handleLocate = useCallback(() => {
     if (!navigator.geolocation) return
@@ -424,6 +519,15 @@ export default function MapPage() {
             selectedPlaceId={selectedVenue?.placeId}
             onMarkerClick={handleMarkerClick}
           />
+
+          {standaloneFestivals.map((festival) => (
+            <StandaloneFestivalMarker
+              key={festival.id}
+              event={festival}
+              isSelected={selectedFestival?.id === festival.id}
+              onClick={() => handleFestivalClick(festival)}
+            />
+          ))}
         </Map>
 
         {/* ── Floating style filter bar + disclaimer ── */}
@@ -444,6 +548,13 @@ export default function MapPage() {
               specialEvent={specialEventsByVenue[selectedVenue.placeId] ?? null}
               onClose={handleClose}
             />
+          </div>
+        )}
+
+        {/* ── Bottom sheet: standalone festival card ── */}
+        {selectedFestival && (
+          <div className={styles.sheet} key={selectedFestival.id}>
+            <FestivalPopup event={selectedFestival} onClose={handleClose} />
           </div>
         )}
 

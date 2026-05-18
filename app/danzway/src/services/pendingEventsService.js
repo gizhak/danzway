@@ -21,6 +21,62 @@ import {
 import { db } from './firebase'
 import { saveEventToFirestore } from './eventsService'
 
+// ─── User Submission ───────────────────────────────────────────────────────────
+
+/**
+ * Saves a raw user-submitted event text into pending_events for admin review + AI parsing.
+ * All schema fields start null/empty — the AI parser fills them in.
+ */
+export async function submitUserEvent(rawText, uid, flyerImageUrl = null) {
+  const id = `user-${uid ?? 'anon'}-${Date.now()}`
+  await setDoc(doc(db, COLL, id), {
+    id,
+    rawText,
+    flyerImageUrl,
+    status:      'raw',          // 'raw' = waiting for manual admin parse; no AI auto-triggered
+    source:      'user_submission',
+    submittedBy: uid ?? 'anonymous',
+    submittedAt: serverTimestamp(),
+    isSpecial:   true,
+    // Schema fields — filled by AI parser or admin before approval
+    title:       null,
+    startDate:   null,
+    endDate:     null,
+    date:        null,
+    time:        null,
+    venue:       null,
+    location:    null,
+    placeId:     null,
+    styles:      [],
+    description: null,
+    price:       null,
+    currency:    'ILS',
+    ticketLink:  null,
+    coordinates: null,
+  })
+  return id
+}
+
+// ─── Load user submissions for admin review ────────────────────────────────────
+
+/** Returns user-submitted events that have not yet been parsed/approved (status:'raw'). */
+export async function loadUserSubmissions() {
+  const snap = await getDocs(
+    query(
+      collection(db, COLL),
+      where('status', '==', 'raw'),
+      where('source', '==', 'user_submission')
+    )
+  )
+  return snap.docs.map(d => {
+    const data = d.data()
+    return {
+      ...data,
+      submittedAt: data.submittedAt?.toMillis?.() ?? data.submittedAt ?? null,
+    }
+  }).sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0))
+}
+
 const COLL = 'pending_events'
 
 // ─── Load ──────────────────────────────────────────────────────────────────────
@@ -85,17 +141,21 @@ export async function upsertPendingEvents(candidates, existingPend = [], liveEve
 export async function approveEvent(pending) {
   await saveEventToFirestore({
     title:        pending.title,
-    date:         pending.date,
+    date:         pending.startDate   ?? pending.date,
+    startDate:    pending.startDate   ?? null,
+    endDate:      pending.endDate     ?? null,
     time:         pending.time,
     venue:        pending.venue,
     location:     pending.location,
-    placeId:      pending.placeId,
+    placeId:      pending.placeId     ?? null,
     styles:       pending.styles      ?? [],
     description:  pending.description ?? '',
     price:        pending.price       ?? '0',
     currency:     pending.currency    ?? 'ILS',
     whatsapp:     pending.whatsapp    ?? null,
-    isDiscovered: true,
+    ticketLink:   pending.ticketLink  ?? null,
+    coordinates:  pending.coordinates ?? null,
+    isDiscovered: pending.source !== 'user_submission',
     isSpecial:    pending.isSpecial   ?? false,
     source:       pending.source      ?? null,
     sourceUrl:    pending.sourceUrl   ?? pending.url ?? null,

@@ -1,12 +1,13 @@
 {
   "nav": {
-    "clubs":   "CLUBS",
-    "parties": "PARTIES",
-    "saved":   "SAVED",
-    "map":     "MAP",
-    "post":    "POST",
-    "profile": "PROFILE",
-    "venues":  "VENUES"
+    "clubs":     "CLUBS",
+    "parties":   "PARTIES",
+    "festivals": "FESTIVALS",
+    "saved":     "SAVED",
+    "map":       "MAP",
+    "post":      "POST",
+    "profile":   "PROFILE",
+    "venues":    "VENUES"
   },
   "home": {
     "hero": {
@@ -72,6 +73,7 @@
     "share":          "SHARE",
     "getDirections":  "TAKE ME THERE",
     "whatsappRsvp":   "WHATSAPP RSVP",
+    "buyTickets":   "Buy Tickets",
     "moreOptions":  "More options",
     "viewDetails":  "View details for {{title}}",
     "empty":        "No events found.",
@@ -133,6 +135,34 @@
     "title":    "Post an Event",
     "subtitle": "Coming soon — list your dance event and reach the community."
   },
+  "submitEvent": {
+    "trigger":      "Found a special event? Share it! ⭐",
+    "title":        "Submit a Special Event",
+    "subtitle":     "Paste a Facebook/Instagram post or any event description. Our team will review and publish it.",
+    "label":        "EVENT DESCRIPTION",
+    "placeholder":  "Paste the event post here — title, date, venue, ticket link, anything you have…",
+    "imageLabel":   "FLYER IMAGE (optional)",
+    "imageBtn":     "Tap to attach a flyer photo",
+    "hint":         "In Hebrew or English, any format. We'll extract the details and review before publishing.",
+    "submit":       "Submit for Review",
+    "saving":       "Submitting…",
+    "done":         "Close",
+    "successTitle": "Thank you! ⭐",
+    "successText":  "Your submission is queued for review. If it's approved it will appear in the Festivals tab within 24 hours."
+  },
+  "festivals": {
+    "hero": {
+      "title":     "Special",
+      "highlight": "Events & Festivals",
+      "subtitle":  "Premium events · Multi-day festivals · Limited tickets"
+    },
+    "empty": {
+      "noEvents": {
+        "title": "No special events yet",
+        "text":  "Check back soon — curated festivals and special nights will appear here."
+      }
+    }
+  },
   "map": {
     "notConfigured": {
       "title": "Map not configured",
@@ -145,7 +175,10 @@
     "viewVenue":      "View Venue →",
     "tonight":        "Tonight · {{time}}",
     "tomorrow":       "Tomorrow · {{time}}",
-    "eventDate":      "{{date}} · {{time}}"
+    "eventDate":      "{{date}} · {{time}}",
+    "specialEvent":   "Special Event",
+    "buyTickets":     "Buy Tickets",
+    "viewEvent":      "View Event →"
   },
   "search": {
     "placeholder": "Search events, styles, cities…",
