@@ -205,7 +205,7 @@
 .popupClose {
   position: absolute;
   top: 0.8rem;
-  right: 0.8rem;
+  inset-inline-end: 0.8rem;
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -231,7 +231,7 @@
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.65rem;
-  padding-right: 1.5rem;
+  padding-inline-end: 1.5rem;
   /* avoid overlap with close button */
 }
 
@@ -415,7 +415,7 @@
   position: absolute;
   /* Sit just above the BottomNav — aligns with Google Maps attribution row */
   bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 50px);
-  right: 10px;
+  inset-inline-end: 10px;
   z-index: 15;
   width: 40px;
   height: 40px;
@@ -504,6 +504,5 @@
   font-size: 0.63rem;
   color: rgba(255, 255, 255, 0.38);
   text-align: center;
-  direction: rtl;
   line-height: 1.4;
 }

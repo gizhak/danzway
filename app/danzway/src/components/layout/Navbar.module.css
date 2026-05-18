@@ -27,10 +27,10 @@
   background-clip: text;
 }
 
-/* Language toggle button — sits at the inline-end (right in LTR, left in RTL) */
+/* Language toggle button — always on the right */
 .langBtn {
   position: absolute;
-  inset-inline-end: 1.25rem;
+  right: 1.25rem;
   height: 32px;
   min-width: 42px;
   padding: 0 0.55rem;
@@ -71,7 +71,7 @@
 /* ── Feedback button ── */
 .feedbackWrap {
   position: absolute;
-  inset-inline-start: 1.25rem;
+  left: 1.25rem;
 }
 
 .feedbackBtn {
@@ -117,7 +117,6 @@
   margin: 0 0 0.4rem;
   font-size: 0.8rem;
   color: #d1d5db;
-  direction: rtl;
 }
 
 .feedbackEmail {

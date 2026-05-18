@@ -95,7 +95,7 @@ export default function Navbar() {
           <>
             <div className={styles.feedbackBackdrop} onClick={() => setFeedbackOpen(false)} />
             <div className={styles.feedbackPopup}>
-              <p className={styles.feedbackText}>שאלות או בעיות? צרו קשר:</p>
+              <p className={styles.feedbackText}>{t('feedback.text')}</p>
               <a
                 href="mailto:guy.izhak.tech@gmail.com"
                 className={styles.feedbackEmail}
