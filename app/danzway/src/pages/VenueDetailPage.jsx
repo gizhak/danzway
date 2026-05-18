@@ -349,7 +349,7 @@ export default function VenueDetailPage() {
         )}
 
         <p className={styles.betaDisclaimer}>
-          DanzWay Beta | המידע נסרק אוטומטית ממקורות ציבוריים. מומלץ לוודא פרטים מול המועדון לפני ההגעה.
+          {t('common.disclaimer')}
         </p>
 
       </motion.div>

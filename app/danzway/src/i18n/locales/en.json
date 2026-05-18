@@ -153,10 +153,11 @@
     "clear":       "Clear search"
   },
   "common": {
-    "tonight":  "Tonight",
-    "tomorrow": "Tomorrow",
-    "loading":  "Loading…",
-    "next":     "NEXT"
+    "tonight":    "Tonight",
+    "tomorrow":   "Tomorrow",
+    "loading":    "Loading…",
+    "next":       "NEXT",
+    "disclaimer": "DanzWay Beta | Data is automatically scanned from public sources. Please verify details with the venue before attending."
   },
   "styles": {
     "all":     "All Styles",
@@ -167,5 +168,8 @@
   },
   "footer": {
     "copy": "© 2026 DanzWay — Find your next dance event."
+  },
+  "feedback": {
+    "text": "Questions or issues? Contact us:"
   }
 }

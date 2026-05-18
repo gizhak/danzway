@@ -13,7 +13,6 @@
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.32);
   text-align: center;
-  direction: rtl;
   line-height: 1.5;
 }
 
@@ -309,7 +308,7 @@
   font-weight: 600;
   color: var(--color-brand-amber-light);
   text-decoration: none;
-  text-align: right;
+  text-align: start;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   transition: color 0.15s ease;
 }
@@ -504,7 +503,7 @@
 .lightboxClose {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  inset-inline-end: 1rem;
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -550,8 +549,8 @@
   background: rgba(255, 255, 255, 0.26);
 }
 
-.lightboxNavPrev { left: 1rem; }
-.lightboxNavNext { right: 1rem; }
+.lightboxNavPrev { inset-inline-start: 1rem; }
+.lightboxNavNext { inset-inline-end: 1rem; }
 
 /* Counter pill */
 .lightboxCounter {

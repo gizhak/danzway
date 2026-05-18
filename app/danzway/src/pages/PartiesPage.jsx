@@ -140,7 +140,7 @@ export default function PartiesPage() {
       {/* ── Beta disclaimer ── */}
       {!isLoading && (
         <div className={styles.disclaimer}>
-          DanzWay Beta | המידע נסרק אוטומטית ממקורות ציבוריים. מומלץ לוודא פרטים מול המועדון לפני ההגעה.
+          {t('common.disclaimer')}
         </div>
       )}
 

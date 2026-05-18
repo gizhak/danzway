@@ -432,9 +432,7 @@ export default function MapPage() {
             activeFilters={styleFilters}
             onSelect={(id) => dispatch(toggleStyleFilter(id))}
           />
-          <div className={styles.disclaimer}>
-            DanzWay Beta | המידע נסרק אוטומטית ממקורות ציבוריים. מומלץ לוודא פרטים מול המועדון לפני ההגעה.
-          </div>
+          <div className={styles.disclaimer}>{t('common.disclaimer')}</div>
         </div>
 
         {/* ── Bottom sheet: selected venue card ── */}
