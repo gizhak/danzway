@@ -3,10 +3,11 @@ scrapers/.env
 *.env.local
 fb_auth.json
 
+# Dependencies — all node_modules everywhere in the repo
+node_modules/
+
 # Python
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-
-functions/node_modules/
