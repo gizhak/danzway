@@ -1,71 +1,87 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { selectSavedIds, selectSavedVenueIds } from '../store/appSlice'
+import { selectSavedIds, selectSavedVenueIds, fetchEvents, selectEventsStatus } from '../store/appSlice'
 import {
   selectActiveVenues,
   selectVenuesStatus,
   fetchVenues,
 } from '../store/venuesSlice'
-import { selectEventsForActiveVenues } from '../store/selectors'
+import { selectEventsForActiveVenues, selectActiveSpecialEvents } from '../store/selectors'
 import { parseLocalDate } from '../i18n/dateUtils'
 import EventCard from '../components/events/EventCard'
 import VenueCard from '../components/venues/VenueCard'
 import styles from './FavoritesPage.module.css'
 
-const FILTERS = ['all', 'parties', 'clubs']
+const FILTERS = ['all', 'parties', 'festivals', 'clubs']
 
 export default function FavoritesPage() {
   const [filter, setFilter] = useState('all')
   const dispatch             = useDispatch()
   const { t }                = useTranslation()
 
-  const savedIds      = useSelector(selectSavedIds)
-  const savedVenueIds = useSelector(selectSavedVenueIds)
-  // Use the same merged list PartiesPage uses (real + recurring virtual events)
-  const allEvents     = useSelector(selectEventsForActiveVenues)
-  const allVenues     = useSelector(selectActiveVenues)
-  const venuesStatus  = useSelector(selectVenuesStatus)
+  const savedIds        = useSelector(selectSavedIds)
+  const savedVenueIds   = useSelector(selectSavedVenueIds)
+  const allEvents       = useSelector(selectEventsForActiveVenues)
+  const specialEvents   = useSelector(selectActiveSpecialEvents)
+  const allVenues       = useSelector(selectActiveVenues)
+  const venuesStatus    = useSelector(selectVenuesStatus)
+  const eventsStatus    = useSelector(selectEventsStatus)
 
   useEffect(() => {
     if (venuesStatus === 'idle') dispatch(fetchVenues())
   }, [venuesStatus, dispatch])
 
+  useEffect(() => {
+    if (eventsStatus === 'idle') dispatch(fetchEvents())
+  }, [eventsStatus, dispatch])
+
   const { todayEvents, futureEvents } = useMemo(() => {
-    const today = new Date(); today.setHours(0, 0, 0, 0)
+    const today    = new Date(); today.setHours(0, 0, 0, 0)
     const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
     const todayEvents  = []
     const futureEvents = []
-    allEvents.forEach((e) => {
+    // Merge regular + special so today's festivals get the 🔥 section (deduplicated)
+    const allSaved = [...allEvents, ...specialEvents].filter(
+      (e, i, arr) => arr.findIndex(x => x.id === e.id) === i
+    )
+    allSaved.forEach((e) => {
       if (!savedIds[e.id] || !e.date) return
       const d = parseLocalDate(e.date)
       if (d < today) return
       if (d < tomorrow) todayEvents.push(e)
-      else futureEvents.push(e)
+      else if (!e.isSpecial) futureEvents.push(e)  // future specials → festivals section only
     })
     return { todayEvents, futureEvents }
-  }, [allEvents, savedIds])
+  }, [allEvents, specialEvents, savedIds])
 
   const savedEvents = useMemo(() => [...todayEvents, ...futureEvents], [todayEvents, futureEvents])
 
-  // Debug
-  useEffect(() => {
-    console.log('[Favorites] allEvents:', allEvents.length, '| savedIds:', Object.keys(savedIds), '| savedEvents:', savedEvents.length)
-  }, [allEvents, savedIds, savedEvents])
+  // Future saved special events only (today's already in 🔥 section)
+  const savedSpecialEvents = useMemo(() => {
+    const today    = new Date(); today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+    return specialEvents.filter((e) => {
+      if (!savedIds[e.id] || !e.date) return false
+      return parseLocalDate(e.date) >= tomorrow
+    })
+  }, [specialEvents, savedIds])
 
   const savedVenues = useMemo(
     () => allVenues.filter((v) => savedVenueIds[v.placeId]),
     [allVenues, savedVenueIds]
   )
 
-  const showEvents = filter === 'all' || filter === 'parties'
-  const showVenues = filter === 'all' || filter === 'clubs'
+  const showEvents    = filter === 'all' || filter === 'parties'
+  const showFestivals = filter === 'all' || filter === 'festivals'
+  const showVenues    = filter === 'all' || filter === 'clubs'
 
   const totalCount =
-    (showEvents ? savedEvents.length : 0) +
-    (showVenues ? savedVenues.length : 0)
+    (showEvents    ? savedEvents.length        : 0) +
+    (showFestivals ? savedSpecialEvents.length : 0) +
+    (showVenues    ? savedVenues.length        : 0)
 
-  const isEmpty = savedEvents.length === 0 && savedVenues.length === 0
+  const isEmpty = savedEvents.length === 0 && savedVenues.length === 0 && savedSpecialEvents.length === 0
 
   return (
     <>
@@ -124,6 +140,16 @@ export default function FavoritesPage() {
                   <EventCard event={e} />
                 </div>
               ))}
+            </section>
+          )}
+
+          {/* ── Saved festivals / special events ── */}
+          {showFestivals && savedSpecialEvents.length > 0 && (
+            <section>
+              {filter === 'all' && (
+                <h2 className={styles.sectionHeader}>⭐ {t('favorites.festivals', 'פסטיבלים')}</h2>
+              )}
+              {savedSpecialEvents.map((e) => <EventCard key={e.id} event={e} />)}
             </section>
           )}
 

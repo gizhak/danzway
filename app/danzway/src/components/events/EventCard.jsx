@@ -69,7 +69,12 @@ export default function EventCard({ event }) {
     image,
     placePhoto,
     description,
-    isRecurring = false,
+    isRecurring  = false,
+    isSpecial    = false,
+    ticketLink,
+    startDate,
+    endDate,
+    coordinates: eventCoords,
   } = event
 
   const saved        = useSelector(selectIsSaved(id))
@@ -81,11 +86,25 @@ export default function EventCard({ event }) {
   const isGApi = (u) => u?.includes('places.googleapis.com')
   const resolvedLogo  = isGApi(_venueLogo)  ? null : (_venueLogo  ?? (isGApi(venueData?.logo)  ? null : venueData?.logo)  ?? null)
   const resolvedPhoto = isGApi(_venuePhoto) ? null : (_venuePhoto ?? venueData?.customImageUrl ?? (venueData?.photos ?? []).find(u => !isGApi(u)) ?? (isGApi(placePhoto) ? null : placePhoto) ?? null)
-  const heroImage     = resolvedLogo || resolvedPhoto || image || GENERIC_IMAGE
-  const coords        = venueData?.coordinates ?? null
+  // Special events: show the flyer (event.image) as hero, not the venue photo
+  const heroImage = (isSpecial && image)
+    ? image
+    : (resolvedLogo || resolvedPhoto || image || GENERIC_IMAGE)
+  const venueCoords = venueData?.coordinates ?? null
+  const coords = venueCoords ?? (
+    eventCoords?.latitude
+      ? { lat: eventCoords.latitude, lng: eventCoords.longitude }
+      : null
+  )
 
-  const relDate        = relativeDate(date, t, lang)
-  const { month, day, weekday } = shortMonthDay(date, lang)
+  const displayDate = startDate ?? date
+  const relDate     = relativeDate(displayDate, t, lang)
+  const { month, day, weekday } = shortMonthDay(displayDate, lang)
+
+  const hasDateRange = startDate && endDate && startDate !== endDate
+  const { month: endMonth, day: endDay } = hasDateRange
+    ? shortMonthDay(endDate, lang)
+    : { month: null, day: null }
 
   const hashtags = danceStyles
     .map((s) => `#${s.toLowerCase().replace(/\s+/g, '')}`)
@@ -111,7 +130,7 @@ export default function EventCard({ event }) {
   }
 
   return (
-    <article className={styles.card}>
+    <article className={`${styles.card} ${isSpecial ? styles.cardSpecial : ''}`}>
 
       {/* ── Header row ── */}
       <div className={styles.header}>
@@ -125,8 +144,11 @@ export default function EventCard({ event }) {
           }
           <div className={styles.venueDate}>
             <span className={styles.relDate}>{relDate}</span>
-            <span className={styles.weekdayChip}>{weekday}</span>
-            {time && <span className={styles.timeChip}>🕐 {time}</span>}
+            {!hasDateRange && <span className={styles.weekdayChip}>{weekday}</span>}
+            {hasDateRange
+              ? <span className={styles.dateRangeChip}>{month} {day} – {endMonth} {endDay}</span>
+              : time && <span className={styles.timeChip}>🕐 {time}</span>
+            }
           </div>
         </div>
         <button className={styles.menuBtn} aria-label={t('event.moreOptions')}>···</button>
@@ -142,6 +164,7 @@ export default function EventCard({ event }) {
             onError={(e) => { e.currentTarget.src = GENERIC_IMAGE; e.currentTarget.onerror = null }}
           />
           <div className={styles.imageOverlay} />
+          {isSpecial && <span className={styles.specialBadge}>⭐ Special</span>}
           <div className={styles.dateBadge}>
             <div className={styles.dateBadgeMonth}>{month}</div>
             <div className={styles.dateBadgeDay}>{day}</div>
@@ -206,14 +229,27 @@ export default function EventCard({ event }) {
         </button>
       </div>
 
+      {/* ── Buy Tickets CTA (special events only) ── */}
+      {ticketLink && (
+        <a
+          href={ticketLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.ticketBtn}
+        >
+          🎟 {t('event.buyTickets')}
+        </a>
+      )}
+
       {/* ── Get Directions CTA ── */}
-      <button
-        className={styles.rsvpBtn}
-        onClick={() => setShowDirections(true)}
-      >
-        <span>📍</span>
-        {t('event.getDirections')}
-      </button>
+      {coords && (
+        <button
+          className={styles.rsvpBtn}
+          onClick={() => setShowDirections(true)}
+        >
+          {t('event.getDirections')}
+        </button>
+      )}
 
       {showDirections && (
         <DirectionsSheet

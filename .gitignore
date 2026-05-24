@@ -1,10 +1,20 @@
 # Secrets — never commit
 scrapers/.env
 *.env.local
+*.secret.local
 fb_auth.json
+
+# Dependencies — all node_modules everywhere in the repo
+node_modules/
 
 # Python
 __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# Firebase emulator artifacts
+*-debug.log
+.runtimeconfig.json
+firebase-export-*/
+.firebase/

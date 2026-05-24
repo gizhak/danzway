@@ -1,0 +1,6 @@
+name = "danzway-flyer-parser"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+CF_ACCOUNT_ID = "a66982a8d8af5dcc29dac528c5da3ff4"

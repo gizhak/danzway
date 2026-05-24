@@ -1,17 +1,18 @@
 {
   "nav": {
-    "clubs":   "CLUBS",
-    "parties": "PARTIES",
-    "saved":   "SAVED",
-    "map":     "MAP",
-    "post":    "POST",
-    "profile": "PROFILE",
-    "venues":  "VENUES"
+    "clubs":     "CLUBS",
+    "parties":   "PARTIES",
+    "festivals": "SPECIALS",
+    "saved":     "SAVED",
+    "map":       "MAP",
+    "post":      "POST",
+    "profile":   "PROFILE",
+    "venues":    "VENUES"
   },
   "home": {
     "hero": {
-      "title":     "Find your next",
-      "highlight": "dance club",
+      "title":     "Place",
+      "highlight": "to Dance",
       "subtitle":  "Salsa · Bachata · Kizomba · Zouk and more across Israel"
     },
     "count_one":   "{{count}} club found",
@@ -58,11 +59,12 @@
   "favorites": {
     "title":        "Saved",
     "subtitle":     "Your saved clubs and parties",
-    "filter_all":     "All",
-    "filter_parties": "Parties",
-    "filter_clubs":   "Clubs",
+    "filter_all":       "All",
+    "filter_parties":   "Parties",
+    "filter_festivals": "Specials",
+    "filter_clubs":     "Venues",
     "parties":      "Parties",
-    "clubs":        "Clubs",
+    "clubs":        "Saved Spots",
     "emptyTitle":   "Nothing saved yet",
     "emptyText":    "Tap ♡ on any venue or event to save it here."
   },
@@ -72,6 +74,7 @@
     "share":          "SHARE",
     "getDirections":  "TAKE ME THERE",
     "whatsappRsvp":   "WHATSAPP RSVP",
+    "buyTickets":   "Buy Tickets",
     "moreOptions":  "More options",
     "viewDetails":  "View details for {{title}}",
     "empty":        "No events found.",
@@ -133,6 +136,35 @@
     "title":    "Post an Event",
     "subtitle": "Coming soon — list your dance event and reach the community."
   },
+  "submitEvent": {
+    "trigger":      "Found a special event? Share it! ⭐",
+    "title":        "Submit a Special Event",
+    "subtitle":     "Upload a flyer photo — our AI will read the details automatically.",
+    "imageLabel":   "FLYER PHOTO",
+    "imageBtn":     "Tap to upload a flyer image",
+    "extraToggle":  "+ Add extra details (optional)",
+    "label":        "EXTRA DETAILS",
+    "placeholder":  "Any extra info — WhatsApp link, notes, corrections…",
+    "hint":         "Our AI reads the image and extracts date, venue, price and more. We review before publishing.",
+    "submit":       "Submit for Review",
+    "saving":       "Submitting…",
+    "done":         "Close",
+    "successTitle": "Thank you!",
+    "successText":  "Your submission is queued for review. If it's approved it will appear in the Specials tab within 24 hours."
+  },
+  "festivals": {
+    "hero": {
+      "title":     "Everything",
+      "highlight": "Happening Here",
+      "subtitle":  "Premium events · Multi-day festivals · Limited tickets"
+    },
+    "empty": {
+      "noEvents": {
+        "title": "No special events yet",
+        "text":  "Check back soon — curated festivals and special nights will appear here."
+      }
+    }
+  },
   "map": {
     "notConfigured": {
       "title": "Map not configured",
@@ -145,7 +177,10 @@
     "viewVenue":      "View Venue →",
     "tonight":        "Tonight · {{time}}",
     "tomorrow":       "Tomorrow · {{time}}",
-    "eventDate":      "{{date}} · {{time}}"
+    "eventDate":      "{{date}} · {{time}}",
+    "specialEvent":   "Special Event",
+    "buyTickets":     "Buy Tickets",
+    "viewEvent":      "View Event →"
   },
   "search": {
     "placeholder": "Search events, styles, cities…",
@@ -157,7 +192,7 @@
     "tomorrow":   "Tomorrow",
     "loading":    "Loading…",
     "next":       "NEXT",
-    "disclaimer": "DanzWay Beta | Data is automatically scanned from public sources. Please verify details with the venue before attending."
+    "disclaimer": "DanzWay Beta 2 | Data is automatically scanned from public sources. Please verify details with the venue before attending."
   },
   "styles": {
     "all":     "All Styles",
@@ -171,5 +206,19 @@
   },
   "feedback": {
     "text": "Questions or issues? Contact us:"
+  },
+  "update": {
+    "message": "A new version of DanzWay is available!",
+    "action":  "Refresh"
+  },
+  "whatsNew": {
+    "badge": "Beta 2 — New",
+    "title": "What's new in DanzWay?",
+    "items": [
+      { "text": "Specials tab — festivals & special events, with the ability to submit a flyer and add an event" },
+      { "text": "The map now updates in real time with all new events" },
+      { "text": "\"Are you coming?\" button — let us know you're attending!" }
+    ],
+    "cta": "Enjoy!"
   }
 }

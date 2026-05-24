@@ -141,18 +141,82 @@ export const selectEventsForActiveVenues = createSelector(
 )
 
 /**
+ * Sorted array of ALL active isSpecial events (venue-tied + standalone festivals).
+ * Used by the ⭐ Festivals tab.
+ * Expiry uses endDate when present.
+ * Defined before the heart selectors so they can reference it without TDZ issues.
+ */
+export const selectActiveSpecialEvents = createSelector(
+  (state) => state.app.events,
+  (state) => state.venues.venues,
+  (events, venues) => {
+    const todayStr = new Date().toISOString().split('T')[0]
+
+    const venueMap = {}
+    venues.forEach((v) => {
+      if (v.placeId) venueMap[v.placeId] = v
+      venueMap[v.name]          = v
+      venueMap[normKey(v.name)] = v
+    })
+
+    const nowTimeStr = new Date().toTimeString().slice(0, 5)
+
+    const result = []
+    events.forEach((e) => {
+      if (!e.isSpecial) return
+      const expiryDate = e.endDate ?? e.date
+      if (!expiryDate || expiryDate < todayStr) return
+      // Same-day: hide only when we know the event ended
+      // - has endTime → hide once endTime passed
+      // - has time but no endTime → keep until tomorrow (all-night event)
+      if (expiryDate === todayStr && e.endTime && e.endTime < nowTimeStr) return
+
+      const parent =
+        (e.placeId ? venueMap[e.placeId] : null) ??
+        venueMap[e.venue ?? ''] ??
+        venueMap[normKey(e.venue ?? '')] ??
+        null
+
+      result.push({
+        ...e,
+        _venueLogo:  parent?.logo           ?? null,
+        _venuePhoto: parent?.photos?.[0]    ?? null,
+        styles:      e.styles?.length       ? e.styles : (parent?.styles ?? []),
+        rating:      e.rating               ?? parent?.rating ?? null,
+      })
+    })
+
+    result.sort((a, b) => {
+      const dateA = a.startDate ?? a.date ?? ''
+      const dateB = b.startDate ?? b.date ?? ''
+      const todayA = dateA === todayStr ? 0 : 1
+      const todayB = dateB === todayStr ? 0 : 1
+      if (todayA !== todayB) return todayA - todayB
+      if (dateA !== dateB) return dateA.localeCompare(dateB)
+      const timeA = a.time ?? '99:99'
+      const timeB = b.time ?? '99:99'
+      return timeA.localeCompare(timeB)
+    })
+    return result
+  }
+)
+
+/**
  * True when the user has a saved event happening TODAY specifically.
  * Used to pulse the heart icon.
+ * Checks both regular events and standalone special events.
  */
 export const selectHasTodaySavedEvent = createSelector(
   (state) => state.app.savedIds,
   selectEventsForActiveVenues,
-  (savedIds, events) => {
+  selectActiveSpecialEvents,
+  (savedIds, events, specialEvents) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const tomorrow = new Date(today)
     tomorrow.setDate(today.getDate() + 1)
-    return events.some((ev) => {
+    const allEvents = [...events, ...specialEvents]
+    return allEvents.some((ev) => {
       if (!savedIds[ev.id] || !ev.date) return false
       const d = new Date(ev.date)
       return d >= today && d < tomorrow
@@ -163,42 +227,66 @@ export const selectHasTodaySavedEvent = createSelector(
 /**
  * True when the user has anything saved — upcoming event (today+) OR any venue.
  * Used to show a filled (non-pulsing) heart.
+ * Checks both regular events and standalone special events.
  */
 export const selectHasAnySaved = createSelector(
   (state) => state.app.savedIds,
   (state) => state.app.savedVenueIds,
   selectEventsForActiveVenues,
-  (savedIds, savedVenueIds, events) => {
+  selectActiveSpecialEvents,
+  (savedIds, savedVenueIds, events, specialEvents) => {
     if (Object.keys(savedVenueIds).length > 0) return true
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    return events.some(
+    const allEvents = [...events, ...specialEvents]
+    return allEvents.some(
       (ev) => savedIds[ev.id] && ev.date && new Date(ev.date) >= today
     )
   }
 )
 
 /**
- * Returns { [placeId]: event } for active isSpecial events (e.g. Facebook birthdays, workshops).
- * Used by MapPage to render gold-glow markers for venues with a special upcoming event.
+ * Returns { [placeId]: event } for active isSpecial events tied to a venue.
+ * Expiry uses endDate when present (multi-day festivals), falls back to date.
+ * Used by MapPage to render gold-glow ★ markers for venues with a special upcoming event.
  */
 export const selectSpecialEventsByVenueMap = createSelector(
   (state) => state.app.events,
   (events) => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    const nowTimeStr = new Date().toTimeString().slice(0, 5)
     const map = {}
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
     events.forEach((e) => {
-      if (!e.isSpecial || !e.date || !e.placeId) return
-      const d = new Date(e.date)
-      d.setHours(0, 0, 0, 0)
-      if (d < today) return
-      // Keep earliest upcoming special event per venue
-      if (!map[e.placeId] || e.date < map[e.placeId].date) {
+      if (!e.isSpecial || !e.placeId) return
+      const expiryDate = e.endDate ?? e.date
+      if (!expiryDate || expiryDate < todayStr) return
+      if (expiryDate === todayStr && e.time && e.time < nowTimeStr) return
+      const startKey = e.startDate ?? e.date ?? ''
+      if (!map[e.placeId] || startKey < (map[e.placeId].startDate ?? map[e.placeId].date ?? '')) {
         map[e.placeId] = e
       }
     })
     return map
+  }
+)
+
+/**
+ * Standalone festivals: isSpecial events with no placeId but with GPS coordinates.
+ * Used by MapPage to render full-star markers at exact festival coordinates (Scenario B).
+ */
+export const selectStandaloneFestivals = createSelector(
+  (state) => state.app.events,
+  (events) => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    const nowTimeStr = new Date().toTimeString().slice(0, 5)
+    return events.filter((e) => {
+      if (!e.isSpecial || e.placeId) return false
+      if (!e.coordinates?.latitude || !e.coordinates?.longitude) return false
+      const expiryDate = e.endDate ?? e.date
+      if (!expiryDate || expiryDate < todayStr) return false
+      if (expiryDate === todayStr && e.endTime && e.endTime < nowTimeStr) return false
+      return true
+    })
   }
 )
 

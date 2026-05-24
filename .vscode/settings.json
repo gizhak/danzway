@@ -1,0 +1,8 @@
+{
+  "files.exclude": {
+    "**/*-debug.log": true,
+    "**/.runtimeconfig.json": true,
+    "**/firebase-export-*": true,
+    "**/.firebase": true
+  }
+}

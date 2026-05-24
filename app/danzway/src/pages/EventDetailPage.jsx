@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link, Navigate } from 'react-router-dom'
+import { useParams, Navigate, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { selectAllEvents, selectEventsStatus, fetchEvents } from '../store/appSlice'
+import { selectSpecialEventsByVenueMap } from '../store/selectors'
 import { refreshVenueMetadata } from '../services/googlePlaces'
 import { shortMonthDay } from '../i18n/dateUtils'
 import Badge from '../components/ui/Badge'
@@ -43,16 +44,41 @@ function SpinnerIcon() {
   )
 }
 
+function CalendarIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  )
+}
+
+function LocationIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/>
+      <circle cx="12" cy="10" r="3"/>
+    </svg>
+  )
+}
+
 export default function EventDetailPage() {
   const dispatch      = useDispatch()
+  const navigate      = useNavigate()
   const { id }        = useParams()
   const { t, i18n }  = useTranslation()
-  const events        = useSelector(selectAllEvents)
-  const eventsStatus  = useSelector(selectEventsStatus)
-  const event         = events.find((e) => e.id === id)
+  const events               = useSelector(selectAllEvents)
+  const eventsStatus         = useSelector(selectEventsStatus)
+  const specialEventsByVenue = useSelector(selectSpecialEventsByVenueMap)
+  const event                = events.find((e) => e.id === id)
 
   const [toastMsg,   setToastMsg]   = useState('')
   const [refreshing, setRefreshing] = useState(false)
+  const [lightbox,   setLightbox]   = useState(false)
+
+  useEffect(() => { window.scrollTo(0, 0) }, [])
 
   // Fetch events if store is empty (direct link / page refresh)
   useEffect(() => {
@@ -84,6 +110,7 @@ export default function EventDetailPage() {
     time,
     location,
     venue,
+    placeId,
     styles: danceStyles,
     image,
     placePhoto,
@@ -91,10 +118,16 @@ export default function EventDetailPage() {
     price,
     currency,
     whatsapp,
+    isSpecial,
   } = event
 
-  // Hero image: prefer real Google Places photo, fall back to manual image, then placeholder
-  const heroImage = placePhoto || image || null
+  // If this event's venue has an active festival, show its flyer (only for non-special events)
+  const venueSpecialEvent = (!isSpecial && placeId)
+    ? (specialEventsByVenue[placeId] ?? null)
+    : null
+
+  // Special events: show flyer (image) first. Others: prefer Places photo.
+  const heroImage = (isSpecial && image) ? image : (placePhoto || image || null)
 
   const parsedDate = new Date(date)
   const { month, day } = shortMonthDay(date, i18n.language)
@@ -165,34 +198,49 @@ export default function EventDetailPage() {
 
       {/* ── Header row: Back + Share ── */}
       <div className={styles.header}>
-        <Link to="/" className={styles.back}>
+        <button className={styles.back} onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/festivals')}>
           <span className={styles.backArrow}>{t('eventDetail.backArrow')}</span>
           <span>{t('eventDetail.back')}</span>
-        </Link>
+        </button>
         <button className={styles.shareFab} onClick={handleShare} aria-label="Share event">
           <ShareIcon />
         </button>
       </div>
 
+      {/* ── Lightbox ── */}
+      {lightbox && heroImage && (
+        <div className={styles.lightboxBackdrop} onClick={() => setLightbox(false)}>
+          <button className={styles.lightboxClose} onClick={() => setLightbox(false)}>✕</button>
+          <img src={heroImage} alt={title} className={styles.lightboxImg} onClick={e => e.stopPropagation()} />
+        </div>
+      )}
+
       {/* ── Hero image ── */}
       <motion.div
-        className={styles.hero}
+        className={`${styles.hero} ${isSpecial ? styles.heroSpecial : ''}`}
         initial={{ opacity: 0, scale: 1.04 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
         {heroImage ? (
-          <img src={heroImage} alt={title} className={styles.heroImg} />
+          <img
+            src={heroImage}
+            alt={title}
+            className={`${styles.heroImg} ${isSpecial ? styles.heroImgClickable : ''}`}
+            onClick={isSpecial ? () => setLightbox(true) : undefined}
+          />
         ) : (
           <div className={styles.heroPlaceholder}>♪</div>
         )}
-        <div className={styles.heroOverlay} />
+        {!isSpecial && <div className={styles.heroOverlay} />}
 
         {/* Date badge */}
-        <div className={styles.dateBadge}>
-          <div className={styles.dateBadgeMonth}>{month}</div>
-          <div className={styles.dateBadgeDay}>{day}</div>
-        </div>
+        {!isSpecial && (
+          <div className={styles.dateBadge}>
+            <div className={styles.dateBadgeMonth}>{month}</div>
+            <div className={styles.dateBadgeDay}>{day}</div>
+          </div>
+        )}
       </motion.div>
 
       {/* ── Content block ── */}
@@ -206,11 +254,11 @@ export default function EventDetailPage() {
 
         <div className={styles.meta}>
           <div className={styles.metaRow}>
-            <span className={styles.metaIcon}>📅</span>
+            <span className={styles.metaIcon}><CalendarIcon /></span>
             <span>{formattedDate} · {time}</span>
           </div>
           <div className={styles.metaRow}>
-            <span className={styles.metaIcon}>📍</span>
+            <span className={styles.metaIcon}><LocationIcon /></span>
             <span>{venue}, {location}</span>
           </div>
         </div>
@@ -222,6 +270,22 @@ export default function EventDetailPage() {
         </div>
 
         <p className={styles.description}>{description}</p>
+
+        {/* ── Venue festival flyer ── */}
+        {venueSpecialEvent?.image && (
+          <div className={styles.flyerSection}>
+            <div className={styles.flyerLabel}>⭐ {t('venue.detail.specialEvent', 'Special Event')}</div>
+            <img
+              src={venueSpecialEvent.image}
+              alt={venueSpecialEvent.title}
+              className={styles.flyerImg}
+              onClick={() => navigate('/map', { state: { placeId } })}
+            />
+            {venueSpecialEvent.title && (
+              <div className={styles.flyerTitle}>{venueSpecialEvent.title}</div>
+            )}
+          </div>
+        )}
 
         <div className={styles.divider} />
 
@@ -268,8 +332,8 @@ export default function EventDetailPage() {
           </a>
         )}
 
-        {/* ── Admin: Refresh Metadata ── */}
-        {IS_ADMIN && (
+        {/* ── Admin: Refresh Metadata — disabled for special events to avoid Google API calls ── */}
+        {IS_ADMIN && !isSpecial && (
           <button
             onClick={handleRefreshMetadata}
             disabled={refreshing}
@@ -282,22 +346,24 @@ export default function EventDetailPage() {
         )}
 
         {/* ── Inline WhatsApp CTA (desktop / larger screens) ── */}
-        <a
-          href={waUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${styles.whatsappBtn} ${styles.whatsappBtnInline}`}
-        >
-          <span>📱</span>
-          {t('eventDetail.whatsappRsvp')}
-        </a>
+        {!isSpecial && (
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${styles.whatsappBtn} ${styles.whatsappBtnInline}`}
+          >
+            <span>📱</span>
+            {t('eventDetail.whatsappRsvp')}
+          </a>
+        )}
       </motion.div>
 
       {/* ── Spacer so fixed CTA doesn't cover content on mobile ── */}
-      <div className={styles.ctaSpacer} />
+      {!isSpecial && <div className={styles.ctaSpacer} />}
 
       {/* ── Fixed WhatsApp CTA — mobile conversion anchor ── */}
-      <div className={styles.ctaBar}>
+      {!isSpecial && <div className={styles.ctaBar}>
         <a
           href={waUrl}
           target="_blank"
@@ -307,7 +373,7 @@ export default function EventDetailPage() {
           <span>📱</span>
           {t('eventDetail.whatsappRsvp')}
         </a>
-      </div>
+      </div>}
 
       {/* ── Toast notification ── */}
       <AnimatePresence>
