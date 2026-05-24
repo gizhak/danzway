@@ -8,18 +8,71 @@
  *     → approveEvent() promotes to `events` collection
  *     → rejectEvent() marks status:'rejected' (stays in pending_events for history)
  */
+import { notifyAdminNewSubmission } from './notificationService'
 import {
   collection,
   doc,
   setDoc,
   updateDoc,
+  deleteDoc,
   getDocs,
   query,
   where,
   serverTimestamp,
 } from 'firebase/firestore'
-import { db } from './firebase'
+import { httpsCallable } from 'firebase/functions'
+import { db, functions } from './firebase'
 import { saveEventToFirestore } from './eventsService'
+
+function deleteFlyerFromStorage(path) {
+  if (!path) return
+  httpsCallable(functions, 'deleteFlyer')({ path }).catch(() => {})
+}
+
+async function geocodeAddress(address, city) {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  if (!apiKey || !address) return null
+  const q = [address, city, 'Israel'].filter(Boolean).join(', ')
+  try {
+    const res  = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(q)}&key=${apiKey}`)
+    const data = await res.json()
+    if (data.status === 'OK' && data.results[0]) {
+      const { lat, lng } = data.results[0].geometry.location
+      return {
+        coordinates: { latitude: lat, longitude: lng },
+        placeId:     data.results[0].place_id ?? null,
+      }
+    }
+  } catch {}
+  return null
+}
+
+async function geocodeByVenueSearch(venue, location) {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  if (!apiKey || !venue) return null
+  const q = [venue, location, 'Israel'].filter(Boolean).join(', ')
+  try {
+    const res  = await fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(q)}&key=${apiKey}`)
+    const data = await res.json()
+    if (data.status === 'OK' && data.results[0]) {
+      const { lat, lng } = data.results[0].geometry.location
+      return {
+        coordinates: { latitude: lat, longitude: lng },
+        placeId:     data.results[0].place_id ?? null,
+      }
+    }
+  } catch {}
+  return null
+}
+
+/** Tries address geocoding first, falls back to Places text-search by venue name.
+ *  Returns { coordinates, placeId } — either field may be null if not found.
+ */
+export async function findEventCoordinates(venue, address, location) {
+  const byAddress = await geocodeAddress(address, location)
+  if (byAddress) return byAddress
+  return (await geocodeByVenueSearch(venue, location)) ?? { coordinates: null, placeId: null }
+}
 
 // ─── User Submission ───────────────────────────────────────────────────────────
 
@@ -27,18 +80,27 @@ import { saveEventToFirestore } from './eventsService'
  * Saves a raw user-submitted event text into pending_events for admin review + AI parsing.
  * All schema fields start null/empty — the AI parser fills them in.
  */
-export async function submitUserEvent(rawText, uid, flyerImageUrl = null) {
+export async function submitUserEvent(rawText, uid, flyerImageUrl = null, flyerStoragePath = null, imageFingerprint = null, hintPlaceId = null) {
+  // Duplicate detection: reject if same image fingerprint already exists
+  if (imageFingerprint) {
+    const dupSnap = await getDocs(
+      query(collection(db, COLL), where('imageFingerprint', '==', imageFingerprint))
+    )
+    if (!dupSnap.empty) throw new Error('פלייר זה כבר הוגש למערכת')
+  }
+
   const id = `user-${uid ?? 'anon'}-${Date.now()}`
   await setDoc(doc(db, COLL, id), {
     id,
     rawText,
     flyerImageUrl,
-    status:      'raw',          // 'raw' = waiting for manual admin parse; no AI auto-triggered
+    flyerStoragePath,
+    imageFingerprint,
+    status:      'raw',
     source:      'user_submission',
     submittedBy: uid ?? 'anonymous',
     submittedAt: serverTimestamp(),
     isSpecial:   true,
-    // Schema fields — filled by AI parser or admin before approval
     title:       null,
     startDate:   null,
     endDate:     null,
@@ -46,7 +108,7 @@ export async function submitUserEvent(rawText, uid, flyerImageUrl = null) {
     time:        null,
     venue:       null,
     location:    null,
-    placeId:     null,
+    placeId:     hintPlaceId ?? null,
     styles:      [],
     description: null,
     price:       null,
@@ -54,6 +116,14 @@ export async function submitUserEvent(rawText, uid, flyerImageUrl = null) {
     ticketLink:  null,
     coordinates: null,
   })
+
+  // Fire-and-forget: notify admin — never blocks or throws
+  notifyAdminNewSubmission({
+    flyerImageUrl,
+    rawText,
+    submittedAt: new Date().toLocaleString('he-IL'),
+  })
+
   return id
 }
 
@@ -139,6 +209,15 @@ export async function upsertPendingEvents(candidates, existingPend = [], liveEve
 
 /** Promotes one pending event to the live `events` collection. */
 export async function approveEvent(pending) {
+  let coordinates = pending.coordinates ?? null
+  let placeId     = pending.placeId     ?? null
+
+  if (!coordinates || !placeId) {
+    const found = await findEventCoordinates(pending.venue, pending.address, pending.location)
+    if (!coordinates) coordinates = found.coordinates
+    if (!placeId)     placeId     = found.placeId
+  }
+
   await saveEventToFirestore({
     title:        pending.title,
     date:         pending.startDate   ?? pending.date,
@@ -147,14 +226,17 @@ export async function approveEvent(pending) {
     time:         pending.time,
     venue:        pending.venue,
     location:     pending.location,
-    placeId:      pending.placeId     ?? null,
+    address:      pending.address     ?? null,
+    placeId,
     styles:       pending.styles      ?? [],
     description:  pending.description ?? '',
     price:        pending.price       ?? '0',
     currency:     pending.currency    ?? 'ILS',
     whatsapp:     pending.whatsapp    ?? null,
     ticketLink:   pending.ticketLink  ?? null,
-    coordinates:  pending.coordinates ?? null,
+    image:            pending.flyerImageUrl    ?? null,
+    flyerStoragePath: pending.flyerStoragePath ?? null,
+    coordinates,
     isDiscovered: pending.source !== 'user_submission',
     isSpecial:    pending.isSpecial   ?? false,
     source:       pending.source      ?? null,
@@ -166,12 +248,56 @@ export async function approveEvent(pending) {
   })
 }
 
-/** Marks a pending event as rejected (kept for audit trail). */
-export async function rejectEvent(pendingId) {
-  await updateDoc(doc(db, COLL, pendingId), {
-    status:     'rejected',
-    rejectedAt: serverTimestamp(),
+/** Deletes an already-approved special event from the live `events` collection and its flyer.
+ *  Also removes the originating pending_events document so the same image can be re-submitted. */
+export async function deleteApprovedEvent(eventId, flyerStoragePath) {
+  await deleteDoc(doc(db, 'events', eventId))
+  if (flyerStoragePath) {
+    const snap = await getDocs(
+      query(collection(db, COLL), where('flyerStoragePath', '==', flyerStoragePath))
+    )
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
+  }
+  deleteFlyerFromStorage(flyerStoragePath)
+}
+
+/** Deletes a rejected pending event from Firestore and cleans up its flyer. */
+export async function rejectEvent(pendingId, flyerStoragePath) {
+  await deleteDoc(doc(db, COLL, pendingId))
+  deleteFlyerFromStorage(flyerStoragePath)
+}
+
+/** Deletes a single pending event document. */
+export async function deletePendingEvent(pendingId, flyerStoragePath) {
+  await deleteDoc(doc(db, COLL, pendingId))
+  deleteFlyerFromStorage(flyerStoragePath)
+}
+
+/** Deletes all pending_events documents that are already approved or rejected (no longer active). */
+export async function purgeCompletedPendingEvents() {
+  const snap = await getDocs(
+    query(collection(db, COLL), where('status', 'in', ['approved', 'rejected']))
+  )
+  await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
+  return snap.size
+}
+
+/** Deletes all pending_events whose startDate is before today. */
+export async function deleteExpiredPendingEvents() {
+  const today = new Date().toISOString().split('T')[0]
+  const snap  = await getDocs(
+    query(collection(db, COLL), where('source', '==', 'user_submission'))
+  )
+  const expired = snap.docs.filter(d => {
+    const date = d.data().startDate
+    return date && date < today
   })
+  await Promise.all(expired.map(d => {
+    const data = d.data()
+    deleteFlyerFromStorage(data.flyerStoragePath)
+    return deleteDoc(d.ref)
+  }))
+  return expired.length
 }
 
 /** Approves every event in the list in parallel (best-effort). */

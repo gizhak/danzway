@@ -29,12 +29,12 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: rgba(156, 163, 175, 0.5);
+  color: rgba(200, 205, 215, 0.72);
   transition: color 0.18s ease;
 }
 
 .navItem:hover {
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* ─── Pill wrapper (icon + label capsule) ────────────────────────────────── */
@@ -67,7 +67,9 @@
 }
 
 .navIcon {
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
 }
 

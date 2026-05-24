@@ -86,7 +86,10 @@ export default function EventCard({ event }) {
   const isGApi = (u) => u?.includes('places.googleapis.com')
   const resolvedLogo  = isGApi(_venueLogo)  ? null : (_venueLogo  ?? (isGApi(venueData?.logo)  ? null : venueData?.logo)  ?? null)
   const resolvedPhoto = isGApi(_venuePhoto) ? null : (_venuePhoto ?? venueData?.customImageUrl ?? (venueData?.photos ?? []).find(u => !isGApi(u)) ?? (isGApi(placePhoto) ? null : placePhoto) ?? null)
-  const heroImage     = resolvedLogo || resolvedPhoto || image || GENERIC_IMAGE
+  // Special events: show the flyer (event.image) as hero, not the venue photo
+  const heroImage = (isSpecial && image)
+    ? image
+    : (resolvedLogo || resolvedPhoto || image || GENERIC_IMAGE)
   const venueCoords = venueData?.coordinates ?? null
   const coords = venueCoords ?? (
     eventCoords?.latitude
@@ -244,7 +247,6 @@ export default function EventCard({ event }) {
           className={styles.rsvpBtn}
           onClick={() => setShowDirections(true)}
         >
-          <span>📍</span>
           {t('event.getDirections')}
         </button>
       )}

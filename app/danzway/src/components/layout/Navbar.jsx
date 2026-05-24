@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -6,6 +6,18 @@ import { selectHasTodaySavedEvent } from '../../store/selectors'
 import { auth } from '../../services/firebase'
 import { trackFeedbackClick } from '../../services/analyticsService'
 import styles from './Navbar.module.css'
+
+const APP_VERSION = 'beta2'
+
+async function checkLatestVersion() {
+  try {
+    const r = await fetch(`/version.json?t=${Date.now()}`)
+    const { version } = await r.json()
+    return version
+  } catch {
+    return null
+  }
+}
 
 const PUBLIC_NAV = [
   { to: '/',          key: 'clubs',     end: true  },
@@ -39,6 +51,8 @@ export default function Navbar() {
   const location = useLocation()
   const hasTodayEvent = useSelector(selectHasTodaySavedEvent)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [versionStatus, setVersionStatus] = useState(null) // null | 'checking' | 'ok' | 'update'
+  const versionPopupRef = useRef(null)
 
   const isAdmin = auth.currentUser?.email === 'guy.izhak.tech@gmail.com'
   const NAV_ITEMS = isAdmin ? ADMIN_NAV : PUBLIC_NAV
@@ -51,11 +65,35 @@ export default function Navbar() {
     if (!feedbackOpen) trackFeedbackClick()
   }
 
+  async function handleBadgeDoubleClick() {
+    setVersionStatus('checking')
+    const latest = await checkLatestVersion()
+    setVersionStatus(latest === null ? null : latest === APP_VERSION ? 'ok' : 'update')
+    setTimeout(() => setVersionStatus(null), 4000)
+  }
+
   return (
     <header className={styles.navbar}>
       <NavLink to="/" className={styles.logo}>
         DanzWay
-        <span className={styles.betaBadge}>Beta</span>
+        <span
+          className={styles.betaBadge}
+          onDoubleClick={handleBadgeDoubleClick}
+          title="Double-tap to check for updates"
+          ref={versionPopupRef}
+        >Beta 2</span>
+        {versionStatus === 'checking' && (
+          <span className={styles.versionPopup}>בודק...</span>
+        )}
+        {versionStatus === 'ok' && (
+          <span className={`${styles.versionPopup} ${styles.versionOk}`}>✓ מעודכן</span>
+        )}
+        {versionStatus === 'update' && (
+          <span
+            className={`${styles.versionPopup} ${styles.versionUpdate}`}
+            onClick={() => window.location.reload(true)}
+          >עדכון זמין — לחץ לרענון</span>
+        )}
       </NavLink>
 
       {/* Desktop nav links — hidden on mobile */}

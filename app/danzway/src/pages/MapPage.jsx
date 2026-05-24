@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   APIProvider,
@@ -13,6 +13,7 @@ import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import {
   selectStyleFilters,
   toggleStyleFilter,
+  toggleSave,
   fetchEvents,
   selectEventsStatus,
 } from '../store/appSlice'
@@ -84,15 +85,19 @@ function VenueMarker({ venue, nextEvent, specialEvent, isSelected, onSetRef, onC
     return () => cbRef.current(null)
   }, [marker])
 
-  const diff      = getDiff(nextEvent?.date)
-  const isLive    = diff === 0
-  const isSpecial = !!specialEvent
+  const todayStr       = new Date().toISOString().split('T')[0]
+  const diff           = getDiff(nextEvent?.date)
+  const isLive         = diff === 0
+  const isSpecial      = !!specialEvent
+  const specialDate    = specialEvent?.startDate ?? specialEvent?.date
+  const isSpecialToday = isSpecial && specialDate === todayStr
 
   const pinClass = [
     styles.pin,
-    isSpecial  ? styles.pinSpecial  : '',
-    isLive     ? styles.pinLive     : '',
-    isSelected ? styles.pinSelected : '',
+    isSpecial       ? styles.pinSpecial       : '',
+    isSpecialToday  ? styles.pinSpecialToday  : '',
+    isLive          ? styles.pinLive          : '',
+    isSelected      ? styles.pinSelected      : '',
   ].filter(Boolean).join(' ')
 
   return (
@@ -100,22 +105,28 @@ function VenueMarker({ venue, nextEvent, specialEvent, isSelected, onSetRef, onC
       ref={markerRef}
       position={{ lat: venue.coordinates.lat, lng: venue.coordinates.lng }}
       onClick={onClick}
-      zIndex={isSelected ? 100 : isSpecial ? 75 : isLive ? 50 : 1}
+      zIndex={isSelected ? 100 : isSpecialToday ? 85 : isSpecial ? 75 : isLive ? 50 : 1}
     >
-      <div className={pinClass}>
-        {venue.logo
-          ? <img
-              src={venue.logo}
-              className={styles.pinLogo}
-              alt=""
-              onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'inline' }}
-            />
-          : null
-        }
-        <span className={styles.pinIcon} style={venue.logo ? { display: 'none' } : {}}>🎵</span>
-        {isLive    && <span className={styles.pinPulse} />}
-        {isSpecial && <span className={styles.pinStar}>★</span>}
-      </div>
+      {isSpecialToday ? (
+        <div className={`${styles.festivalPin} ${styles.festivalPinToday} ${isSelected ? styles.festivalPinSelected : ''}`}>
+          ★
+        </div>
+      ) : (
+        <div className={pinClass}>
+          {venue.logo
+            ? <img
+                src={venue.logo}
+                className={styles.pinLogo}
+                alt=""
+                onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'inline' }}
+              />
+            : null
+          }
+          <span className={styles.pinIcon} style={venue.logo ? { display: 'none' } : {}}>🎵</span>
+          {isLive    && <span className={styles.pinPulse} />}
+          {isSpecial && <span className={styles.pinStar}>★</span>}
+        </div>
+      )}
     </AdvancedMarker>
   )
 }
@@ -170,14 +181,21 @@ function ClusteredMarkers({ venues, nextEventsByVenue, specialEventsByVenue, sel
 // ─── Standalone festival star marker (Scenario B) ────────────────────────────
 function StandaloneFestivalMarker({ event, isSelected, onClick }) {
   const [markerRef] = useAdvancedMarkerRef()
+  const todayStr = new Date().toISOString().split('T')[0]
+  const isToday  = (event.startDate ?? event.date) === todayStr
   return (
     <AdvancedMarker
       ref={markerRef}
       position={{ lat: event.coordinates.latitude, lng: event.coordinates.longitude }}
       onClick={onClick}
-      zIndex={isSelected ? 120 : 90}
+      zIndex={isSelected ? 120 : isToday ? 90 : 0}
     >
-      <div className={`${styles.festivalPin} ${isSelected ? styles.festivalPinSelected : ''}`}>
+      <div className={[
+        styles.festivalPin,
+        !isToday && !isSelected ? styles.festivalPinDimmed : '',
+        isToday    ? styles.festivalPinToday    : '',
+        isSelected ? styles.festivalPinSelected : '',
+      ].filter(Boolean).join(' ')}>
         ★
       </div>
     </AdvancedMarker>
@@ -186,11 +204,16 @@ function StandaloneFestivalMarker({ event, isSelected, onClick }) {
 
 // ─── Festival bottom-sheet popup (Scenario B) ─────────────────────────────────
 function FestivalPopup({ event, onClose }) {
-  const { t, i18n } = useTranslation()
-  const lang = i18n.language
+  const { t, i18n }        = useTranslation()
+  const dispatch            = useDispatch()
+  const lang                = i18n.language
+  const saved               = useSelector((state) => !!state.app.savedIds[event.id])
+  const [showDirs, setShowDirs] = useState(false)
 
   const displayDate = event.startDate ?? event.date
   const endDateVal  = event.endDate
+  const todayStr    = new Date().toISOString().split('T')[0]
+  const isToday     = displayDate === todayStr
   const locale = lang === 'he' ? 'he-IL' : 'en-US'
   const fmt    = (d) => parseLocalDate(d).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
 
@@ -235,6 +258,27 @@ function FestivalPopup({ event, onClose }) {
           >
             🎟 {t('map.buyTickets')}
           </a>
+        )}
+        {isToday ? (
+          <>
+            <button className={styles.popupSaveBtn} style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)', color: '#0a0a0a', fontWeight: 700, border: 'none' }} onClick={() => setShowDirs(true)}>
+              📍 {lang === 'he' ? 'קח אותי לשם' : 'Get Directions'}
+            </button>
+            {showDirs && (
+              <DirectionsSheet
+                coords={{ lat: event.coordinates.latitude, lng: event.coordinates.longitude }}
+                name={event.title ?? event.venue}
+                onClose={() => setShowDirs(false)}
+              />
+            )}
+          </>
+        ) : (
+          <button
+            className={`${styles.popupSaveBtn} ${saved ? styles.popupSaveBtnSaved : ''}`}
+            onClick={() => dispatch(toggleSave(event.id))}
+          >
+            {saved ? '♥' : '♡'} {t('event.save')}
+          </button>
         )}
         <Link
           to={`/events/${event.id}`}
@@ -366,13 +410,23 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
         >
           {t('map.directions')}
         </button>
-        <Link
-          to={`/venues/${venue.placeId}`}
-          className={styles.popupViewBtn}
-          onClick={onClose}
-        >
-          {t('map.viewVenue')}
-        </Link>
+        {specialEvent ? (
+          <Link
+            to={`/events/${specialEvent.id}`}
+            className={styles.popupViewBtn}
+            onClick={onClose}
+          >
+            {t('map.viewEvent', 'פרטי האירוע')} ★
+          </Link>
+        ) : (
+          <Link
+            to={`/venues/${venue.placeId}`}
+            className={styles.popupViewBtn}
+            onClick={onClose}
+          >
+            {t('map.viewVenue')}
+          </Link>
+        )}
       </div>
 
       {showDirections && (
@@ -389,6 +443,8 @@ function VenuePopup({ venue, nextEvent, specialEvent, onClose }) {
 // ─── Main page ───────────────────────────────────────────────────────────────
 export default function MapPage() {
   const dispatch             = useDispatch()
+  const routeLocation        = useLocation()
+  const navState             = routeLocation.state ?? {}
   const styleFilters         = useSelector(selectStyleFilters)
   const activeVenues         = useSelector(selectActiveVenues)
   const venuesStatus         = useSelector(selectVenuesStatus)
@@ -400,8 +456,12 @@ export default function MapPage() {
   const [selectedVenue,    setSelectedVenue]    = useState(null)
   const [selectedFestival, setSelectedFestival] = useState(null)
   const [userLocation,  setUserLoc]       = useState(null)
-  const [mapCenter,     setMapCenter]     = useState(DEFAULT_CENTER)
+  const initialCenter = (navState.lat && navState.lng)
+    ? { lat: navState.lat, lng: navState.lng }
+    : DEFAULT_CENTER
+  const [mapCenter,     setMapCenter]     = useState(initialCenter)
   const mapRef = useRef(null)
+  const didSeekRef = useRef(false)
 
   // Derive nextEvent live from the selector — never stale when Firestore updates
   const selectedNextEvent = selectedVenue
@@ -432,11 +492,28 @@ export default function MapPage() {
       ({ coords }) => {
         const loc = { lat: coords.latitude, lng: coords.longitude }
         setUserLoc(loc)
-        setMapCenter(loc)
+        // Only override center with user location if we weren't sent here via flyer nav
+        if (!navState.lat) setMapCenter(loc)
       },
       () => {}
     )
   }, [])
+
+  // Auto-open venue popup when navigated from a flyer link
+  useEffect(() => {
+    if (didSeekRef.current || !navState.placeId || activeVenues.length === 0) return
+    const target = activeVenues.find((v) => v.placeId === navState.placeId)
+    if (!target?.coordinates) return
+    didSeekRef.current = true
+    setSelectedVenue(target)
+    setSelectedFestival(null)
+    if (mapRef.current) {
+      mapRef.current.panTo({ lat: target.coordinates.lat, lng: target.coordinates.lng })
+      mapRef.current.setZoom(16)
+    } else {
+      setMapCenter({ lat: target.coordinates.lat, lng: target.coordinates.lng })
+    }
+  }, [activeVenues, navState.placeId])
 
   // Same AND filter logic as CLUBS tab; venues without coordinates are excluded
   const filteredVenues = useMemo(() => {

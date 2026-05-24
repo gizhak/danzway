@@ -4,6 +4,43 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 
+let _cleanupDone = false
+
+/**
+ * Deletes all past events from Firestore in one batch.
+ * Runs at most once per session (module-level flag).
+ * Uses the events already in memory — zero extra Firestore reads.
+ * Past = (endDate ?? date) < today's ISO date string.
+ */
+export async function cleanupPastEventsOnce(events) {
+  if (_cleanupDone) return 0
+  _cleanupDone = true
+
+  const now = new Date()
+  const todayStr = now.toISOString().split('T')[0]
+  const nowTimeStr = now.toTimeString().slice(0, 5)
+  const toDelete = events.filter((e) => {
+    const effectiveEnd = e.endDate ?? e.date
+    if (!effectiveEnd) return false
+    if (effectiveEnd < todayStr) return true
+    // Same-day: delete only if endTime is set and has passed (no endTime = all-night, keep until tomorrow)
+    if (effectiveEnd === todayStr && e.endTime && e.endTime < nowTimeStr) return true
+    return false
+  })
+
+  if (toDelete.length === 0) {
+    console.log('[Cleanup] No past events found — DB is clean.')
+    return 0
+  }
+
+  console.log(`[Cleanup] Deleting ${toDelete.length} past event(s):`, toDelete.map(e => `${e.id} (${e.endDate ?? e.date})`))
+  const batch = writeBatch(db)
+  toDelete.forEach((e) => batch.delete(doc(db, 'events', e.id)))
+  await batch.commit()
+  console.log(`[Cleanup] Done — ${toDelete.length} event(s) removed from Firestore.`)
+  return toDelete.length
+}
+
 /**
  * Saves a manually-created event to the 'events' Firestore collection.
  * Generates a unique ID and writes the `id` field into the document so

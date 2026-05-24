@@ -60,6 +60,45 @@
   white-space: nowrap;
 }
 
+.cleanupBtn {
+  margin-left: auto;
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.10);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.cleanupBtn:hover:not(:disabled) { background: rgba(239, 68, 68, 0.20); }
+.cleanupBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.purgeBtn {
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.10);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  color: #a5b4fc;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.purgeBtn:hover:not(:disabled) { background: rgba(99, 102, 241, 0.20); }
+.purgeBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.cleanupMsg {
+  font-size: 0.76rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
 /* ─── API key warning ────────────────────────────────────── */
 .apiKeyWarning {
   margin: 1rem 1.5rem 0;
@@ -97,12 +136,9 @@
 .cardHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.85rem 1.25rem;
+  padding: 0.7rem 1.25rem;
   background: rgba(245, 158, 11, 0.06);
   border-bottom: 1px solid rgba(245, 158, 11, 0.12);
-  gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .cardMeta {
@@ -111,6 +147,21 @@
   gap: 0.4rem;
   flex-wrap: wrap;
   min-width: 0;
+}
+
+/* ─── Parse buttons row ──────────────────────────────────── */
+.parseBtnsRow {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.10);
+  flex-wrap: wrap;
+}
+
+.parseBtnsRow .parseBtn,
+.parseBtnsRow .ocrBtn {
+  flex: 1;
+  min-width: 120px;
 }
 
 .metaLabel {
@@ -132,6 +183,30 @@
 }
 
 .metaDot { color: rgba(255, 255, 255, 0.2); }
+
+.headerBtns {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.ocrBtn {
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  background: rgba(20, 184, 166, 0.12);
+  border: 1px solid rgba(20, 184, 166, 0.40);
+  color: #2dd4bf;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.ocrBtn:hover:not(:disabled) { background: rgba(20, 184, 166, 0.22); }
+.ocrBtn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .parseBtn {
   padding: 0.45rem 1rem;
@@ -157,6 +232,18 @@
   margin: 0;
   background: rgba(239, 68, 68, 0.07);
   border-bottom: 1px solid rgba(239, 68, 68, 0.12);
+}
+
+.pastDateWarn {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fca5a5;
+  margin: 0;
+  background: rgba(239, 68, 68, 0.14);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.30);
+  direction: rtl;
+  text-align: right;
 }
 
 /* ─── Two-column body ────────────────────────────────────── */
@@ -204,13 +291,17 @@
 .flyerThumb {
   display: block;
   width: 100%;
-  max-height: 220px;
+  max-height: 420px;
   object-fit: contain;
   border-radius: 8px;
   border: 1px solid rgba(245, 158, 11, 0.22);
   margin-bottom: 0.75rem;
   background: #0a0a10;
+  cursor: zoom-in;
+  transition: opacity 0.15s;
 }
+
+.flyerThumb:hover { opacity: 0.88; }
 
 /* Raw text pre */
 .rawText {
@@ -268,6 +359,16 @@
 
 .fieldInput::placeholder,
 .fieldTextarea::placeholder { color: rgba(255, 255, 255, 0.22); }
+
+.venueMatchBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #34d399;
+  margin-top: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
 
 .fieldTextarea { resize: vertical; line-height: 1.5; }
 
@@ -351,6 +452,37 @@
   margin: 0;
 }
 
+/* ─── Parse loading overlay ─────────────────────────────── */
+.parseOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgba(10, 10, 16, 0.78);
+  backdrop-filter: blur(3px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  color: #fbbf24;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 0 0 16px 16px;
+}
+
+.parseSpinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(245, 158, 11, 0.20);
+  border-top-color: #fbbf24;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ─── Empty state ────────────────────────────────────────── */
 .empty {
   text-align: center;
@@ -414,3 +546,245 @@
 }
 
 .loginBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Admin image lightbox ───────────────────────────────── */
+.adminLightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.93);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  padding: 1rem;
+}
+
+.adminLightboxImg {
+  max-width: 94vw;
+  max-height: 94vh;
+  object-fit: contain;
+  border-radius: 10px;
+  cursor: default;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8);
+}
+
+.adminLightboxClose {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  color: #f3f4f6;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  z-index: 301;
+}
+
+.adminLightboxClose:hover { background: rgba(220, 38, 38, 0.55); }
+
+/* ─── Approved events section ────────────────────────────── */
+.approvedSection {
+  max-width: 1200px;
+  margin: 2.5rem auto 0;
+  padding: 0 1.5rem 2rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.sectionTitle {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.approvedList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.approvedCard {
+  background: rgba(18, 18, 26, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.approvedRow {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.6rem 1rem;
+}
+
+.approvedThumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  background: #0a0a10;
+  cursor: zoom-in;
+  flex-shrink: 0;
+}
+
+.approvedInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.approvedTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.approvedMeta {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.40);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.approvedBtns {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.findBtn {
+  padding: 0.28rem 0.75rem;
+  border-radius: 7px;
+  background: rgba(99, 102, 241, 0.10);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  color: #a5b4fc;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.findBtn:hover:not(:disabled) { background: rgba(99, 102, 241, 0.20); }
+.findBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.editBtn {
+  padding: 0.28rem 0.75rem;
+  border-radius: 7px;
+  background: rgba(245, 158, 11, 0.10);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  color: #fbbf24;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.editBtn:hover { background: rgba(245, 158, 11, 0.20); }
+.editBtnActive {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.50);
+}
+
+.deleteBtn {
+  padding: 0.28rem 0.75rem;
+  border-radius: 7px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  color: #f87171;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.deleteBtn:hover { background: rgba(239, 68, 68, 0.18); }
+
+.deleteConfirmBtn {
+  padding: 0.28rem 0.75rem;
+  border-radius: 7px;
+  background: rgba(239, 68, 68, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  color: #fca5a5;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.deleteConfirmBtn:hover:not(:disabled) { background: rgba(239, 68, 68, 0.35); }
+.deleteConfirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.deleteCancelBtn {
+  padding: 0.28rem 0.65rem;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.50);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.deleteCancelBtn:hover { background: rgba(255, 255, 255, 0.10); }
+
+.approvedEditForm {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.approvedSaveRow {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.2rem;
+}
+
+.saveBtn {
+  padding: 0 1.75rem;
+  height: 38px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  letter-spacing: 0.03em;
+}
+
+.saveBtn:hover:not(:disabled) { opacity: 0.88; }
+.saveBtn:disabled { opacity: 0.35; cursor: not-allowed; }

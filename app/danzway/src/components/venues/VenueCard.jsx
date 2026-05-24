@@ -192,10 +192,7 @@ export default function VenueCard({ venue }) {
         className={styles.directionsBtn}
         onClick={() => setShowDirections(true)}
       >
-        <span>📍</span>
         {t('event.getDirections')}
-        {phone && <span className={styles.directionsSep}>·</span>}
-        {phone && <span className={styles.directionsPhone}>{phone}</span>}
       </button>
 
       {showDirections && (

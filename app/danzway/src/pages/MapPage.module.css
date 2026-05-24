@@ -94,6 +94,19 @@
   animation: goldPulse 2.4s ease-in-out infinite;
 }
 
+/* Venue whose special event is TODAY — intense gold glow, bigger star */
+.pinSpecialToday {
+  border-color: #fbbf24;
+  border-width: 3px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.22) 0%, rgba(217, 119, 6, 0.14) 100%);
+  box-shadow:
+    0 0 0 5px rgba(245, 158, 11, 0.45),
+    0 0 22px 7px rgba(245, 158, 11, 0.65),
+    0 2px 10px rgba(0, 0, 0, 0.55);
+  animation: goldPulse 1.6s ease-in-out infinite;
+  transform: scale(1.15);
+}
+
 /* Star badge: top-right corner of the pin */
 .pinStar {
   position: absolute;
@@ -410,6 +423,25 @@
   opacity: 0.88;
 }
 
+.popupSaveBtn {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.popupSaveBtnSaved {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+}
+
 /* ── My Location FAB ────────────────────────────────────────────────────── */
 .locationBtn {
   position: absolute;
@@ -498,37 +530,55 @@
 }
 
 /* ─── Standalone festival star marker (Scenario B) ───────────────────────── */
+@keyframes starTwinkle {
+  0%, 100% { opacity: 1;    transform: scale(1)    rotate(0deg);   box-shadow: 0 0 0 2px rgba(245,158,11,0.3), 0 0 10px 3px rgba(245,158,11,0.55), 0 2px 8px rgba(0,0,0,0.5); }
+  25%       { opacity: 0.7; transform: scale(1.18) rotate(12deg);  box-shadow: 0 0 0 4px rgba(245,158,11,0.5), 0 0 22px 8px rgba(255,220,80,0.8),  0 2px 8px rgba(0,0,0,0.5); }
+  50%       { opacity: 1;   transform: scale(0.88) rotate(0deg);   box-shadow: 0 0 0 2px rgba(245,158,11,0.2), 0 0 8px  2px rgba(245,158,11,0.35), 0 2px 8px rgba(0,0,0,0.5); }
+  75%       { opacity: 0.8; transform: scale(1.12) rotate(-10deg); box-shadow: 0 0 0 4px rgba(245,158,11,0.45),0 0 20px 7px rgba(255,220,80,0.7),  0 2px 8px rgba(0,0,0,0.5); }
+}
+
 .festivalPin {
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-  border: 2.5px solid #fff9;
+  border: 2px solid #fff9;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 15px;
   line-height: 1;
   color: #0a0a10;
   cursor: pointer;
   box-shadow:
-    0 0 0 3px rgba(245, 158, 11, 0.35),
-    0 0 18px 5px rgba(245, 158, 11, 0.50),
-    0 2px 10px rgba(0, 0, 0, 0.55);
+    0 0 0 2px rgba(245, 158, 11, 0.3),
+    0 0 10px 3px rgba(245, 158, 11, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.5);
   animation: goldPulse 2.4s ease-in-out infinite;
   transition: transform 0.18s ease;
 }
 
 .festivalPin:hover {
-  transform: scale(1.12);
+  transform: scale(1.15);
+}
+
+.festivalPinDimmed {
+  opacity: 0.45;
+  filter: grayscale(0.4) brightness(0.8);
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.festivalPinToday {
+  animation: starTwinkle 1.2s ease-in-out infinite;
 }
 
 .festivalPinSelected {
-  transform: scale(1.22);
+  transform: scale(1.25);
   box-shadow:
-    0 0 0 5px rgba(245, 158, 11, 0.28),
-    0 0 26px 8px rgba(245, 158, 11, 0.65),
-    0 4px 14px rgba(0, 0, 0, 0.55);
+    0 0 0 4px rgba(245, 158, 11, 0.28),
+    0 0 20px 6px rgba(245, 158, 11, 0.65),
+    0 4px 12px rgba(0, 0, 0, 0.55);
 }
 
 /* ─── Festival popup header ──────────────────────────────────────────────── */

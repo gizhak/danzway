@@ -1,6 +1,7 @@
 /* ─── Hero ──────────────────────────────────────────────── */
 .hero {
   margin-bottom: 1.25rem;
+  text-align: center;
 }
 
 .heroStarRow {

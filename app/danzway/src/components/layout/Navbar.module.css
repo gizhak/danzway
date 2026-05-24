@@ -15,6 +15,7 @@
 
 /* Centered logo */
 .logo {
+  position: relative;
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -64,8 +65,44 @@
   color: #fbbf24;
   vertical-align: middle;
   line-height: 1.6;
+  cursor: default;
+  user-select: none;
   /* override the gradient clip from parent <a> */
   -webkit-text-fill-color: #fbbf24;
+}
+
+.versionPopup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(18, 18, 26, 0.97);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #e5e7eb;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  animation: fadeIn 0.15s ease;
+  z-index: 100;
+}
+
+.versionOk {
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+
+.versionUpdate {
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #c084fc;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 /* ── Feedback button ── */

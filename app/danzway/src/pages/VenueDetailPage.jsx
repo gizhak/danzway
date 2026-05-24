@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { selectAllVenues, selectVenuesStatus, fetchVenues } from '../store/venuesSlice'
 import { selectNextEventByVenueName } from '../store/appSlice'
+import { selectSpecialEventsByVenueMap } from '../store/selectors'
 import { shortMonthDay, venueCity } from '../i18n/dateUtils'
 import Badge from '../components/ui/Badge'
 import styles from './VenueDetailPage.module.css'
@@ -20,6 +21,41 @@ function ShareIcon() {
       <circle cx="18" cy="19" r="3" />
       <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
       <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  )
+}
+
+function LocationIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/>
+      <circle cx="12" cy="10" r="3"/>
+    </svg>
+  )
+}
+
+function PhoneIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.98-.98a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+    </svg>
+  )
+}
+
+function StarIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  )
+}
+
+function MusicIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18V5l12-2v13"/>
+      <circle cx="6" cy="18" r="3"/>
+      <circle cx="18" cy="16" r="3"/>
     </svg>
   )
 }
@@ -46,8 +82,9 @@ export default function VenueDetailPage() {
   const { t, i18n }       = useTranslation()
   const venues            = useSelector(selectAllVenues)
   const venuesStatus      = useSelector(selectVenuesStatus)
-  const nextEventsByVenue = useSelector(selectNextEventByVenueName)
-  const venue             = venues.find((v) => v.placeId === placeId)
+  const nextEventsByVenue     = useSelector(selectNextEventByVenueName)
+  const specialEventsByVenue  = useSelector(selectSpecialEventsByVenueMap)
+  const venue                 = venues.find((v) => v.placeId === placeId)
   const [toastMsg,      setToastMsg]      = useState('')
   const [lightboxIndex, setLightboxIndex] = useState(null)
   const swipeStartX = useRef(0)
@@ -128,6 +165,9 @@ export default function VenueDetailPage() {
     instagramPostUrl,
     coordinates,
   } = venue
+
+  // Active special event for this venue (flyer)
+  const specialEvent = specialEventsByVenue[placeId] ?? null
 
   // Hero: manual override → first Google photo → generic fallback
   // gallery is already computed above (before early returns)
@@ -230,25 +270,25 @@ export default function VenueDetailPage() {
         <div className={styles.meta}>
           {address && (
             <div className={styles.metaRow}>
-              <span className={styles.metaIcon}>📍</span>
+              <span className={styles.metaIcon}><LocationIcon /></span>
               <span>{address}</span>
             </div>
           )}
           {phone && (
             <a href={`tel:${phone}`} className={styles.metaRow}>
-              <span className={styles.metaIcon}>📞</span>
+              <span className={styles.metaIcon}><PhoneIcon /></span>
               <span>{phone}</span>
             </a>
           )}
           {rating && (
             <div className={styles.metaRow}>
-              <span className={styles.metaIcon}>★</span>
+              <span className={styles.metaIcon}><StarIcon /></span>
               <span>{rating.toFixed(1)}{reviewCount > 0 ? ` · ${reviewCount.toLocaleString()} ${t('venue.detail.reviews')}` : ''}</span>
             </div>
           )}
           {categoryLine && (
             <div className={styles.metaRow}>
-              <span className={styles.metaIcon}>🎵</span>
+              <span className={styles.metaIcon}><MusicIcon /></span>
               <span>{categoryLine}</span>
             </div>
           )}
@@ -275,6 +315,28 @@ export default function VenueDetailPage() {
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
             ))}
+          </div>
+        )}
+
+        {/* Flyer — shown when venue has an active special event */}
+        {specialEvent?.image && (
+          <div className={styles.flyerSection}>
+            <div className={styles.flyerLabel}>⭐ {t('venue.detail.specialEvent', 'Special Event')}</div>
+            <img
+              src={specialEvent.image}
+              alt={specialEvent.title}
+              className={styles.flyerImg}
+              onClick={() => {
+                if (coordinates) {
+                  navigate('/map', { state: { lat: coordinates.lat, lng: coordinates.lng, placeId } })
+                } else {
+                  navigate('/map')
+                }
+              }}
+            />
+            {specialEvent.title && (
+              <div className={styles.flyerTitle}>{specialEvent.title}</div>
+            )}
           </div>
         )}
 

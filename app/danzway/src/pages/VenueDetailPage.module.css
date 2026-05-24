@@ -278,6 +278,41 @@
   opacity: 0.85;
 }
 
+/* ─── Flyer (special event linked to this venue) ─────── */
+.flyerSection {
+  margin-bottom: 1.25rem;
+}
+
+.flyerLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-brand-amber-light);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.flyerImg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  cursor: zoom-in;
+  transition: opacity 0.15s;
+}
+
+.flyerImg:hover {
+  opacity: 0.9;
+}
+
+.flyerTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-brand-text);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
 /* ─── Divider ─────────────────────────────────────────── */
 .divider {
   height: 1px;

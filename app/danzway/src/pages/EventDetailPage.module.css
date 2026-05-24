@@ -26,6 +26,9 @@
   font-weight: 600;
   color: var(--color-brand-text);
   text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
   transition: color 0.15s ease;
 }
 
@@ -78,6 +81,55 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* Special event (flyer): full-width, natural portrait height, clickable */
+.heroSpecial {
+  aspect-ratio: unset;
+  height: auto;
+  background: transparent;
+}
+
+.heroImgClickable {
+  width: 100%;
+  height: auto;
+  object-fit: unset;
+  cursor: zoom-in;
+  display: block;
+}
+
+.lightboxBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightboxImg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .heroPlaceholder {
@@ -200,6 +252,41 @@
   color: #0a0a0a;
   background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
   box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+}
+
+/* ─── Venue festival flyer ────────────────────────────── */
+.flyerSection {
+  margin-bottom: 1.25rem;
+}
+
+.flyerLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-brand-amber-light);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.flyerImg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  cursor: zoom-in;
+  transition: opacity 0.15s;
+}
+
+.flyerImg:hover {
+  opacity: 0.9;
+}
+
+.flyerTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-brand-text);
+  margin-top: 0.5rem;
+  text-align: center;
 }
 
 /* ─── Section divider ─────────────────────────────────── */
