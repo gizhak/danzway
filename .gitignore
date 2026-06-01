@@ -3,6 +3,7 @@ scrapers/.env
 *.env.local
 *.secret.local
 fb_auth.json
+.claude/settings.local.json
 
 # Dependencies — all node_modules everywhere in the repo
 node_modules/

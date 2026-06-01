@@ -9,6 +9,45 @@ import SearchBar from '../components/ui/SearchBar'
 import SubmitEventModal from '../components/ui/SubmitEventModal'
 import styles from './SpecialEventsPage.module.css'
 
+// Hebrew → English city aliases for bilingual search
+const HE_TO_EN = {
+  'תל אביב': 'tel aviv', 'ת"א': 'tel aviv',
+  'ירושלים': 'jerusalem',
+  'חיפה': 'haifa',
+  'ראשון': 'rishon', 'ראשון לציון': 'rishon lezion',
+  'נתניה': 'netanya',
+  'אשדוד': 'ashdod',
+  'אשקלון': 'ashkelon',
+  'פתח תקוה': 'petah tikva', 'פ"ת': 'petah tikva',
+  'הרצליה': 'herzliya',
+  'רמת גן': 'ramat gan',
+  'גבעתיים': 'givatayim',
+  'בני ברק': 'bnei brak',
+  'חולון': 'holon',
+  'בת ים': 'bat yam',
+  'כפר סבא': 'kfar saba',
+  'רעננה': 'raanana',
+  'מודיעין': 'modiin',
+  'אילת': 'eilat',
+  'באר שבע': 'beer sheva',
+  'רחובות': 'rehovot',
+  'חדרה': 'hadera',
+  'נס ציונה': 'nes ziona',
+  'לוד': 'lod',
+  'רמלה': 'ramla',
+  'הוד השרון': 'hod hasharon',
+  'רמת השרון': 'ramat hasharon',
+  'כפר יונה': 'kfar yona',
+  'יבנה': 'yavne',
+  'קריית גת': 'kiryat gat',
+}
+
+function matchesQuery(text, q, qEn) {
+  if (!text) return false
+  const t = text.toLowerCase()
+  return t.includes(q) || (qEn && t.includes(qEn))
+}
+
 export default function SpecialEventsPage() {
   const [query,       setQuery]      = useState('')
   const [submitOpen,  setSubmitOpen] = useState(false)
@@ -28,12 +67,14 @@ export default function SpecialEventsPage() {
 
   const filtered = useMemo(() => {
     if (!query.trim()) return events
-    const q = query.toLowerCase()
+    const q   = query.toLowerCase()
+    const qEn = HE_TO_EN[q] ?? HE_TO_EN[query.trim()] ?? null
     return events.filter(
-      ({ title, venue, location, styles: danceStyles = [] }) =>
-        title?.toLowerCase().includes(q) ||
-        venue?.toLowerCase().includes(q) ||
-        location?.toLowerCase().includes(q) ||
+      ({ title, venue, location, city, styles: danceStyles = [] }) =>
+        matchesQuery(title,    q, qEn) ||
+        matchesQuery(venue,    q, qEn) ||
+        matchesQuery(location, q, qEn) ||
+        matchesQuery(city,     q, qEn) ||
         danceStyles.some((s) => s.toLowerCase().includes(q))
     )
   }, [events, query])
