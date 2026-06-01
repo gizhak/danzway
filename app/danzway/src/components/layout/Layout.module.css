@@ -21,3 +21,13 @@
     padding-bottom: 2.5rem;
   }
 }
+
+/* Inner wrapper applied to the pre-rendered adjacent page during swipe */
+.pageContent {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 1.5rem);
+  box-sizing: border-box;
+}

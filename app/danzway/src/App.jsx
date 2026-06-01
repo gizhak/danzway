@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import HomePage from './pages/HomePage'
@@ -29,6 +29,14 @@ const PAGE_TITLES = {
   '/admin/venues': 'Admin',
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
 function PageTracker() {
   const location = useLocation()
   useEffect(() => {
@@ -43,6 +51,7 @@ export default function App() {
   useAnonymousAuth()
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <PageTracker />
       <Routes>
         <Route element={<Layout />}>
