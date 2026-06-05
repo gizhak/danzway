@@ -56,7 +56,7 @@ export default function StyleFilterRow({ activeFilters = [], onSelect }) {
   }
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} data-tour="style-filter">
       <div className={styles.row}>
         {STYLE_FILTERS.map(({ id, img }) => {
           const isActive =

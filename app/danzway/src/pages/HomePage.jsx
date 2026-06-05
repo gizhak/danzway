@@ -89,7 +89,7 @@ export default function HomePage() {
             {t('home.hero.title')}{' '}
             <span className={styles.heroTitleGradient}>{t('home.hero.highlight')}</span>
           </h1>
-          <button className={styles.addVenueBtn} onClick={() => setSubmitOpen(true)}>
+          <button className={styles.addVenueBtn} onClick={() => setSubmitOpen(true)} data-tour="add-venue-btn">
             {t('venueSubmit.trigger')}
           </button>
         </div>

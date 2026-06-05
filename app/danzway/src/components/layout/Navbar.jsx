@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux'
 import { selectHasTodaySavedEvent } from '../../store/selectors'
 import { auth } from '../../services/firebase'
 import { trackFeedbackClick } from '../../services/analyticsService'
+import { useTour } from '../tour/TourContext'
 import styles from './Navbar.module.css'
 
 const APP_VERSION = 'beta2'
@@ -54,6 +55,7 @@ export default function Navbar() {
   const [versionStatus, setVersionStatus] = useState(null) // null | 'checking' | 'ok' | 'update'
   const versionPopupRef = useRef(null)
 
+  const { startTour } = useTour()
   const isAdmin = auth.currentUser?.email === 'guy.izhak.tech@gmail.com'
   const NAV_ITEMS = isAdmin ? ADMIN_NAV : PUBLIC_NAV
 
@@ -120,6 +122,12 @@ export default function Navbar() {
       </nav>
 
       <div className={styles.feedbackWrap}>
+        <button
+          className={styles.tourBtn}
+          onClick={startTour}
+          aria-label={t('tour.start')}
+          title={t('tour.start')}
+        >?</button>
         <button
           className={styles.feedbackBtn}
           onClick={handleFeedbackToggle}

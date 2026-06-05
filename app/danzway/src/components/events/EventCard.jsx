@@ -185,6 +185,7 @@ export default function EventCard({ event }) {
           whileTap={{ scale: 0.9 }}
           animate={isGoing ? { scale: [1, 1.12, 0.95, 1] } : { scale: 1 }}
           transition={{ duration: 0.3 }}
+          data-tour="attend-btn"
         >
           {!isGoing && <PlusIcon />}
           <span>{isGoing
