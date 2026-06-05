@@ -139,7 +139,7 @@ export default function VenueDetailPage() {
     return (
       <div className={styles.notFound}>
         <p>{t('venue.detail.notFound')}</p>
-        <button className={styles.backLink} onClick={() => navigate(-1)}>
+        <button className={styles.backLink} onClick={() => navigate('/')}>
           {t('venue.detail.backArrow')} {t('venue.detail.back')}
         </button>
       </div>
@@ -210,7 +210,7 @@ export default function VenueDetailPage() {
 
       {/* ── Sticky header: Back + Name + Share ── */}
       <div className={styles.header}>
-        <button className={styles.back} onClick={() => navigate(-1)}>
+        <button className={styles.back} onClick={() => navigate('/')}>
           <span className={styles.backArrow}>{t('venue.detail.backArrow')}</span>
           <span>{t('venue.detail.back')}</span>
         </button>
