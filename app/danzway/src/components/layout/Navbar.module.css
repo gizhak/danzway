@@ -2,11 +2,11 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  height: 60px;
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(0px, env(safe-area-inset-top)) 1.25rem 0;
+  padding: max(0.75rem, env(safe-area-inset-top)) 1.25rem 0.75rem;
   background: rgba(8, 8, 9, 0.72);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
