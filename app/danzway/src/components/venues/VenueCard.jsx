@@ -71,7 +71,7 @@ export default function VenueCard({ venue }) {
     const url  = `${window.location.origin}/venues/${placeId}`
     const text = `${t('share.joinMe', { name })} ${url}`
     if (navigator.share) {
-      try { await navigator.share({ title: name, text, url }) } catch { /* cancelled */ }
+      try { await navigator.share({ title: name, text }) } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(url).catch(() => {})
     }

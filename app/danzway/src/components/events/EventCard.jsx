@@ -129,9 +129,9 @@ export default function EventCard({ event }) {
     const url  = isRecurring && event.placeId
       ? `${window.location.origin}/venues/${event.placeId}`
       : `${window.location.origin}/events/${id}`
-    const text = t('share.joinMe', { name: title ?? venue })
+    const text = `${t('share.joinMe', { name: title ?? venue })} ${url}`
     if (navigator.share) {
-      try { await navigator.share({ title: title ?? venue, text, url }) } catch { /* cancelled */ }
+      try { await navigator.share({ title: title ?? venue, text }) } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(url).catch(() => {})
     }
