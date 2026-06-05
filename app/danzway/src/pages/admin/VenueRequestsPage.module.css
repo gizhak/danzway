@@ -1,0 +1,514 @@
+/* ─── Page shell ─────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background: #0a0a10;
+  color: #f3f4f6;
+  padding: 0 0 4rem;
+  font-family: inherit;
+  direction: rtl;
+}
+
+.centeredMsg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #9ca3af;
+}
+
+/* ─── Top bar ────────────────────────────────────────────── */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: rgba(18, 18, 26, 0.95);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.pageTitle {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fbbf24;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  background: #f59e0b;
+  color: #0a0a10;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.1rem 0.45rem;
+  min-width: 1.2rem;
+  text-align: center;
+}
+
+.navLink {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.navLink:hover { background: rgba(255,255,255,0.07); color: #f3f4f6; }
+
+/* ─── Content ────────────────────────────────────────────── */
+.content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.sectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.emptyMsg {
+  color: rgba(255,255,255,0.3);
+  font-size: 0.88rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* ─── Request card ───────────────────────────────────────── */
+.card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.card:hover { border-color: rgba(255, 255, 255, 0.16); }
+
+.card_approved { border-color: rgba(52, 211, 153, 0.3); }
+.card_rejected { border-color: rgba(248, 113, 113, 0.2); opacity: 0.7; }
+.card_added    { border-color: rgba(99, 102, 241, 0.35); }
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardName {
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardCity {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+}
+
+.cardDate {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.expandIcon {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+
+/* ─── Status badge ───────────────────────────────────────── */
+.statusBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.badge_pending  { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.badge_approved { background: rgba(52,211,153,0.15); color: #34d399; }
+.badge_rejected { background: rgba(248,113,113,0.12); color: #f87171; }
+.badge_added    { background: rgba(99,102,241,0.15);  color: #a5b4fc; }
+
+/* ─── Card body ──────────────────────────────────────────── */
+.cardBody {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.photo {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin: 0.75rem 0;
+  display: block;
+}
+
+.detailGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.detailItem {
+  display: flex;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  align-items: flex-start;
+}
+
+.detailLabel {
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  min-width: 5rem;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+}
+
+.detailDesc {
+  color: rgba(255,255,255,0.7);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+/* ─── Contacts ───────────────────────────────────────────── */
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.contactChip {
+  padding: 0.3rem 0.65rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #d1d5db;
+  font-size: 0.78rem;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.contactChip:hover { background: rgba(255,255,255,0.13); color: #fff; }
+
+/* ─── Card header actions ────────────────────────────────── */
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.editBtn, .deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  line-height: 1;
+}
+.editBtn:hover, .deleteBtn:hover { opacity: 1; }
+
+.confirmRow {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+.confirmYes {
+  padding: 0.2rem 0.55rem;
+  background: rgba(248,113,113,0.2);
+  border: 1px solid rgba(248,113,113,0.4);
+  border-radius: 6px;
+  color: #f87171;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+.confirmNo {
+  padding: 0.2rem 0.55rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ─── Status row (approve / pending / reject) ────────────── */
+.statusRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.statusBtn {
+  flex: 1;
+  padding: 0.6rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.statusBtn:disabled { opacity: 0.35; cursor: default; }
+.statusBtn:not(:disabled):hover { background: rgba(255,255,255,0.1); }
+
+.statusBtnActive_approved {
+  background: rgba(52,211,153,0.15);
+  border-color: rgba(52,211,153,0.45);
+  color: #34d399;
+}
+.statusBtnActive_pending {
+  background: rgba(245,158,11,0.15);
+  border-color: rgba(245,158,11,0.45);
+  color: #fbbf24;
+}
+.statusBtnActive_rejected {
+  background: rgba(248,113,113,0.12);
+  border-color: rgba(248,113,113,0.35);
+  color: #f87171;
+}
+
+.statusBtnReject {
+  background: rgba(248,113,113,0.08);
+  border-color: rgba(248,113,113,0.25);
+  color: #f87171;
+}
+.statusBtnReject:not(:disabled):hover {
+  background: rgba(248,113,113,0.18);
+  border-color: rgba(248,113,113,0.45);
+}
+
+.statusBtnAdd {
+  background: rgba(99,102,241,0.1);
+  border-color: rgba(99,102,241,0.3);
+  color: #a5b4fc;
+}
+.statusBtnAdd:not(:disabled):hover {
+  background: rgba(99,102,241,0.2);
+  border-color: rgba(99,102,241,0.5);
+}
+
+.statusBtnActive_added {
+  background: rgba(99,102,241,0.15);
+  border-color: rgba(99,102,241,0.4);
+  color: #a5b4fc;
+}
+
+/* ─── Edit form ──────────────────────────────────────────── */
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+}
+
+.editLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.1rem;
+}
+
+.editInput {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  color: #f3f4f6;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  direction: rtl;
+}
+.editInput:focus { border-color: rgba(245,158,11,0.5); }
+
+.editTextarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  color: #f3f4f6;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  direction: rtl;
+}
+.editTextarea:focus { border-color: rgba(245,158,11,0.5); }
+
+.editRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.editCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.contactFields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* ─── Style chips (in edit mode) ─────────────────────────── */
+.stylesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+.styleChip {
+  padding: 0.28rem 0.65rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.6);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.styleChipOn {
+  background: rgba(245,158,11,0.18);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+/* ─── Edit action buttons ────────────────────────────────── */
+.editActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.saveBtn {
+  flex: 1;
+  padding: 0.65rem;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  border: none;
+  border-radius: 10px;
+  color: #0a0a10;
+  font-weight: 800;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.saveBtn:disabled { opacity: 0.45; cursor: default; }
+
+.cancelBtn {
+  padding: 0.65rem 1.1rem;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.88rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.cancelBtn:hover { background: rgba(255,255,255,0.07); }
+
+/* ─── Login ──────────────────────────────────────────────── */
+.loginWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #0a0a10;
+  gap: 1rem;
+}
+
+.loginTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fbbf24;
+  margin: 0;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.loginInput {
+  padding: 0.7rem 0.9rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  color: #f3f4f6;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+}
+.loginInput:focus { border-color: rgba(245,158,11,0.5); }
+
+.loginErr {
+  color: #f87171;
+  font-size: 0.82rem;
+  margin: 0;
+  text-align: center;
+}
+
+.loginBtn {
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  border: none;
+  border-radius: 10px;
+  color: #0a0a10;
+  font-weight: 800;
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.loginBtn:disabled { opacity: 0.5; cursor: default; }

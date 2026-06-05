@@ -6,6 +6,7 @@ import EventDetailPage from './pages/EventDetailPage'
 import MapPage from './pages/MapPage'
 import VenueDiscoveryPage from './pages/admin/VenueDiscoveryPage'
 import FlyersReviewPage from './pages/admin/FlyersReviewPage'
+import VenueRequestsPage from './pages/admin/VenueRequestsPage'
 import VenueDetailPage from './pages/VenueDetailPage'
 import PartiesPage from './pages/PartiesPage'
 import SpecialEventsPage from './pages/SpecialEventsPage'
@@ -74,6 +75,9 @@ export default function App() {
         )}
         {IS_ADMIN && (
           <Route path="/admin/flyers" element={<FlyersReviewPage />} />
+        )}
+        {IS_ADMIN && (
+          <Route path="/admin/venue-requests" element={<VenueRequestsPage />} />
         )}
       </Routes>
     </BrowserRouter>

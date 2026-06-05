@@ -2717,6 +2717,10 @@ function VenueDashboard() {
           <span className={styles.sidebarTabIcon}>⭐</span>
           <span className={styles.sidebarTabLabel}>Flyers</span>
         </Link>
+        <Link to="/admin/venue-requests" className={styles.sidebarFlyersLink}>
+          <span className={styles.sidebarTabIcon}>🏛️</span>
+          <span className={styles.sidebarTabLabel}>Venues</span>
+        </Link>
       </nav>
 
       {/* ── Main content ── */}
