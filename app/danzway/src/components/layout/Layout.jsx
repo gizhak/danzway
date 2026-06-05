@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import TourOverlay from '../tour/TourOverlay'
+import { useTour } from '../tour/TourContext'
 import { flushSync } from 'react-dom'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
@@ -27,6 +28,7 @@ const VEL_THRESHOLD  = 0.3   // px/ms
 
 export default function Layout() {
   const { needsUpdate, acceptUpdate } = useVersionCheck()
+  const { active: tourActive } = useTour()
   const [showWhatsNew, setShowWhatsNew] = useState(() => shouldShowWhatsNew())
   const navigate     = useNavigate()
   const location     = useLocation()
@@ -190,7 +192,7 @@ export default function Layout() {
 
       <Footer />
       <BottomNav />
-      {showWhatsNew && !needsUpdate && <WhatsNewModal onClose={() => setShowWhatsNew(false)} />}
+      {showWhatsNew && !needsUpdate && !tourActive && <WhatsNewModal onClose={() => setShowWhatsNew(false)} />}
       <TourOverlay />
     </div>
   )
