@@ -155,7 +155,7 @@ export default function Layout() {
       <Navbar />
       {needsUpdate && <UpdateBanner onRefresh={() => window.location.reload(true)} />}
 
-      <main ref={mainRef} className={styles.main} style={{ position: 'relative', overflow: 'hidden' }}>
+      <main ref={mainRef} className={styles.main} style={{ position: 'relative', overflow: 'clip' }}>
 
         {/* Adjacent page — pre-rendered off-screen, slides in during swipe */}
         {adjacent && (

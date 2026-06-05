@@ -15,6 +15,7 @@ import {
 import VenueCard from '../components/venues/VenueCard'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import SearchBar from '../components/ui/SearchBar'
+import VenueSubmitModal from '../components/ui/VenueSubmitModal'
 import styles from './HomePage.module.css'
 
 /**
@@ -51,8 +52,9 @@ function filterVenues(venues, query, styleFilters) {
 }
 
 export default function HomePage() {
-  const [query,   setQuery]   = useState('')
-  const dispatch              = useDispatch()
+  const [query,       setQuery]       = useState('')
+  const [submitOpen,  setSubmitOpen]  = useState(false)
+  const dispatch                      = useDispatch()
   const { t }                 = useTranslation()
   const styleFilters          = useSelector(selectStyleFilters)
   const activeVenues          = useSelector(selectActiveVenues)
@@ -82,10 +84,15 @@ export default function HomePage() {
     <>
       {/* ── Hero ── */}
       <section className={styles.hero}>
-        <h1 className={styles.heroTitle}>
-          {t('home.hero.title')}{' '}
-          <span className={styles.heroTitleGradient}>{t('home.hero.highlight')}</span>
-        </h1>
+        <div className={styles.heroTitleRow}>
+          <h1 className={styles.heroTitle}>
+            {t('home.hero.title')}{' '}
+            <span className={styles.heroTitleGradient}>{t('home.hero.highlight')}</span>
+          </h1>
+          <button className={styles.addVenueBtn} onClick={() => setSubmitOpen(true)}>
+            {t('venueSubmit.trigger')}
+          </button>
+        </div>
         <p className={styles.heroSubtitle}>{t('home.hero.subtitle')}</p>
       </section>
 
@@ -144,6 +151,8 @@ export default function HomePage() {
           <p className={styles.emptyText}>{t('home.empty.noMatch.text')}</p>
         </div>
       )}
+
+      {submitOpen && <VenueSubmitModal onClose={() => setSubmitOpen(false)} />}
     </>
   )
 }

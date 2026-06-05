@@ -4,11 +4,19 @@
   text-align: center;
 }
 
+.heroTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-bottom: 0.4rem;
+}
+
 .heroTitle {
   font-size: 2.25rem;
   font-weight: 800;
   color: var(--color-brand-heading);
-  margin: 0 0 0.4rem;
+  margin: 0;
   letter-spacing: -0.04em;
   line-height: 1.1;
 }
@@ -25,6 +33,26 @@
   color: var(--color-brand-text);
   margin: 0;
   opacity: 0.65;
+}
+
+.addVenueBtn {
+  flex-shrink: 0;
+  padding: 0.28rem 0.65rem;
+  border-radius: 20px;
+  background: transparent;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #f59e0b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1.4;
+}
+.addVenueBtn:hover {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.7);
 }
 
 /* ─── Sticky filter + search assembly ───────────────────── */

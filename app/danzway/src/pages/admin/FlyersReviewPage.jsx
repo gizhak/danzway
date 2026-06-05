@@ -1063,6 +1063,7 @@ export default function FlyersReviewPage() {
       <div className={styles.topBar}>
         <Link to="/admin/venues" className={styles.backLink}>← Admin Dashboard</Link>
         <h1 className={styles.pageTitle}>⭐ Special Events Review</h1>
+        <Link to="/admin/venue-requests" className={styles.backLink}>🏛️ Venue Requests</Link>
         <span className={styles.badge}>{pending.length} pending</span>
         <button
           className={styles.cleanupBtn}

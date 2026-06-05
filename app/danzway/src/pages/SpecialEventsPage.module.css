@@ -33,12 +33,39 @@
   opacity: 0.65;
 }
 
-/* ─── Search bar ─────────────────────────────────────────── */
+/* ─── Sticky bar ─────────────────────────────────────────── */
+.stickyBar {
+  position: sticky;
+  top: 60px;
+  z-index: 40;
+  margin-inline: -1.25rem;
+  padding-inline: 1.25rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+  background: rgba(8, 8, 12, 0.86);
+  backdrop-filter: blur(10px) saturate(1.3);
+  -webkit-backdrop-filter: blur(10px) saturate(1.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .searchRow {
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 
 /* ─── Submit CTA ────────────────────────────────────────── */
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.18); }
+}
+
+.submitWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
 .submitTrigger {
   display: flex;
   align-items: center;
@@ -52,14 +79,21 @@
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
-  margin-bottom: 1rem;
   transition: background 0.15s, box-shadow 0.15s;
   letter-spacing: 0.02em;
+  animation: ctaPulse 2.4s ease-in-out infinite;
 }
 
 .submitTrigger:hover {
   background: rgba(245, 158, 11, 0.14);
   box-shadow: 0 0 18px rgba(245, 158, 11, 0.18);
+  animation: none;
+}
+
+.submitHint {
+  font-size: 0.72rem;
+  color: rgba(245, 158, 11, 0.55);
+  letter-spacing: 0.03em;
 }
 
 /* ─── Events feed ───────────────────────────────────────── */

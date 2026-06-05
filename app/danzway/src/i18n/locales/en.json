@@ -194,12 +194,40 @@
     "next":       "NEXT",
     "disclaimer": "DanzWay Beta 2 | Data is automatically scanned from public sources. Please verify details with the venue before attending."
   },
+  "venueSubmit": {
+    "trigger":      "+ Add Venue",
+    "title":        "Add Your Venue",
+    "subtitle":     "Your venue not listed? We'd love to add it!",
+    "step1Label":   "Step 1 of 2 — Venue Details",
+    "step2Label":   "Step 2 of 2 — Photo & Contact",
+    "name":         "Venue Name",
+    "address":      "Address (Street + Number)",
+    "city":         "City",
+    "stylesLabel":  "Dance Styles",
+    "description":  "Tell us about your venue — the vibe, who comes, what makes it special...",
+    "photoBtn":     "Add a Venue Photo",
+    "contactLabel": "Contact Info",
+    "recommended":  "recommended",
+    "email":        "Email",
+    "googleUrl":    "Google Maps link (optional)",
+    "next":         "Next →",
+    "back":         "← Back",
+    "submit":       "Submit",
+    "saving":       "Submitting...",
+    "successTitle": "Thank you!",
+    "successText":  "Your request has been received. We'll review it and be in touch soon.",
+    "done":         "Close",
+    "error":        "Something went wrong. Please try again."
+  },
   "styles": {
-    "all":     "All Styles",
-    "Salsa":   "Salsa",
-    "Bachata": "Bachata",
-    "Kizomba": "Kizomba",
-    "Zouk":    "Zouk"
+    "all":               "All Styles",
+    "Salsa":             "Salsa",
+    "Bachata":           "Bachata",
+    "Kizomba":           "Kizomba",
+    "Zouk":              "Zouk",
+    "Tango":             "Tango",
+    "West Coast Swing":  "WCS",
+    "Social":            "Social"
   },
   "footer": {
     "copy": "© 2026 DanzWay — Find your next dance event."

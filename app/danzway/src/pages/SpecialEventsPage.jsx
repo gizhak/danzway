@@ -93,14 +93,18 @@ export default function SpecialEventsPage() {
         <p className={styles.heroSubtitle}>{t('festivals.hero.subtitle')}</p>
       </section>
 
-      {/* ── Search + submit row ── */}
-      <div className={styles.searchRow}>
-        <SearchBar value={query} onChange={setQuery} />
+      {/* ── Sticky: submit CTA + search ── */}
+      <div className={styles.stickyBar}>
+        <div className={styles.submitWrap}>
+          <button className={styles.submitTrigger} onClick={() => setSubmitOpen(true)}>
+            {t('submitEvent.trigger')}
+          </button>
+          <span className={styles.submitHint}>👆 {t('submitEvent.hint', { defaultValue: 'הקש להגשת אירוע' })}</span>
+        </div>
+        <div className={styles.searchRow}>
+          <SearchBar value={query} onChange={setQuery} />
+        </div>
       </div>
-
-      <button className={styles.submitTrigger} onClick={() => setSubmitOpen(true)}>
-        {t('submitEvent.trigger')}
-      </button>
 
       {/* ── Loading skeletons ── */}
       {isLoading && (
