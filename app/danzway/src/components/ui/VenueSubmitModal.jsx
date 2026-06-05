@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../services/firebase'
 import { selectUid } from '../../store/appSlice'
+import { notifyAdminNewVenueRequest } from '../../services/notificationService'
 import styles from './VenueSubmitModal.module.css'
 
 const DANCE_STYLES = ['Salsa', 'Bachata', 'Kizomba', 'Zouk', 'Tango', 'West Coast Swing', 'Social']
@@ -113,6 +114,7 @@ export default function VenueSubmitModal({ onClose }) {
         submittedAt: serverTimestamp(),
         status:      'pending',
       })
+      notifyAdminNewVenueRequest({ name: name.trim(), city: city.trim(), address: address.trim() })
       setStatus('done')
     } catch {
       setErrMsg(t('venueSubmit.error'))
