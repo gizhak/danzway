@@ -14,9 +14,10 @@ const GENERIC_IMAGE =
   'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
 
 const optimizeImage = (url, w = 300, q = 70) => {
-  if (!url) return null
+  if (!url || typeof url !== 'string') return url
   if (url.includes('cloudinary.com')) return url.replace('/upload/', `/upload/w_${w},q_${q},c_fill/`)
-  if (url.includes('unsplash.com')) return url.includes('?') ? url + `&w=${w}&q=${q}` : url + `?w=${w}&q=${q}`
+  if (url.includes('unsplash.com')) return url.replace(/w=\d+/, `w=${w}`).replace(/q=\d+/, `q=${q}`)
+  if (url.includes('lh3.googleusercontent.com')) return url.replace(/w\d+/, `w${w}`)
   return url
 }
 
