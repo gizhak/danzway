@@ -160,12 +160,14 @@
 }
 
 .feedbackPopup {
-  position: absolute;
-  top: calc(100% + 8px);
-  inset-inline-start: 0;
+  position: fixed;
+  bottom: auto;
+  left: 50%;
+  top: 76px;
+  transform: translateX(-50%);
   z-index: 99;
-  min-width: 230px;
-  max-width: calc(100vw - 32px);
+  width: calc(100vw - 32px);
+  max-width: 280px;
   padding: 0.85rem 1rem;
   background: rgba(18, 18, 26, 0.97);
   backdrop-filter: blur(16px);
@@ -173,7 +175,6 @@
   border: 1px solid rgba(245, 158, 11, 0.28);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.55);
-  margin-inline-start: max(0px, calc((100vw - 230px) / -2));
 }
 
 .feedbackText {
