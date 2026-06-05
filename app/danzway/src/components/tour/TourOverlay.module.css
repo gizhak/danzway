@@ -1,0 +1,189 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+}
+
+/* ── Dark SVG overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: auto;
+}
+
+/* ── Glowing ring around spotlit element ── */
+.ring {
+  position: fixed;
+  border-radius: 14px;
+  pointer-events: none;
+  animation: ringPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(245,158,11,0.9), 0 0 18px rgba(245,158,11,0.3); }
+  50%       { box-shadow: 0 0 0 5px rgba(245,158,11,0.6), 0 0 32px rgba(245,158,11,0.5); }
+}
+
+/* ── Tooltip card ── */
+.card {
+  position: fixed;
+  background: rgba(14, 14, 20, 0.97);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 18px;
+  padding: 1.1rem 1.2rem 1rem;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(245,158,11,0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  pointer-events: auto;
+  animation: cardIn 0.22s ease;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* override for centered modal (transform from JS) */
+.card[style*="translate(-50%"] {
+  animation: cardInCenter 0.25s ease;
+}
+@keyframes cardInCenter {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 12px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.counter {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(245, 158, 11, 0.55);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fbbf24;
+  margin: 0 0 0.5rem;
+  line-height: 1.25;
+}
+
+.desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 1rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* ── Map legend ── */
+.mapLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.25rem;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+  direction: rtl;
+}
+
+.miniPin {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #181820;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.miniPinSpecial {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.22);
+}
+
+.miniPinStar {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.45rem;
+  color: #0a0a10;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.miniStandalone {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.18);
+  border: 2px solid #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
+/* ── Action buttons ── */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.skipBtn {
+  padding: 0.45rem 0.85rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.skipBtn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nextBtn {
+  padding: 0.5rem 1.2rem;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  border: none;
+  border-radius: 10px;
+  color: #0a0a10;
+  font-size: 0.85rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.nextBtn:hover { opacity: 0.88; }

@@ -96,7 +96,7 @@ export default function SpecialEventsPage() {
       {/* ── Sticky: submit CTA + search ── */}
       <div className={styles.stickyBar}>
         <div className={styles.submitWrap}>
-          <button className={styles.submitTrigger} onClick={() => setSubmitOpen(true)}>
+          <button className={styles.submitTrigger} onClick={() => setSubmitOpen(true)} data-tour="submit-event-btn">
             {t('submitEvent.trigger')}
           </button>
           <span className={styles.submitHint}>👆 {t('submitEvent.hint', { defaultValue: 'הקש להגשת אירוע' })}</span>

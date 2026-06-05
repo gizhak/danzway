@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { TourProvider } from './components/tour/TourContext'
 import Layout from './components/layout/Layout'
 import HomePage from './pages/HomePage'
 import EventDetailPage from './pages/EventDetailPage'
@@ -52,6 +53,7 @@ export default function App() {
   useAnonymousAuth()
   return (
     <BrowserRouter>
+      <TourProvider>
       <ScrollToTop />
       <PageTracker />
       <Routes>
@@ -80,6 +82,7 @@ export default function App() {
           <Route path="/admin/venue-requests" element={<VenueRequestsPage />} />
         )}
       </Routes>
+      </TourProvider>
     </BrowserRouter>
   )
 }

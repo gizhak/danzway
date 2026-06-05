@@ -99,6 +99,7 @@ export default function BottomNav() {
             key={to}
             to={to}
             end={end}
+            data-tour={`tab-${key}`}
             className={({ isActive }) =>
               isActive ? `${styles.navItem} ${styles.active}` : styles.navItem
             }

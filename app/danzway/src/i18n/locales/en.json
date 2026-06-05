@@ -248,5 +248,22 @@
       { "text": "\"Are you coming?\" button — let us know you're attending!" }
     ],
     "cta": "Enjoy!"
+  },
+  "tour": {
+    "start":  "App Tour",
+    "next":   "Next",
+    "skip":   "Skip step",
+    "end":    "Close",
+    "finish": "Got it!",
+    "step":   "{{current}} / {{total}}",
+    "welcome":   { "title": "Welcome to DanzWay 🕺",       "desc": "Let us show you around — it'll only take a minute" },
+    "home":      { "title": "Dance Clubs",                  "desc": "Find all social dance venues in Israel. Filter by style — Salsa, Bachata, Kizomba and more" },
+    "addVenue":  { "title": "Add a Venue",                  "desc": "Your club not listed? Tap here to submit a request — it's free and quick" },
+    "parties":   { "title": "Parties & Events",             "desc": "All upcoming events sorted by date. Tap a style bubble to filter by your favorite dance style" },
+    "attend":    { "title": "Are you going?",               "desc": "Tap here to mark that you're attending an event. You can see how many people plan to come — and others can see you too" },
+    "festivals": { "title": "Special Events",               "desc": "Workshops, festivals, congresses. Spot a missing event? Tap this button to submit it" },
+    "saved":     { "title": "Saved",                        "desc": "Tap ♡ on any event or venue to save it here. The heart in the nav will pulse on days you have a saved event" },
+    "map":       { "title": "Map", "desc": "Discover dance venues on the map near you. Tap a pin to see venue details", "legendVenue": "Dance venue", "legendSpecial": "Venue with special event", "legendStandalone": "Standalone special" },
+    "done":      { "title": "You're all set! 🎉",           "desc": "Now you know everything. Tap ? anytime to restart the tour" }
   }
 }
