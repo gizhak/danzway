@@ -14,6 +14,13 @@ import styles from './EventCard.module.css'
 
 const GENERIC_IMAGE = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
 
+const optimizeImage = (url, w = 300, q = 70) => {
+  if (!url) return null
+  if (url.includes('cloudinary.com')) return url.replace('/upload/', `/upload/w_${w},q_${q},c_fill/`)
+  if (url.includes('unsplash.com')) return url.includes('?') ? url + `&w=${w}&q=${q}` : url + `?w=${w}&q=${q}`
+  return url
+}
+
 function PeopleIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -87,9 +94,9 @@ export default function EventCard({ event }) {
   const resolvedLogo  = isGApi(_venueLogo)  ? null : (_venueLogo  ?? (isGApi(venueData?.logo)  ? null : venueData?.logo)  ?? null)
   const resolvedPhoto = isGApi(_venuePhoto) ? null : (_venuePhoto ?? venueData?.customImageUrl ?? (venueData?.photos ?? []).find(u => !isGApi(u)) ?? (isGApi(placePhoto) ? null : placePhoto) ?? null)
   // Special events: show the flyer (event.image) as hero, not the venue photo
-  const heroImage = (isSpecial && image)
+  const heroImage = optimizeImage((isSpecial && image)
     ? image
-    : (resolvedLogo || resolvedPhoto || image || GENERIC_IMAGE)
+    : (resolvedLogo || resolvedPhoto || image || GENERIC_IMAGE))
   const venueCoords = venueData?.coordinates ?? null
   const coords = venueCoords ?? (
     eventCoords?.latitude

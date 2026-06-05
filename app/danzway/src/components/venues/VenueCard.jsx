@@ -13,6 +13,13 @@ import styles from './VenueCard.module.css'
 const GENERIC_IMAGE =
   'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
 
+const optimizeImage = (url, w = 300, q = 70) => {
+  if (!url) return null
+  if (url.includes('cloudinary.com')) return url.replace('/upload/', `/upload/w_${w},q_${q},c_fill/`)
+  if (url.includes('unsplash.com')) return url.includes('?') ? url + `&w=${w}&q=${q}` : url + `?w=${w}&q=${q}`
+  return url
+}
+
 function getAvatarInitials(name = '') {
   return name
     .split(' ')
@@ -51,7 +58,7 @@ export default function VenueCard({ venue }) {
   const isGoogleApiUrl = (u) => u && u.includes('places.googleapis.com')
   const safePhoto = photos.find(u => !isGoogleApiUrl(u))
   const safeLogo  = isGoogleApiUrl(logo) ? null : logo
-  const heroImage = venue.customImageUrl ?? safePhoto ?? GENERIC_IMAGE
+  const heroImage = optimizeImage(venue.customImageUrl ?? safePhoto ?? GENERIC_IMAGE)
 
   const mapsUrl = coordinates
     ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
