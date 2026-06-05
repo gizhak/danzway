@@ -16,6 +16,10 @@ export const fetchEvents = createAsyncThunk('app/fetchEvents', async () => {
   })
 })
 
+const savedStyleFilters = (() => {
+  try { return JSON.parse(localStorage.getItem('danzway-style-filters') ?? '[]') } catch { return [] }
+})()
+
 // ─── Slice ─────────────────────────────────────────────────
 const appSlice = createSlice({
   name: 'app',
@@ -23,7 +27,7 @@ const appSlice = createSlice({
     uid:           null, // anonymous Firebase uid
     savedIds:      {},   // Record<eventId, true>  — events saved by user
     savedVenueIds: {},   // Record<placeId, true>  — venues saved by user
-    styleFilters: [],
+    styleFilters: Array.isArray(savedStyleFilters) ? savedStyleFilters : [],
     events: [],
     status: 'idle',
     error: null,
@@ -56,15 +60,16 @@ const appSlice = createSlice({
       if (!Array.isArray(state.styleFilters)) state.styleFilters = []
       const style = action.payload
       if (style === 'all') {
-        state.styleFilters = []                          // clear all → show everything
+        state.styleFilters = []
       } else {
         const idx = state.styleFilters.indexOf(style)
         if (idx >= 0) {
-          state.styleFilters.splice(idx, 1)             // deselect
+          state.styleFilters.splice(idx, 1)
         } else {
-          state.styleFilters.push(style)                // add to selection
+          state.styleFilters.push(style)
         }
       }
+      localStorage.setItem('danzway-style-filters', JSON.stringify([...state.styleFilters]))
     },
   },
   extraReducers: (builder) => {
