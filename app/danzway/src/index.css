@@ -61,3 +61,15 @@ body {
   border: none;
   cursor: pointer;
 }
+
+/* ─── Disable zoom on touch ───────────────────────────── */
+html {
+  touch-action: manipulation;
+}
+
+body, #root {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
