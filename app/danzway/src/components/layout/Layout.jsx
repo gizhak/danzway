@@ -56,6 +56,7 @@ export default function Layout() {
 
     function onTouchStart(e) {
       if (navigating.current) return
+      if (e.target.closest('[data-no-swipe]')) { g.current = { active: false }; return }
       const t = e.touches[0]
       g.current = { startX: t.clientX, startY: t.clientY, active: true, locked: null, lastX: t.clientX, lastT: Date.now() }
     }

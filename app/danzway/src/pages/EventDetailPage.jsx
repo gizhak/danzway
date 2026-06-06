@@ -198,7 +198,7 @@ export default function EventDetailPage() {
 
       {/* ── Header row: Back + Share ── */}
       <div className={styles.header}>
-        <button className={styles.back} onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/festivals')}>
+        <button className={styles.back} onClick={() => navigate('/')}>
           <span className={styles.backArrow}>{t('eventDetail.backArrow')}</span>
           <span>{t('eventDetail.back')}</span>
         </button>

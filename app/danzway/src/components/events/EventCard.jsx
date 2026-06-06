@@ -18,7 +18,6 @@ const optimizeImage = (url, w = 300, q = 70) => {
   if (!url || typeof url !== 'string') return url
   if (url.includes('cloudinary.com')) return url.replace('/upload/', `/upload/w_${w},q_${q},c_fill/`)
   if (url.includes('unsplash.com')) return url.replace(/w=\d+/, `w=${w}`).replace(/q=\d+/, `q=${q}`)
-  if (url.includes('lh3.googleusercontent.com')) return url.replace(/w\d+/, `w${w}`)
   return url
 }
 
@@ -129,9 +128,9 @@ export default function EventCard({ event }) {
     const url  = isRecurring && event.placeId
       ? `${window.location.origin}/venues/${event.placeId}`
       : `${window.location.origin}/events/${id}`
-    const text = t('share.joinMe', { name: title ?? venue })
+    const text = `${t('share.joinMe', { name: title ?? venue })} ${url}`
     if (navigator.share) {
-      try { await navigator.share({ title: title ?? venue, text, url }) } catch { /* cancelled */ }
+      try { await navigator.share({ title: title ?? venue, text }) } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(url).catch(() => {})
     }

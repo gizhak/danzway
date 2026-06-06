@@ -42,11 +42,14 @@ function loadState() {
 
     // ── Current Redux format ──────────────────────────────
     if (parsed && typeof parsed.savedIds === 'object' && !Array.isArray(parsed.savedIds)) {
+      const storedFilters = (() => {
+        try { return JSON.parse(localStorage.getItem('danzway-style-filters') ?? '[]') } catch { return [] }
+      })()
       return {
         app: {
           savedIds:      parsed.savedIds      ?? {},
           savedVenueIds: parsed.savedVenueIds ?? {},
-          styleFilters:  [],
+          styleFilters:  Array.isArray(storedFilters) ? storedFilters : [],
           events:        [],
           status:        'idle',
           error:         null,

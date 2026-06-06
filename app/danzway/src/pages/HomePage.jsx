@@ -16,6 +16,7 @@ import VenueCard from '../components/venues/VenueCard'
 import StyleFilterRow from '../components/events/StyleFilterRow'
 import SearchBar from '../components/ui/SearchBar'
 import VenueSubmitModal from '../components/ui/VenueSubmitModal'
+import { useTour } from '../components/tour/TourContext'
 import styles from './HomePage.module.css'
 
 /**
@@ -60,6 +61,16 @@ export default function HomePage() {
   const activeVenues          = useSelector(selectActiveVenues)
   const venuesStatus          = useSelector(selectVenuesStatus)
   const eventsStatus          = useSelector(selectEventsStatus)
+  const { startTour }         = useTour()
+
+  // Start tour for new users who arrive at home
+  useEffect(() => {
+    const tourSeen = localStorage.getItem('danzway_tour_seen')
+    if (!tourSeen) {
+      const timer = setTimeout(() => startTour(), 500)
+      return () => clearTimeout(timer)
+    }
+  }, [startTour])
 
   useEffect(() => {
     if (venuesStatus === 'idle') dispatch(fetchVenues())
