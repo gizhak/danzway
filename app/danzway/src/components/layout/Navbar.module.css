@@ -2,12 +2,13 @@
   position: sticky;
   top: 0;
   z-index: 50;
+  flex-shrink: 0;
   min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: max(0.75rem, env(safe-area-inset-top)) 1.25rem 0.75rem;
-  background: rgba(8, 8, 9, 0.72);
+  background: rgba(8, 8, 9, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -192,54 +193,5 @@
 }
 .feedbackEmail:hover { text-decoration: underline; }
 
-/* ── Desktop nav links (hidden on mobile) ── */
-.desktopNav {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .desktopNav {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .desktopLink {
-    padding: 0.35rem 0.8rem;
-    border-radius: 8px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    color: rgba(156, 163, 175, 0.65);
-    text-decoration: none;
-    transition: color 0.15s, background 0.15s;
-  }
-
-  .desktopLink:hover {
-    color: #f3f4f6;
-    background: rgba(255, 255, 255, 0.06);
-  }
-
-  .desktopLinkActive {
-    color: #fbbf24;
-    background: rgba(245, 158, 11, 0.12);
-  }
-
-  .desktopLinkSavedPulse {
-    color: #fbbf24;
-    animation: savedGlow 1.4s ease-in-out infinite;
-  }
-
-  @keyframes savedGlow {
-    0%, 100% {
-      color: #fbbf24;
-      text-shadow: 0 0 6px rgba(251, 191, 36, 0.4);
-    }
-    42% {
-      color: #fff;
-      text-shadow: 0 0 12px rgba(251, 191, 36, 0.9), 0 0 20px rgba(251, 191, 36, 0.4);
-    }
-  }
-}
 
 /* Hamburger styles preserved here — re-enable in Navbar.jsx when side-menu is needed */

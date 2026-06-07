@@ -5,7 +5,6 @@ import { flushSync } from 'react-dom'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import Navbar from './Navbar'
-import Footer from './Footer'
 import BottomNav from './BottomNav'
 import UpdateBanner from './UpdateBanner'
 import WhatsNewModal, { shouldShowWhatsNew } from './WhatsNewModal'
@@ -45,6 +44,16 @@ export default function Layout() {
   const [adjacent, setAdjacent] = useState(null)
 
   const g = useRef({ startX: 0, startY: 0, active: false, locked: null, lastX: 0, lastT: 0 })
+  const currentPageRef = useRef(null)
+
+  useEffect(() => {
+    return dragX.on('change', v => {
+      const el = currentPageRef.current
+      if (!el) return
+      if (v === 0) el.style.removeProperty('transform')
+      else el.style.transform = `translateX(${v}px)`
+    })
+  }, [dragX])
 
   const currentTabIdx = TAB_ROUTES.findIndex(r =>
     r === '/' ? location.pathname === '/' : location.pathname.startsWith(r)
@@ -152,6 +161,7 @@ export default function Layout() {
       dragX.set(0)
       setAdjacent(null)
     }
+    if (mainRef.current) mainRef.current.scrollTop = 0
   }, [location.pathname, dragX])
 
   return (
@@ -159,7 +169,7 @@ export default function Layout() {
       <Navbar />
       {needsUpdate && <UpdateBanner onRefresh={acceptUpdate} />}
 
-      <main ref={mainRef} className={styles.main} style={{ position: 'relative', overflow: 'clip' }}>
+      <main ref={mainRef} className={styles.main} style={{ position: 'relative' }}>
 
         {/* Adjacent page — pre-rendered off-screen, slides in during swipe */}
         {adjacent && (
@@ -184,14 +194,13 @@ export default function Layout() {
           </motion.div>
         )}
 
-        {/* Current page */}
-        <motion.div style={{ x: dragX, width: '100%' }}>
+        {/* Current page — plain div so no transform at rest (iOS sticky bug) */}
+        <div ref={currentPageRef} className={styles.currentPage}>
           <Outlet />
-        </motion.div>
+        </div>
 
       </main>
 
-      <Footer />
       <BottomNav />
       {showWhatsNew && !needsUpdate && !tourActive && <WhatsNewModal onClose={() => setShowWhatsNew(false)} />}
       <TourOverlay />

@@ -1,19 +1,30 @@
 .layout {
   display: flex;
   flex-direction: column;
-  min-height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .main {
   flex: 1;
-  /* Center the app shell — feels like a mobile app on desktop */
+  min-height: 0;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem;
-  /* Reserve space for fixed BottomNav (60px) + device safe area + breathing room */
-  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 1.5rem);
+  /* No top padding: keeps main's content edge flush under the navbar so
+     sticky bars (top: 0) cling directly to the header with no gap.
+     Top spacing lives on .currentPage instead. */
+  padding: 0 1.25rem 1.5rem;
   box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Resting top spacing for page content (replaces main's old padding-top) */
+.currentPage {
+  width: 100%;
+  padding-top: 1.5rem;
 }
 
 @media (min-width: 768px) {

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -54,6 +54,20 @@ export default function Navbar() {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [versionStatus, setVersionStatus] = useState(null) // null | 'checking' | 'ok' | 'update'
   const versionPopupRef = useRef(null)
+  const navbarRef = useRef(null)
+
+  useEffect(() => {
+    const el = navbarRef.current
+    if (!el) return
+    const update = () => {
+      const h = el.getBoundingClientRect().height
+      document.documentElement.style.setProperty('--navbar-h', `${h}px`)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const { startTour } = useTour()
   const isAdmin = auth.currentUser?.email === 'guy.izhak.tech@gmail.com'
@@ -75,7 +89,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className={styles.navbar}>
+    <header ref={navbarRef} className={styles.navbar}>
       <NavLink to="/" className={styles.logo}>
         DanzWay
         <span
@@ -97,29 +111,6 @@ export default function Navbar() {
           >עדכון זמין — לחץ לרענון</span>
         )}
       </NavLink>
-
-      {/* Desktop nav links — hidden on mobile */}
-      <nav className={styles.desktopNav}>
-        {NAV_ITEMS.map(({ to, key, end }) => {
-          const isSaved = key === 'saved'
-          return (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                [
-                  styles.desktopLink,
-                  isActive ? styles.desktopLinkActive : '',
-                  isSaved && pulseSaved ? styles.desktopLinkSavedPulse : '',
-                ].filter(Boolean).join(' ')
-              }
-            >
-              {t(`nav.${key}`)}
-            </NavLink>
-          )
-        })}
-      </nav>
 
       <div className={styles.feedbackWrap}>
         <button
