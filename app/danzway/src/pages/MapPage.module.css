@@ -7,8 +7,9 @@
 ────────────────────────────────────────────────────────────────────────────── */
 .page {
   position: fixed;
-  top: 60px;
-  /* Navbar height */
+  /* Sit below the sticky Navbar (measured live into --navbar-h, falls back to 60px).
+     This pushes the floating filter bar down so it never hides behind the header. */
+  top: var(--navbar-h, 60px);
   left: 0;
   right: 0;
   bottom: 0;

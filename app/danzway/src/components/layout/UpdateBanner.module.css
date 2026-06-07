@@ -1,6 +1,7 @@
 .banner {
+  /* Sticky update banner, positioned below navbar */
   position: sticky;
-  top: 60px;
+  top: 0;
   z-index: 49;
   display: flex;
   align-items: center;
