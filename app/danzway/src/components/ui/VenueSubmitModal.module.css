@@ -196,6 +196,19 @@
   font-size: 0.74rem;
 }
 
+/* ─── Regular parties (recurring schedule) ───────────────── */
+.scheduleHint {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 0 0.5rem;
+  line-height: 1.4;
+}
+.scheduleRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
 /* ─── Dance style chips ──────────────────────────────────── */
 .stylesGrid {
   display: flex;
