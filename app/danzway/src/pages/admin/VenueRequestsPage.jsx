@@ -6,20 +6,75 @@ import {
   setDoc,
 } from 'firebase/firestore'
 import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth'
-import { db, auth } from '../../services/firebase'
+import { httpsCallable } from 'firebase/functions'
+import { db, auth, functions } from '../../services/firebase'
 import styles from './VenueRequestsPage.module.css'
 
 const ADMIN_EMAIL  = 'guy.izhak.tech@gmail.com'
 const DANCE_STYLES = ['Salsa', 'Bachata', 'Kizomba', 'Zouk', 'Tango', 'West Coast Swing', 'Social']
-const MAPS_KEY     = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+const DAY_LABELS   = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 
-async function geocodeAddress(address, city) {
-  const q = encodeURIComponent(`${address}, ${city}, Israel`)
-  const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${q}&key=${MAPS_KEY}`)
-  const json = await res.json()
-  if (json.status !== 'OK' || !json.results[0]) return null
-  const { lat, lng } = json.results[0].geometry.location
-  return { lat, lng }
+// Build a recurringSchedule (venue shape) from a request's requested schedule or admin edits.
+function toRecurringSchedule(sched) {
+  if (!sched?.days?.length) return null
+  return {
+    days:        sched.days,
+    time:        sched.time || '21:00',
+    title:       (sched.title ?? '').trim(),
+    description: '',
+  }
+}
+const MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? ''
+
+// Client-side geocode (production) — domain is whitelisted in Google Cloud Console.
+// Tries the address first, then falls back to a Places text-search by venue name.
+// Returns { latitude, longitude } | null — mirrors the working Flyers flow.
+async function geocodeClientSide(venue, address, location) {
+  if (address) {
+    const q    = [address, location, 'Israel'].filter(Boolean).join(', ')
+    const res  = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(q)}&key=${MAPS_API_KEY}`)
+    const data = await res.json()
+    if (data.status === 'OK' && data.results[0]) {
+      const r = data.results[0]
+      return { latitude: r.geometry.location.lat, longitude: r.geometry.location.lng }
+    }
+  }
+  if (venue) {
+    const q    = [venue, location, 'Israel'].filter(Boolean).join(', ')
+    const res  = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method:  'POST',
+      headers: {
+        'Content-Type':     'application/json',
+        'X-Goog-Api-Key':   MAPS_API_KEY,
+        'X-Goog-FieldMask': 'places.id,places.location,places.formattedAddress,places.displayName',
+      },
+      body: JSON.stringify({ textQuery: q }),
+    })
+    const data = await res.json()
+    if (data.places?.[0]) {
+      const p = data.places[0]
+      return { latitude: p.location.latitude, longitude: p.location.longitude }
+    }
+  }
+  return null
+}
+
+// In dev: routes through the Cloud Function (bypasses the localhost referrer block).
+// In prod: calls the APIs directly (domain whitelisted in Google Cloud Console).
+// Returns coordinates as { lat, lng } for venue docs (the shape the map reads), or null.
+async function resolveCoordinates(venue, address, location) {
+  if (!venue && !address) return null
+  let geo = null
+  if (import.meta.env.PROD) {
+    geo = await geocodeClientSide(venue, address, location)
+  } else {
+    const fn = httpsCallable(functions, 'geocodeVenue', { timeout: 15000 })
+    const result = await fn({ venue: venue ?? null, address: address ?? null, location: location ?? null, apiKey: MAPS_API_KEY })
+    geo = result.data?.coordinates ?? null
+  }
+  if (!geo) return null
+  // Normalise both possible shapes ({latitude,longitude} | {lat,lng}) → {lat,lng}
+  return { lat: geo.latitude ?? geo.lat, lng: geo.longitude ?? geo.lng }
 }
 
 function fmt(ts) {
@@ -30,10 +85,23 @@ function fmt(ts) {
 
 // ─── Request card ─────────────────────────────────────────────────────────────
 
-function RequestCard({ req, onSave, onDelete, onApprove, onReject, onStatusChange, onAddToVenues, busy }) {
+function RequestCard({ req, onSave, onDelete, onApprove, onReject, onStatusChange, onAddToVenues, onRefreshLocation, busy }) {
   const [expanded, setExpanded] = useState(true)
   const [editing,  setEditing]  = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  // Recurring schedule the admin will apply on "add" — pre-filled from the request.
+  const [sched, setSched] = useState({
+    days:  req.requestedSchedule?.days  ?? [],
+    time:  req.requestedSchedule?.time  ?? '21:00',
+    title: req.requestedSchedule?.title ?? '',
+  })
+  function toggleSchedDay(d) {
+    setSched(s => ({
+      ...s,
+      days: s.days.includes(d) ? s.days.filter(x => x !== d) : [...s.days, d].sort((a, b) => a - b),
+    }))
+  }
 
   // Edit form state
   const [form, setForm] = useState({
@@ -124,6 +192,12 @@ function RequestCard({ req, onSave, onDelete, onApprove, onReject, onStatusChang
                 <Row label="כתובת"    value={`${req.address}, ${req.city}`} />
                 <Row label="סגנונות"  value={req.styles?.join(' · ')} />
                 <Row label="על המקום" value={req.description} desc />
+                {req.requestedSchedule?.days?.length > 0 && (
+                  <Row label="זמנים שביקשו" value={
+                    `${req.requestedSchedule.days.map(d => DAY_LABELS[d]).join(' · ')} · ${req.requestedSchedule.time}`
+                    + (req.requestedSchedule.title ? ` · ${req.requestedSchedule.title}` : '')
+                  } />
+                )}
               </div>
 
               <div className={styles.contacts}>
@@ -133,6 +207,30 @@ function RequestCard({ req, onSave, onDelete, onApprove, onReject, onStatusChang
                 {req.facebook  && <a href={req.facebook.startsWith('http') ? req.facebook : `https://facebook.com/${req.facebook}`} target="_blank" rel="noreferrer" className={styles.contactChip}>👍 {req.facebook}</a>}
                 {req.googleUrl && <a href={req.googleUrl} target="_blank" rel="noreferrer" className={styles.contactChip}>📍 Google</a>}
               </div>
+
+              {/* Recurring schedule editor — applied as the venue's auto-generated events */}
+              {req.status === 'approved' && (
+                <div className={styles.scheduleEditor}>
+                  <label className={styles.editLabel}>↻ מסיבות קבועות (יתווספו כאירועים אוטומטיים ל-8 שבועות)</label>
+                  <div className={styles.stylesGrid}>
+                    {DAY_LABELS.map((label, i) => (
+                      <button key={i} type="button"
+                        className={`${styles.styleChip} ${sched.days.includes(i) ? styles.styleChipOn : ''}`}
+                        onClick={() => toggleSchedDay(i)}>{label}</button>
+                    ))}
+                  </div>
+                  {sched.days.length > 0 && (
+                    <div className={styles.scheduleRow}>
+                      <input className={styles.editInput} type="time" value={sched.time}
+                        onChange={e => setSched(s => ({ ...s, time: e.target.value }))}
+                        style={{ maxWidth: '120px' }} />
+                      <input className={styles.editInput} placeholder="שם האירוע (אופציונלי)"
+                        value={sched.title}
+                        onChange={e => setSched(s => ({ ...s, title: e.target.value }))} />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Status buttons */}
               <div className={styles.statusRow}>
@@ -152,15 +250,23 @@ function RequestCard({ req, onSave, onDelete, onApprove, onReject, onStatusChang
                     </button>
                     <button className={`${styles.statusBtn} ${styles.statusBtnAdd}`}
                       disabled={isBusy}
-                      onClick={() => onAddToVenues(req)}>
+                      onClick={() => onAddToVenues(req, sched)}>
                       {isBusy ? '⏳' : '🏛️ הוסף למועדונים'}
                     </button>
                   </>
                 )}
                 {req.status === 'added' && (
-                  <button className={`${styles.statusBtn} ${styles.statusBtnActive_added}`} disabled>
-                    🏛️ נוסף למועדונים
-                  </button>
+                  <>
+                    <button className={`${styles.statusBtn} ${styles.statusBtnActive_added}`} disabled>
+                      🏛️ נוסף למועדונים
+                    </button>
+                    <button className={`${styles.statusBtn} ${styles.statusBtnAdd}`}
+                      disabled={isBusy}
+                      onClick={() => onRefreshLocation(req)}
+                      title="רענן את הקואורדינטות במפה (לתיקון מקומות שנוספו לפני התיקון)">
+                      {isBusy ? '⏳' : '📍 רענן מיקום במפה'}
+                    </button>
+                  </>
                 )}
                 {req.status !== 'added' && (
                   <button className={`${styles.statusBtn} ${styles.statusBtnReject}`}
@@ -361,11 +467,22 @@ export default function VenueRequestsPage() {
   }
 
   // Geocode + create venue doc + mark request as added
-  async function handleAddToVenues(req) {
+  async function handleAddToVenues(req, schedule) {
     setBusy(req.id + '_add')
     try {
-      const coords = await geocodeAddress(req.address, req.city)
+      // Robust geocode (same flow as Flyers): address → venue-name fallback,
+      // routed through the Cloud Function in dev so localhost isn't referrer-blocked.
+      const coords = await resolveCoordinates(req.name, req.address, req.city)
+      if (!coords) {
+        const proceed = confirm(
+          '⚠️ לא נמצאו קואורדינטות לכתובת הזו — המקום לא יופיע במפה.\n' +
+          'בדוק/תקן את הכתובת ונסה שוב, או הוסף בכל זאת (בלי מיקום במפה)?'
+        )
+        if (!proceed) { setBusy(null); return }
+      }
       const venueId = `custom_${req.id.slice(0, 12)}`
+      // Prefer the admin's edited schedule, fall back to what the venue requested.
+      const recurringSchedule = toRecurringSchedule(schedule) ?? toRecurringSchedule(req.requestedSchedule)
       await setDoc(doc(db, 'venues', venueId), {
         placeId:      venueId,
         name:         req.name,
@@ -375,6 +492,7 @@ export default function VenueRequestsPage() {
         description:  req.description ?? null,
         photos:       req.photoUrl ? [req.photoUrl] : [],
         coordinates:  coords,
+        recurringSchedule,
         whatsapp:     req.whatsapp  ?? null,
         email:        req.email     ?? null,
         instagram:    req.instagram ?? null,
@@ -398,6 +516,27 @@ export default function VenueRequestsPage() {
     setBusy(null)
   }
 
+  // Re-geocode an already-added venue and patch only its coordinates.
+  // Fixes venues that were added before the geocode fix (missing map pin).
+  async function handleRefreshLocation(req) {
+    setBusy(req.id + '_add')
+    try {
+      const coords = await resolveCoordinates(req.name, req.address, req.city)
+      if (!coords) {
+        alert('⚠️ עדיין לא נמצאו קואורדינטות. בדוק/תקן את הכתובת ונסה שוב.')
+        setBusy(null)
+        return
+      }
+      const venueId = req.venueId ?? `custom_${req.id.slice(0, 12)}`
+      await updateDoc(doc(db, 'venues', venueId), { coordinates: coords })
+      alert('✓ המיקום עודכן — המקום יופיע עכשיו במפה.')
+    } catch (err) {
+      console.error('[RefreshLocation]', err)
+      alert('שגיאה בעדכון המיקום: ' + err.message)
+    }
+    setBusy(null)
+  }
+
   if (loading) return <div className={styles.centeredMsg}>Loading…</div>
   if (!user || user.email !== ADMIN_EMAIL) return <LoginGate />
 
@@ -408,6 +547,7 @@ export default function VenueRequestsPage() {
     onReject: handleReject,
     onStatusChange: handleStatusChange,
     onAddToVenues: handleAddToVenues,
+    onRefreshLocation: handleRefreshLocation,
     busy,
   }
 

@@ -275,6 +275,20 @@
   margin-top: 0.75rem;
 }
 
+/* ─── Recurring schedule editor (on approved requests) ───── */
+.scheduleEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.scheduleRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .statusBtn {
   flex: 1;
   padding: 0.6rem;

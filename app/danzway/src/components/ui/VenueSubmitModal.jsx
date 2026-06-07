@@ -8,6 +8,8 @@ import { notifyAdminNewVenueRequest } from '../../services/notificationService'
 import styles from './VenueSubmitModal.module.css'
 
 const DANCE_STYLES = ['Salsa', 'Bachata', 'Kizomba', 'Zouk', 'Tango', 'West Coast Swing', 'Social']
+const DAY_LABELS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const DAY_LABELS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 
 function compressImage(file, maxPx = 1400, quality = 0.82) {
   return new Promise((resolve) => {
@@ -41,9 +43,10 @@ async function uploadPhoto(blob) {
 }
 
 export default function VenueSubmitModal({ onClose }) {
-  const { t }  = useTranslation()
+  const { t, i18n } = useTranslation()
   const uid    = useSelector(selectUid)
   const [step, setStep] = useState(1)
+  const DAY_LABELS = i18n.language === 'he' ? DAY_LABELS_HE : DAY_LABELS_EN
 
   // Step 1
   const [name,           setName]           = useState('')
@@ -51,6 +54,11 @@ export default function VenueSubmitModal({ onClose }) {
   const [city,           setCity]           = useState('')
   const [selectedStyles, setSelectedStyles] = useState([])
   const [description,    setDescription]    = useState('')
+
+  // Step 1 — regular parties (optional). Same shape the admin applies as recurringSchedule.
+  const [schedDays,  setSchedDays]  = useState([])
+  const [schedTime,  setSchedTime]  = useState('21:00')
+  const [schedTitle, setSchedTitle] = useState('')
 
   // Step 2
   const [imageFile,     setImageFile]     = useState(null)
@@ -69,6 +77,12 @@ export default function VenueSubmitModal({ onClose }) {
 
   function toggleStyle(s) {
     setSelectedStyles(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
+  }
+
+  function toggleSchedDay(d) {
+    setSchedDays(prev =>
+      prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort((a, b) => a - b)
+    )
   }
 
   async function handleFileChange(e) {
@@ -104,6 +118,9 @@ export default function VenueSubmitModal({ onClose }) {
         city:        city.trim(),
         styles:      selectedStyles,
         description: description.trim() || null,
+        requestedSchedule: schedDays.length
+          ? { days: schedDays, time: schedTime, title: schedTitle.trim() || null }
+          : null,
         photoUrl,
         whatsapp:    whatsapp.trim()   || null,
         email:       email.trim()      || null,
@@ -184,6 +201,31 @@ export default function VenueSubmitModal({ onClose }) {
                   placeholder={t('venueSubmit.description')}
                   value={description} onChange={e => setDescription(e.target.value)}
                   rows={3} />
+
+                {/* Regular parties — optional recurring schedule */}
+                <div>
+                  <p className={styles.fieldLabel}>{t('venueSubmit.scheduleLabel')}</p>
+                  <p className={styles.scheduleHint}>{t('venueSubmit.scheduleHint')}</p>
+                  <div className={styles.stylesGrid}>
+                    {DAY_LABELS.map((label, i) => (
+                      <button key={i} type="button"
+                        className={`${styles.styleChip} ${schedDays.includes(i) ? styles.styleChipOn : ''}`}
+                        onClick={() => toggleSchedDay(i)}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {schedDays.length > 0 && (
+                    <div className={styles.scheduleRow}>
+                      <input className={styles.input} type="time"
+                        value={schedTime} onChange={e => setSchedTime(e.target.value)}
+                        style={{ maxWidth: '130px' }} />
+                      <input className={styles.input}
+                        placeholder={t('venueSubmit.scheduleTitle')}
+                        value={schedTitle} onChange={e => setSchedTitle(e.target.value)} />
+                    </div>
+                  )}
+                </div>
 
                 <button className={styles.nextBtn} disabled={!step1Valid}
                   onClick={() => setStep(2)}>
